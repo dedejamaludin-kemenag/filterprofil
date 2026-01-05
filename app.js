@@ -113,7 +113,7 @@
       return;
     }
 
-    // UPDATE: Kolom Tahapan sekarang dirender polos (safeText saja)
+    // UPDATE: Kolom PIC & Tahapan sekarang dirender polos (safeText saja)
     els.tbody.innerHTML = rows.map(r => `
       <tr>
         <td>
@@ -124,11 +124,11 @@
         <td>${safeText(r.program)}</td>
         <td>${safeText(r.penilaian || "-")}</td>
         <td>${safeText(r.tahapan || "-")}</td>
-        <td><span class="tag-pic">${safeText(r.pic)}</span></td>
+        <td>${safeText(r.pic)}</td>
       </tr>
     `).join("");
 
-    // UPDATE MOBILE: Tahapan juga tidak dibold
+    // Mobile view
     els.cards.innerHTML = rows.map(r => `
       <div class="m-card">
         <div class="m-header">
