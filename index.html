@@ -15,30 +15,42 @@
 
   <style>
     :root {
-      /* THEME: Emerald & Dark Slate */
-      --bg-body: #1c1c1c; 
-      --bg-surface: #262626;
-      --bg-surface-glass: rgba(38, 38, 38, 0.98);
-      --bg-input: #171717;
+      /* --- TEMA BARU: CERAH (60% Putih : 20% Hijau : 20% Biru) --- */
+
+      /* 60% BASE (White/Light Slate) */
+      --bg-body: #f8fafc;       /* Background utama (Slate-50) */
+      --bg-surface: #ffffff;    /* Card/Panel background (Putih Murni) */
+      --bg-surface-glass: rgba(255, 255, 255, 0.90); /* Glass Effect Putih */
+      --bg-input: #f1f5f9;      /* Input background (Slate-100) */
       
-      --border: #404040;
-      --border-light: #525252;
+      --border: #e2e8f0;        /* Border halus (Slate-200) */
+      --border-light: #cbd5e1;  /* Border hover (Slate-300) */
       
-      --text-main: #ededed;
-      --text-muted: #a3a3a3;
-      --text-dim: #737373;
+      /* TEXT (Nuansa Biru Gelap agar kontras di background putih) */
+      --text-main: #0f172a;     /* Slate-900 */
+      --text-muted: #475569;    /* Slate-600 */
+      --text-dim: #94a3b8;      /* Slate-400 */
 
-      --primary: #3ecf8e; 
-      --primary-hover: #34d399;
-      --primary-glow: rgba(62, 207, 142, 0.3);
+      /* 20% PRIMARY (Fresh Green) */
+      --primary: #10b981;       /* Emerald-500 */
+      --primary-hover: #059669; /* Emerald-600 */
+      --primary-glow: rgba(16, 185, 129, 0.25);
 
-      --success: #3ecf8e;
-      --danger: #ef4444;
-      --warning: #f59e0b;
+      /* 20% ACCENT (Blue) */
+      --accent-blue: #3b82f6;   /* Blue-500 */
+      --accent-glow: rgba(59, 130, 246, 0.15);
 
+      /* Status Colors */
+      --success: #10b981;
+      --danger: #ef4444;        /* Red-500 */
+      --warning: #f59e0b;       /* Amber-500 */
+
+      /* Radius & Shadows (Shadow lebih soft untuk light mode) */
       --radius-sm: 8px;
       --radius-md: 12px;
       --radius-lg: 16px;
+      --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
       
       --font-sans: 'Inter', sans-serif;
     }
@@ -50,9 +62,10 @@
       font-family: var(--font-sans);
       background-color: var(--bg-body);
       color: var(--text-main);
+      /* Background Gradient Halus: Biru di Kiri Atas, Hijau di Kanan Bawah */
       background-image: 
-        radial-gradient(at 0% 0%, rgba(62, 207, 142, 0.08) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(62, 207, 142, 0.05) 0px, transparent 50%);
+        radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
       background-attachment: fixed;
       min-height: 100vh;
       font-size: 16px;
@@ -83,7 +96,8 @@
       font-size: 32px;
       font-weight: 800;
       letter-spacing: -0.5px;
-      background: linear-gradient(to right, #fff, #3ecf8e);
+      /* Gradient Text: Biru Gelap ke Hijau Cerah */
+      background: linear-gradient(to right, #0f172a, #10b981);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
@@ -97,7 +111,7 @@
 
     /* BUTTONS & BADGES */
     .btn-upload {
-      background: rgba(62, 207, 142, 0.1);
+      background: #f0fdf4; /* Hijau sangat muda */
       border: 1px dashed var(--primary);
       color: var(--primary);
       padding: 10px 18px;
@@ -108,12 +122,12 @@
       display: flex; align-items: center; gap: 8px;
       transition: all 0.2s;
     }
-    .btn-upload:hover { background: rgba(62, 207, 142, 0.2); }
+    .btn-upload:hover { background: #dcfce7; }
 
     .btn-add-new {
       background: var(--primary);
       border: 1px solid var(--primary);
-      color: #000;
+      color: #ffffff; /* Teks Putih agar kontras dengan hijau */
       padding: 10px 18px;
       border-radius: var(--radius-sm);
       font-size: 14px;
@@ -121,7 +135,7 @@
       cursor: pointer;
       display: flex; align-items: center; gap: 8px;
       transition: all 0.2s;
-      box-shadow: 0 4px 10px var(--primary-glow);
+      box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
     }
     .btn-add-new:hover { background: var(--primary-hover); transform: translateY(-1px); }
 
@@ -136,6 +150,7 @@
       font-size: 14px;
       font-weight: 500;
       color: var(--text-muted);
+      box-shadow: var(--shadow-soft);
     }
     .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-dim); }
     .dot.ok { background: var(--success); box-shadow: 0 0 8px var(--primary-glow); }
@@ -150,7 +165,7 @@
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       position: sticky; top: 20px; z-index: 100;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      box-shadow: var(--shadow-card);
     }
     
     details summary {
@@ -163,11 +178,11 @@
       user-select: none;
       transition: background 0.2s;
     }
-    details summary:hover { background: rgba(255,255,255,0.02); }
+    details summary:hover { background: #f8fafc; }
     details summary::-webkit-details-marker { display: none; }
     
-    .sum-title { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; }
-    .sum-title i { font-size: 24px; color: var(--primary); }
+    .sum-title { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 18px; color: var(--text-main); }
+    .sum-title i { font-size: 24px; color: var(--accent-blue); /* Ikon filter jadi Biru */ }
     
     .filter-body {
       padding: 0 24px 24px;
@@ -192,7 +207,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: var(--primary);
+      color: var(--accent-blue); /* Label filter jadi Biru */
       margin-bottom: 8px;
     }
 
@@ -213,8 +228,13 @@
     }
     textarea { resize: vertical; min-height: 100px; }
     select { padding-right: 40px; cursor: pointer; }
-    select:hover, input:hover, textarea:hover { border-color: var(--border-light); }
-    select:focus, input:focus, textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(62,207,142,0.1); }
+    select:hover, input:hover, textarea:hover { border-color: var(--border-light); background: #fff; }
+    select:focus, input:focus, textarea:focus { 
+      border-color: var(--primary); 
+      background: #fff;
+      outline: none; 
+      box-shadow: 0 0 0 3px var(--primary-glow); 
+    }
 
     .select-arrow {
       position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
@@ -232,17 +252,18 @@
       cursor: pointer; transition: all 0.2s; height: 54px;
       border: 1px solid transparent;
     }
-    .btn-primary { background: var(--primary); color: #000; }
+    .btn-primary { background: var(--primary); color: #fff; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2); }
     .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
-    .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
-    .btn-secondary:hover { border-color: var(--text-main); color: var(--text-main); }
+    
+    .btn-secondary { background: #fff; border: 1px solid var(--border); color: var(--text-muted); }
+    .btn-secondary:hover { border-color: var(--text-main); color: var(--text-main); background: #f8fafc; }
     
     .btn-danger { 
-      background: rgba(239, 68, 68, 0.1); 
+      background: #fef2f2; 
       color: var(--danger); 
-      border: 1px solid var(--danger); 
+      border: 1px solid #fee2e2; 
     }
-    .btn-danger:hover { background: var(--danger); color: white; }
+    .btn-danger:hover { background: var(--danger); color: white; border-color: var(--danger); }
 
     /* RESULTS TABLE */
     .results-area {
@@ -251,10 +272,11 @@
       border-radius: var(--radius-lg);
       overflow: hidden;
       min-height: 300px;
+      box-shadow: var(--shadow-card);
     }
     .table-header-info {
       padding: 20px 24px;
-      background: rgba(0,0,0,0.2);
+      background: #f8fafc; /* Header tabel warna terang */
       border-bottom: 1px solid var(--border);
       display: flex; justify-content: space-between; color: var(--text-muted); font-size: 14px;
     }
@@ -262,31 +284,33 @@
     .table-responsive { width: 100%; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 16px; min-width: 1000px; }
     th {
-      text-align: left; padding: 18px 24px; background: rgba(0,0,0,0.3);
+      text-align: left; padding: 18px 24px; background: #f1f5f9;
       border-bottom: 1px solid var(--border); color: var(--text-muted);
       font-weight: 700; font-size: 13px; text-transform: uppercase; white-space: nowrap;
     }
-    td { padding: 20px 24px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; }
+    td { padding: 20px 24px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; color: var(--text-main); }
     
     tbody tr, .m-card { cursor: pointer; transition: background 0.2s; }
-    tbody tr:hover { background: rgba(62, 207, 142, 0.08) !important; }
-    .m-card:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    tbody tr:hover { background: #f0fdf4 !important; /* Hijau sangat muda saat hover */ }
+    
+    .m-card:hover { border-color: var(--primary); box-shadow: var(--shadow-soft); }
 
-    .cell-profil { color: var(--primary); font-weight: 700; font-size: 17px; display: block; margin-bottom: 6px; }
-    .cell-def { font-size: 15px; color: var(--text-dim); }
+    .cell-profil { color: var(--accent-blue); font-weight: 700; font-size: 17px; display: block; margin-bottom: 6px; }
+    .cell-def { font-size: 15px; color: var(--text-muted); }
     
     .cards-container { display: none; padding: 20px; flex-direction: column; gap: 16px; }
-    .m-card { background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; }
+    .m-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-soft); }
     .m-header { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px dashed var(--border); }
-    .m-title { font-weight: 700; color: var(--primary); font-size: 18px; margin-bottom: 6px; }
-    .m-sub { font-size: 15px; color: var(--text-dim); font-style: italic; }
+    .m-title { font-weight: 700; color: var(--accent-blue); font-size: 18px; margin-bottom: 6px; }
+    .m-sub { font-size: 15px; color: var(--text-muted); font-style: italic; }
     .m-row { display: grid; grid-template-columns: 110px 1fr; gap: 12px; font-size: 15px; margin-bottom: 10px; }
-    .m-label { color: var(--text-muted); font-size: 13px; padding-top: 2px; }
+    .m-label { color: var(--text-dim); font-size: 13px; padding-top: 2px; }
 
     /* --- MODALS (SHARED STYLE) --- */
     .modal-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+      background: rgba(15, 23, 42, 0.4); /* Overlay gelap transparan */
+      backdrop-filter: blur(4px);
       z-index: 1000; display: flex; align-items: center; justify-content: center;
       opacity: 0; pointer-events: none; transition: all 0.3s;
     }
@@ -296,17 +320,17 @@
       background: var(--bg-surface); border: 1px solid var(--border);
       width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;
       border-radius: var(--radius-lg); padding: 24px;
-      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
       transform: translateY(20px); transition: transform 0.3s;
     }
     .modal-overlay.open .modal-box { transform: translateY(0); }
     
-    /* Small Modal (untuk Confirm) */
     .modal-box.modal-sm { max-width: 400px; text-align: center; }
 
     .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .modal-title { font-size: 20px; font-weight: 800; color: var(--primary); }
-    .modal-close { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; }
+    .modal-title { font-size: 20px; font-weight: 800; color: var(--text-main); }
+    .modal-close { background: none; border: none; color: var(--text-dim); font-size: 24px; cursor: pointer; }
+    .modal-close:hover { color: var(--danger); }
     
     .modal-body { display: flex; flex-direction: column; gap: 16px; }
     
@@ -316,7 +340,6 @@
     }
     .right-actions { display: flex; gap: 12px; }
 
-    /* Helper */
     .hidden { display: none !important; }
 
     /* --- TOAST NOTIFICATION --- */
@@ -327,8 +350,10 @@
     .toast {
       background: var(--bg-surface); border-left: 4px solid var(--primary);
       color: var(--text-main); padding: 16px 20px;
+      border: 1px solid var(--border);
+      border-left-width: 4px;
       border-radius: var(--radius-sm);
-      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
       display: flex; align-items: center; gap: 12px;
       min-width: 300px; font-size: 14px; font-weight: 500;
       animation: slideIn 0.3s ease;
@@ -339,8 +364,8 @@
     .toast.success i { color: var(--success); }
     .toast.error { border-color: var(--danger); }
     .toast.error i { color: var(--danger); }
-    .toast.info { border-color: var(--primary); }
-    .toast.info i { color: var(--primary); }
+    .toast.info { border-color: var(--accent-blue); }
+    .toast.info i { color: var(--accent-blue); }
 
     @keyframes slideIn {
       from { transform: translateX(100%); opacity: 0; }
