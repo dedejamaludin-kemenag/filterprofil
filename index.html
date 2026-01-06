@@ -182,7 +182,7 @@
 
     .input-wrapper { position: relative; }
     
-    select, input {
+    select, input, textarea {
       width: 100%;
       background: var(--bg-input);
       border: 1px solid var(--border);
@@ -195,9 +195,10 @@
       appearance: none;
       line-height: 1.5;
     }
+    textarea { resize: vertical; min-height: 100px; }
     select { padding-right: 40px; cursor: pointer; }
-    select:hover, input:hover { border-color: var(--border-light); }
-    select:focus, input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(62,207,142,0.1); }
+    select:hover, input:hover, textarea:hover { border-color: var(--border-light); }
+    select:focus, input:focus, textarea:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 2px rgba(62,207,142,0.1); }
 
     .select-arrow {
       position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
@@ -219,6 +220,9 @@
     .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
     .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
     .btn-secondary:hover { border-color: var(--text-main); color: var(--text-main); }
+    
+    .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
 
     /* RESULTS TABLE */
     .results-area {
@@ -243,9 +247,12 @@
       font-weight: 700; font-size: 13px; text-transform: uppercase; white-space: nowrap;
     }
     td { padding: 20px 24px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; }
-    tbody tr:hover { background: rgba(62, 207, 142, 0.02); }
+    
+    /* INTERACTIVE ROWS */
+    tbody tr, .m-card { cursor: pointer; transition: background 0.2s; }
+    tbody tr:hover { background: rgba(62, 207, 142, 0.08) !important; }
+    .m-card:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
 
-    /* Typography Cell */
     .cell-profil { color: var(--primary); font-weight: 700; font-size: 17px; display: block; margin-bottom: 6px; }
     .cell-def { font-size: 15px; color: var(--text-dim); }
     
@@ -255,9 +262,33 @@
     .m-header { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px dashed var(--border); }
     .m-title { font-weight: 700; color: var(--primary); font-size: 18px; margin-bottom: 6px; }
     .m-sub { font-size: 15px; color: var(--text-dim); font-style: italic; }
-    
     .m-row { display: grid; grid-template-columns: 110px 1fr; gap: 12px; font-size: 15px; margin-bottom: 10px; }
     .m-label { color: var(--text-muted); font-size: 13px; padding-top: 2px; }
+
+    /* --- MODAL EDIT --- */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+      z-index: 999; display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: all 0.3s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+    .modal-box {
+      background: var(--bg-surface); border: 1px solid var(--border);
+      width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+      border-radius: var(--radius-lg); padding: 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      transform: translateY(20px); transition: transform 0.3s;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0); }
+
+    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .modal-title { font-size: 20px; font-weight: 800; color: var(--primary); }
+    .modal-close { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; }
+    
+    .modal-body { display: flex; flex-direction: column; gap: 16px; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end; }
 
     @media (max-width: 1024px) {
       .table-responsive { display: none; }
@@ -272,19 +303,16 @@
 <body>
 
   <div class="wrap">
-    
     <header class="header">
       <div class="brand">
         <h1>Pontren Data Explorer</h1>
         <p>Filter data Program Pontren & Indikator realtime.</p>
       </div>
-      
       <div class="header-actions">
         <input type="file" id="fileExcel" accept=".xlsx, .xls" style="display:none" />
         <button class="btn-upload" onclick="document.getElementById('fileExcel').click()">
           <i class="ph ph-microsoft-excel-logo" style="font-size:20px"></i> Import Excel
         </button>
-
         <div class="status-badge">
           <span id="statusDot" class="dot ok"></span>
           <span id="status">Ready</span>
@@ -296,75 +324,26 @@
       <details id="filtersPanel" open>
         <summary>
           <div class="sum-title">
-            <i class="ph ph-faders"></i>
-            Konfigurasi Filter
+            <i class="ph ph-faders"></i> Konfigurasi Filter
           </div>
           <i class="ph ph-caret-down"></i>
         </summary>
-        
         <div class="filter-body">
           <div class="grid-filters">
-            <div class="form-group">
-              <label>1. Profil</label>
-              <div class="input-wrapper">
-                <select id="f_profil"><option value="">Semua</option></select>
-                <i class="ph ph-caret-down select-arrow"></i>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>2. Indikator</label>
-              <div class="input-wrapper">
-                <select id="f_indikator"><option value="">Semua</option></select>
-                <i class="ph ph-caret-down select-arrow"></i>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>3. Program</label>
-              <div class="input-wrapper">
-                <select id="f_program"><option value="">Semua</option></select>
-                <i class="ph ph-caret-down select-arrow"></i>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>4. Penilaian</label>
-              <div class="input-wrapper">
-                <select id="f_penilaian"><option value="">Semua</option></select>
-                <i class="ph ph-caret-down select-arrow"></i>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>5. Tahapan</label>
-              <div class="input-wrapper">
-                <select id="f_tahapan"><option value="">Semua</option></select>
-                <i class="ph ph-caret-down select-arrow"></i>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label>6. PIC</label>
-              <div class="input-wrapper">
-                <select id="f_pic"><option value="">Semua</option></select>
-                <i class="ph ph-caret-down select-arrow"></i>
-              </div>
-            </div>
+            <div class="form-group"><label>1. Profil</label><div class="input-wrapper"><select id="f_profil"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>2. Indikator</label><div class="input-wrapper"><select id="f_indikator"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>3. Program</label><div class="input-wrapper"><select id="f_program"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>4. Penilaian</label><div class="input-wrapper"><select id="f_penilaian"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>5. Tahapan</label><div class="input-wrapper"><select id="f_tahapan"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>6. PIC</label><div class="input-wrapper"><select id="f_pic"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
           </div>
-
           <div class="action-bar">
             <div class="search-box form-group">
               <label>Pencarian Kata Kunci</label>
               <input id="q" type="text" placeholder="Ketik apa saja..." autocomplete="off">
             </div>
-            
-            <button id="btn_apply" class="btn btn-primary">
-              <i class="ph ph-magnifying-glass"></i> Terapkan
-            </button>
-            <button id="btn_reset" class="btn btn-secondary">
-              <i class="ph ph-arrow-counter-clockwise"></i> Reset
-            </button>
+            <button id="btn_apply" class="btn btn-primary"><i class="ph ph-magnifying-glass"></i> Terapkan</button>
+            <button id="btn_reset" class="btn btn-secondary"><i class="ph ph-arrow-counter-clockwise"></i> Reset</button>
           </div>
         </div>
       </details>
@@ -372,29 +351,71 @@
 
     <div class="results-area">
       <div class="table-header-info">
-        <span>Menampilkan <b id="count">0</b> data</span>
+        <span>Menampilkan <b id="count">0</b> data <span style="font-size:12px; margin-left:10px; opacity:0.7">(Klik baris untuk mengedit)</span></span>
       </div>
-
       <div class="table-responsive">
         <table>
           <thead>
             <tr>
               <th width="20%">PROFIL & DEFINISI</th>
-              <th width="10%">INDIKATOR</th>
+              <th width="20%">INDIKATOR</th>
               <th width="20%">PROGRAM</th>
-              <th width="20%">PENILAIAN</th>
-              <th width="20%">TAHAPAN</th>
+              <th width="15%">PENILAIAN</th>
+              <th width="15%">TAHAPAN</th>
               <th width="10%">PIC</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
         </table>
       </div>
-
       <div class="cards-container" id="cards"></div>
     </div>
-
   </div>
+
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div class="modal-title">Edit Data</div>
+        <button class="modal-close" id="btnCloseModal"><i class="ph ph-x"></i></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="e_id">
+        <div class="form-group">
+          <label>Profil</label>
+          <input type="text" id="e_profil">
+        </div>
+        <div class="form-group">
+          <label>Definisi</label>
+          <textarea id="e_definisi"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Indikator</label>
+          <textarea id="e_indikator"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Program</label>
+          <input type="text" id="e_program">
+        </div>
+        <div class="form-group">
+          <label>Penilaian</label>
+          <input type="text" id="e_penilaian">
+        </div>
+        <div class="form-group">
+          <label>Tahapan</label>
+          <input type="text" id="e_tahapan">
+        </div>
+        <div class="form-group">
+          <label>PIC</label>
+          <input type="text" id="e_pic">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" id="btnCancelEdit" style="height:44px">Batal</button>
+        <button class="btn btn-primary" id="btnSaveEdit" style="height:44px">Simpan Perubahan</button>
+      </div>
+    </div>
+  </div>
+
   <script src="./app.js"></script>
 </body>
 </html>
