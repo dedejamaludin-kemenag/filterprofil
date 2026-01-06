@@ -21,6 +21,7 @@
     // Buttons
     btnApply: document.getElementById("btn_apply"),
     btnReset: document.getElementById("btn_reset"),
+    btnAddData: document.getElementById("btnAddData"), // Tombol Tambah
     // Display
     tbody: document.getElementById("tbody"),
     cards: document.getElementById("cards"),
@@ -31,6 +32,7 @@
     fileExcel: document.getElementById("fileExcel"),
     // Edit Modal Elements
     modal: document.getElementById("editModal"),
+    modalTitle: document.getElementById("modalTitle"),
     btnCloseModal: document.getElementById("btnCloseModal"),
     btnCancelEdit: document.getElementById("btnCancelEdit"),
     btnSaveEdit: document.getElementById("btnSaveEdit"),
@@ -87,48 +89,99 @@
   }
 
   // --- MODAL & EDIT LOGIC ---
-  function openEditModal(row) {
-    els.e_id.value = row.id;
-    els.e_profil.value = row.profil || "";
-    els.e_definisi.value = row.definisi || "";
-    els.e_indikator.value = row.indikator || "";
-    els.e_program.value = row.program || "";
-    els.e_penilaian.value = row.penilaian || "";
-    els.e_tahapan.value = row.tahapan || "";
-    els.e_pic.value = row.pic || "";
+  
+  // Fungsi Buka Modal (Bisa untuk Edit atau Tambah Baru)
+  function openModal(row) {
+    if (row) {
+      // MODE EDIT
+      els.modalTitle.textContent = "Edit Data";
+      els.e_id.value = row.id;
+      els.e_profil.value = row.profil || "";
+      els.e_definisi.value = row.definisi || "";
+      els.e_indikator.value = row.indikator || "";
+      els.e_program.value = row.program || "";
+      els.e_penilaian.value = row.penilaian || "";
+      els.e_tahapan.value = row.tahapan || "";
+      els.e_pic.value = row.pic || "";
+      
+      // Tampilkan tombol hapus
+      els.btnDeleteData.classList.remove("hidden");
+    } else {
+      // MODE TAMBAH BARU
+      els.modalTitle.textContent = "Tambah Data Baru";
+      els.e_id.value = ""; // ID Kosong = Tanda Insert
+      els.e_profil.value = "";
+      els.e_definisi.value = "";
+      els.e_indikator.value = "";
+      els.e_program.value = "";
+      els.e_penilaian.value = "";
+      els.e_tahapan.value = "";
+      els.e_pic.value = "";
+
+      // Sembunyikan tombol hapus (belum ada data)
+      els.btnDeleteData.classList.add("hidden");
+    }
+    
     els.modal.classList.add("open");
   }
 
-  function closeEditModal() {
+  function closeModal() {
     els.modal.classList.remove("open");
   }
 
   async function saveChanges() {
     const id = els.e_id.value;
-    if (!id) return;
-    if (!confirm("Simpan perubahan data ini?")) return;
-    setStatus("Menyimpan...", "load");
-
-    const updates = {
-      profil: els.e_profil.value,
-      definisi: els.e_definisi.value,
-      indikator: els.e_indikator.value,
-      program: els.e_program.value,
-      penilaian: els.e_penilaian.value,
-      tahapan: els.e_tahapan.value,
-      pic: els.e_pic.value,
-      updated_at: new Date()
+    
+    const dataToSave = {
+      profil: els.e_profil.value.trim(),
+      definisi: els.e_definisi.value.trim(),
+      indikator: els.e_indikator.value.trim(),
+      program: els.e_program.value.trim(),
+      penilaian: els.e_penilaian.value.trim(),
+      tahapan: els.e_tahapan.value.trim(),
+      pic: els.e_pic.value.trim(),
     };
 
-    const { error } = await db.from("program_pontren").update(updates).eq("id", id);
-    if (error) {
-      console.error(error);
-      alert("Gagal menyimpan: " + error.message);
-      setStatus("Gagal Simpan", "err");
+    // Validasi Minimal 1 Kolom
+    const hasData = Object.values(dataToSave).some(val => val !== "");
+    if (!hasData) {
+      alert("Harap isi minimal 1 kolom!");
+      return;
+    }
+
+    if (id) {
+      // --- LOGIKA UPDATE ---
+      if (!confirm("Simpan perubahan data ini?")) return;
+      setStatus("Menyimpan...", "load");
+      dataToSave.updated_at = new Date();
+
+      const { error } = await db.from("program_pontren").update(dataToSave).eq("id", id);
+      
+      if (error) {
+        console.error(error);
+        alert("Gagal update: " + error.message);
+        setStatus("Gagal Update", "err");
+      } else {
+        closeModal();
+        alert("Data berhasil diperbarui!");
+        await fetchData(); 
+      }
+
     } else {
-      closeEditModal();
-      alert("Data berhasil diperbarui!");
-      await fetchData(); 
+      // --- LOGIKA INSERT BARU ---
+      setStatus("Menambahkan...", "load");
+      
+      const { error } = await db.from("program_pontren").insert(dataToSave);
+      
+      if (error) {
+        console.error(error);
+        alert("Gagal menambah: " + error.message);
+        setStatus("Gagal Insert", "err");
+      } else {
+        closeModal();
+        alert("Data baru berhasil ditambahkan!");
+        await fetchData();
+      }
     }
   }
 
@@ -144,21 +197,14 @@
       alert("Gagal menghapus: " + error.message);
       setStatus("Gagal Hapus", "err");
     } else {
-      closeEditModal();
+      closeModal();
       alert("Data berhasil dihapus.");
       await fetchData(); 
     }
   }
 
-  els.btnCloseModal.addEventListener("click", closeEditModal);
-  els.btnCancelEdit.addEventListener("click", closeEditModal);
-  els.btnSaveEdit.addEventListener("click", saveChanges);
-  els.btnDeleteData.addEventListener("click", deleteData);
-  els.modal.addEventListener("click", (e) => {
-    if (e.target === els.modal) closeEditModal();
-  });
+  // --- DATA LOADING & TABLE RENDER ---
 
-  // --- DATA LOADING ---
   async function loadFilterOptions(currentFilters) {
     const f = currentFilters;
     const { data, error } = await db.rpc("get_program_pontren_options", {
@@ -232,14 +278,14 @@
     document.querySelectorAll('tr[data-index]').forEach(row => {
       row.addEventListener('click', () => {
         const idx = row.getAttribute('data-index');
-        openEditModal(allRowsData[idx]);
+        openModal(allRowsData[idx]); // Buka Modal Edit
       });
     });
     
     document.querySelectorAll('.m-card[data-index]').forEach(card => {
       card.addEventListener('click', () => {
         const idx = card.getAttribute('data-index');
-        openEditModal(allRowsData[idx]);
+        openModal(allRowsData[idx]); // Buka Modal Edit
       });
     });
   }
@@ -278,9 +324,7 @@
     els.penilaian.value = ""; els.tahapan.value = ""; els.pic.value = ""; els.q.value = "";
   }
 
-  // ==========================================
-  // EXCEL IMPORT: SMART MERGE (KEY: PROGRAM + PIC)
-  // ==========================================
+  // --- IMPORT EXCEL ---
   els.fileExcel.addEventListener("change", async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -300,7 +344,6 @@
 
       if (!rawExcel.length) throw new Error("File kosong");
 
-      // Load DB Data untuk Cek Duplikat
       const { data: dbData, error: dbErr } = await db.from("program_pontren").select("*");
       if (dbErr) throw dbErr;
 
@@ -309,30 +352,23 @@
       const promises = [];
 
       for (let row of rawExcel) {
-        // KUNCI: Program & PIC
         const newProgram = (row['Program'] || row['program'] || '').trim();
         const newPic = (row['PIC'] || row['pic'] || '').trim();
         
-        // Skip jika kunci kosong (tidak valid)
         if (!newProgram || !newPic) continue;
 
-        // Data Pelengkap
         const newProfil = (row['Profil'] || row['profil'] || '').trim();
         const newDefinisi = (row['Definisi'] || row['definisi'] || '').trim();
         const newIndikator = (row['Indikator'] || row['indikator'] || '').trim();
         const newPenilaian = (row['Penilaian'] || row['penilaian'] || '').trim();
         const newTahapan = (row['Tahapan'] || row['tahapan'] || '').trim();
 
-        // Cari Match berdasarkan Program & PIC
         const match = dbData.find(d => 
           (d.program || '').toLowerCase() === newProgram.toLowerCase() && 
           (d.pic || '').toLowerCase() === newPic.toLowerCase()
         );
 
         if (match) {
-          // --- MATCH FOUND: UPDATE (MERGE) ---
-          // Update Profil, Indikator, dll jika di Excel ada isinya.
-          // Jika di Excel kosong, pertahankan data lama.
           const updates = {
             profil: newProfil || match.profil,
             definisi: newDefinisi || match.definisi,
@@ -341,12 +377,9 @@
             tahapan: newTahapan || match.tahapan,
             updated_at: new Date()
           };
-
           promises.push(db.from("program_pontren").update(updates).eq("id", match.id));
           updateCount++;
-
         } else {
-          // --- NO MATCH: INSERT NEW ---
           const newData = {
             program: newProgram,
             pic: newPic,
@@ -362,9 +395,7 @@
       }
 
       setStatus(`Processing: ${insertCount} New, ${updateCount} Updates...`, "load");
-
       await Promise.all(promises);
-
       alert(`Selesai!\n- Data Baru: ${insertCount}\n- Data Diupdate (Merge): ${updateCount}`);
       els.fileExcel.value = "";
       await fetchData();
@@ -377,6 +408,8 @@
   });
 
   // Events
+  els.btnAddData.addEventListener("click", () => openModal(null)); // Klik Tambah Baru
+
   els.btnApply.addEventListener("click", () => {
     if (window.innerWidth < 1024) els.filtersPanel.open = false;
     fetchData();
@@ -394,6 +427,15 @@
   [els.profil, els.indikator, els.program, els.penilaian, els.tahapan, els.pic].forEach(el => 
     el && el.addEventListener("change", fetchData)
   );
+
+  // Modal Events
+  els.btnCloseModal.addEventListener("click", closeModal);
+  els.btnCancelEdit.addEventListener("click", closeModal);
+  els.btnSaveEdit.addEventListener("click", saveChanges);
+  els.btnDeleteData.addEventListener("click", deleteData);
+  els.modal.addEventListener("click", (e) => {
+    if (e.target === els.modal) closeModal();
+  });
 
   (async function init() {
     if (window.innerWidth < 1024) els.filtersPanel.open = false;
