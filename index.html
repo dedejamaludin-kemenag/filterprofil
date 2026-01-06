@@ -18,7 +18,7 @@
       /* THEME: Emerald & Dark Slate */
       --bg-body: #1c1c1c; 
       --bg-surface: #262626;
-      --bg-surface-glass: rgba(38, 38, 38, 0.98); /* Sedikit lebih solid agar sticky enak dilihat */
+      --bg-surface-glass: rgba(38, 38, 38, 0.98);
       --bg-input: #171717;
       
       --border: #404040;
@@ -128,18 +128,14 @@
     .dot.err { background: var(--danger); }
     @keyframes pulse { 0% {opacity: 1} 50% {opacity: .4} 100% {opacity: 1} }
 
-    /* --- FILTER PANEL (Sticky Update) --- */
+    /* FILTER PANEL (Sticky) */
     .filter-panel {
       background: var(--bg-surface-glass);
-      backdrop-filter: blur(16px); /* Blur diperkuat */
+      backdrop-filter: blur(16px);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      
-      /* STICKY CONFIGURATION */
-      position: sticky;
-      top: 20px; /* Jarak dari atas browser saat scroll */
-      z-index: 100; /* Pastikan di atas elemen lain */
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5); /* Shadow agar terlihat melayang */
+      position: sticky; top: 20px; z-index: 100;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     }
     
     details summary {
@@ -227,8 +223,16 @@
     .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
     .btn-secondary:hover { border-color: var(--text-main); color: var(--text-main); }
     
-    .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
-    .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
+    /* Tombol Hapus */
+    .btn-danger { 
+      background: rgba(239, 68, 68, 0.1); 
+      color: var(--danger); 
+      border: 1px solid var(--danger); 
+    }
+    .btn-danger:hover { 
+      background: var(--danger); 
+      color: white;
+    }
 
     /* RESULTS TABLE */
     .results-area {
@@ -254,7 +258,6 @@
     }
     td { padding: 20px 24px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; }
     
-    /* INTERACTIVE ROWS */
     tbody tr, .m-card { cursor: pointer; transition: background 0.2s; }
     tbody tr:hover { background: rgba(62, 207, 142, 0.08) !important; }
     .m-card:hover { border-color: var(--primary); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
@@ -262,7 +265,6 @@
     .cell-profil { color: var(--primary); font-weight: 700; font-size: 17px; display: block; margin-bottom: 6px; }
     .cell-def { font-size: 15px; color: var(--text-dim); }
     
-    /* MOBILE CARDS */
     .cards-container { display: none; padding: 20px; flex-direction: column; gap: 16px; }
     .m-card { background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; }
     .m-header { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px dashed var(--border); }
@@ -294,7 +296,13 @@
     .modal-close { background: none; border: none; color: var(--text-muted); font-size: 24px; cursor: pointer; }
     
     .modal-body { display: flex; flex-direction: column; gap: 16px; }
-    .modal-actions { display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end; }
+    
+    /* Actions: Tombol Hapus di kiri, Batal & Simpan di kanan */
+    .modal-actions { 
+      display: flex; gap: 12px; margin-top: 24px; 
+      justify-content: space-between; /* Hapus kiri, Simpan Kanan */
+    }
+    .right-actions { display: flex; gap: 12px; }
 
     @media (max-width: 1024px) {
       .table-responsive { display: none; }
@@ -303,7 +311,8 @@
       .action-bar { flex-direction: column; align-items: stretch; }
       .btn { width: 100%; }
       .header-actions { width: 100%; justify-content: space-between; margin-top: 12px; }
-      /* Di mobile, jika sticky terlalu memakan tempat, user bisa menutup <details> */
+      .modal-actions { flex-direction: column-reverse; } /* Di HP, Hapus paling bawah */
+      .right-actions { flex-direction: column; width: 100%; }
     }
   </style>
 </head>
@@ -416,9 +425,15 @@
           <input type="text" id="e_pic">
         </div>
       </div>
+      
       <div class="modal-actions">
-        <button class="btn btn-secondary" id="btnCancelEdit" style="height:44px">Batal</button>
-        <button class="btn btn-primary" id="btnSaveEdit" style="height:44px">Simpan Perubahan</button>
+        <button class="btn btn-danger" id="btnDeleteData" style="height:44px">
+          <i class="ph ph-trash"></i> Hapus Data
+        </button>
+        <div class="right-actions">
+          <button class="btn btn-secondary" id="btnCancelEdit" style="height:44px">Batal</button>
+          <button class="btn btn-primary" id="btnSaveEdit" style="height:44px">Simpan Perubahan</button>
+        </div>
       </div>
     </div>
   </div>
