@@ -48,7 +48,6 @@
 
     * { box-sizing: border-box; outline: none; }
     
-    /* 1. KEMBALIKAN SCROLL KE BODY (Agar Header bisa discroll) */
     html, body {
       height: auto; 
       min-height: 100vh;
@@ -61,7 +60,7 @@
         radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
       font-size: 16px;
       -webkit-font-smoothing: antialiased;
-      overflow-y: auto; /* Scroll utama di sini */
+      overflow-y: auto; 
     }
 
     .wrap {
@@ -73,13 +72,12 @@
       gap: 20px;
     }
 
-    /* HEADER: Akan tergulir ke atas (menghilang) saat scroll */
+    /* HEADER */
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding-bottom: 20px;
-      /* Border dipindah ke pseudo-element atau dihapus agar rapi saat scroll */
       gap: 16px;
     }
     .brand h1 {
@@ -95,21 +93,20 @@
 
     .header-actions { display: flex; align-items: center; gap: 12px; }
 
-    /* --- LAYOUT WORKSPACE BARU (Sticky) --- */
-    /* Area ini akan menempel di layar setelah Header discroll */
+    /* WORKSPACE (Sticky) */
     .app-workspace {
       position: sticky;
-      top: 20px; /* Jarak dari atas layar */
-      height: calc(100vh - 40px); /* Full height minus margin */
+      top: 20px;
+      height: calc(100vh - 40px);
       display: flex;
       flex-direction: column;
       gap: 20px;
-      overflow: hidden; /* Mencegah double scrollbar */
+      overflow: hidden;
     }
 
-    /* FILTER PANEL: Bagian atas dari sticky area */
+    /* FILTER PANEL */
     .filter-panel {
-      flex-shrink: 0; /* Jangan mengecil */
+      flex-shrink: 0;
       background: var(--bg-surface-glass);
       backdrop-filter: blur(16px);
       border: 1px solid var(--border);
@@ -118,19 +115,18 @@
       z-index: 20;
     }
     
-    /* RESULTS AREA: Mengisi sisa ruang & menangani scroll tabel */
+    /* RESULTS AREA */
     .results-area {
-      flex-grow: 1; /* Mengisi sisa tinggi layar */
+      flex-grow: 1;
       display: flex;
       flex-direction: column;
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      overflow: hidden; /* Penting! */
+      overflow: hidden;
       box-shadow: var(--shadow-card);
     }
 
-    /* Header Info (Jumlah Data) */
     .table-header-info {
       flex-shrink: 0;
       padding: 20px 24px;
@@ -140,19 +136,17 @@
       z-index: 15;
     }
 
-    /* Area Tabel Scrollable */
     .table-responsive {
       flex-grow: 1;
-      overflow: auto; /* Scroll bar pindah ke sini! */
+      overflow: auto;
       width: 100%;
     }
 
     table { width: 100%; border-collapse: collapse; font-size: 16px; min-width: 1000px; }
     
-    /* TABLE HEADER STICKY (Menempel di dalam box results) */
     th {
       position: sticky;
-      top: 0; /* Menempel di atas area scroll tabel */
+      top: 0;
       z-index: 10;
       text-align: left; padding: 18px 24px; 
       background: #f1f5f9;
@@ -172,13 +166,19 @@
       padding: 20px; 
       flex-direction: column; gap: 16px; 
     }
-    /* ... (Style Card Sama) ... */
     
-    /* Komponen UI Lain (Tombol, Input, Modal, Toast - Tetap Sama) */
+    /* UI Components */
     .btn-upload { background: #f0fdf4; border: 1px dashed var(--primary); color: var(--primary); padding: 10px 18px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; }
     .btn-upload:hover { background: #dcfce7; }
-    .btn-add-new { background: var(--primary); border: 1px solid var(--primary); color: #fff; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2); }
-    .btn-add-new:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    
+    /* Tombol Add di dalam Modal (Secondary Style) */
+    .btn-add-modal {
+      background: transparent; border: 1px solid var(--primary); color: var(--primary);
+      padding: 10px 18px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+    }
+    .btn-add-modal:hover { background: #f0fdf4; }
+
     .status-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: 999px; font-size: 14px; font-weight: 500; color: var(--text-muted); }
     .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-dim); }
     .dot.ok { background: var(--success); box-shadow: 0 0 8px var(--primary-glow); }
@@ -213,6 +213,7 @@
     .m-label { color: var(--text-dim); font-size: 13px; padding-top: 2px; }
     .cell-profil { color: var(--accent-blue); font-weight: 700; font-size: 17px; display: block; margin-bottom: 6px; }
     .cell-def { font-size: 15px; color: var(--text-muted); }
+    
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: all 0.3s; }
     .modal-overlay.open { opacity: 1; pointer-events: auto; }
     .modal-box { background: var(--bg-surface); border: 1px solid var(--border); width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; border-radius: var(--radius-lg); padding: 24px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15); transform: translateY(20px); transition: transform 0.3s; }
@@ -222,8 +223,12 @@
     .modal-title { font-size: 20px; font-weight: 800; color: var(--text-main); }
     .modal-close { background: none; border: none; color: var(--text-dim); font-size: 24px; cursor: pointer; }
     .modal-body { display: flex; flex-direction: column; gap: 16px; }
-    .modal-actions { display: flex; gap: 12px; margin-top: 24px; justify-content: space-between; }
+    
+    /* MODAL ACTIONS - UPDATED LAYOUT */
+    .modal-actions { display: flex; gap: 12px; margin-top: 24px; justify-content: space-between; align-items: center; }
+    .left-actions { display: flex; gap: 12px; }
     .right-actions { display: flex; gap: 12px; }
+    
     .hidden { display: none !important; }
     .toast-container { position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; }
     .toast { background: var(--bg-surface); border-left: 4px solid var(--primary); color: var(--text-main); padding: 16px 20px; border: 1px solid var(--border); border-left-width: 4px; border-radius: var(--radius-sm); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 12px; min-width: 300px; font-size: 14px; font-weight: 500; animation: slideIn 0.3s ease; }
@@ -242,11 +247,14 @@
       .action-bar { flex-direction: column; align-items: stretch; }
       .btn { width: 100%; }
       .header-actions { width: 100%; justify-content: space-between; margin-top: 12px; }
-      .modal-actions { flex-direction: column-reverse; }
+      
+      /* Mobile Modal Actions: Stack Vertical */
+      .modal-actions { flex-direction: column-reverse; align-items: stretch; }
+      .left-actions { flex-direction: column; width: 100%; }
       .right-actions { flex-direction: column; width: 100%; }
+
       .toast-container { left: 24px; right: 24px; top: 12px; }
       .toast { width: 100%; min-width: auto; }
-      /* Filter tetap sticky via top:20px tapi tidak di dalam container fix */
       .filter-panel { position: sticky; top: 10px; }
     }
   </style>
@@ -263,9 +271,6 @@
         <p>Filter data Program Pontren & Indikator realtime.</p>
       </div>
       <div class="header-actions">
-        <button class="btn-add-new" id="btnAddData">
-          <i class="ph ph-plus"></i> Tambah Baru
-        </button>
         <input type="file" id="fileExcel" accept=".xlsx, .xls" style="display:none" />
         <button class="btn-upload" onclick="document.getElementById('fileExcel').click()">
           <i class="ph ph-microsoft-excel-logo" style="font-size:20px"></i> Import Excel
@@ -331,9 +336,7 @@
 
         <div class="cards-container" id="cards"></div>
       </div>
-      
     </main>
-
   </div>
 
   <div class="modal-overlay" id="editModal">
@@ -352,8 +355,15 @@
         <div class="form-group"><label>Tahapan</label><input type="text" id="e_tahapan"></div>
         <div class="form-group"><label>PIC</label><input type="text" id="e_pic"></div>
       </div>
+      
       <div class="modal-actions">
-        <button class="btn btn-danger" id="btnDeleteData" style="height:44px"><i class="ph ph-trash"></i> Hapus</button>
+        <div class="left-actions">
+          <button class="btn btn-danger" id="btnDeleteData" style="height:44px"><i class="ph ph-trash"></i></button>
+          <button class="btn-add-modal" id="btnSwitchToAdd" style="height:44px">
+            <i class="ph ph-plus"></i> Tambah Baru
+          </button>
+        </div>
+        
         <div class="right-actions">
           <button class="btn btn-secondary" id="btnCancelEdit" style="height:44px">Batal</button>
           <button class="btn btn-primary" id="btnSaveEdit" style="height:44px">Simpan</button>
