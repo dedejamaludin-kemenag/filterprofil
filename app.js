@@ -10,7 +10,6 @@
 
   // Cache Element DOM
   const els = {
-    // Filters
     profil: document.getElementById("f_profil"),
     indikator: document.getElementById("f_indikator"),
     program: document.getElementById("f_program"),
@@ -18,11 +17,9 @@
     tahapan: document.getElementById("f_tahapan"),
     pic: document.getElementById("f_pic"),
     q: document.getElementById("q"),
-    // Buttons
     btnApply: document.getElementById("btn_apply"),
     btnReset: document.getElementById("btn_reset"),
-    btnAddData: document.getElementById("btnAddData"), // Tombol Tambah
-    // Display
+    btnAddData: document.getElementById("btnAddData"),
     tbody: document.getElementById("tbody"),
     cards: document.getElementById("cards"),
     count: document.getElementById("count"),
@@ -30,13 +27,16 @@
     statusDot: document.getElementById("statusDot"),
     filtersPanel: document.getElementById("filtersPanel"),
     fileExcel: document.getElementById("fileExcel"),
-    // Edit Modal Elements
+    
+    // Modal Edit
     modal: document.getElementById("editModal"),
     modalTitle: document.getElementById("modalTitle"),
     btnCloseModal: document.getElementById("btnCloseModal"),
     btnCancelEdit: document.getElementById("btnCancelEdit"),
     btnSaveEdit: document.getElementById("btnSaveEdit"),
     btnDeleteData: document.getElementById("btnDeleteData"),
+    
+    // Form Inputs
     e_id: document.getElementById("e_id"),
     e_profil: document.getElementById("e_profil"),
     e_definisi: document.getElementById("e_definisi"),
@@ -45,10 +45,67 @@
     e_penilaian: document.getElementById("e_penilaian"),
     e_tahapan: document.getElementById("e_tahapan"),
     e_pic: document.getElementById("e_pic"),
+
+    // Toast & Confirm
+    toastContainer: document.getElementById("toastContainer"),
+    confirmModal: document.getElementById("confirmModal"),
+    confirmText: document.getElementById("confirmText"),
+    btnConfirmYes: document.getElementById("btnConfirmYes"),
+    btnConfirmNo: document.getElementById("btnConfirmNo"),
   };
 
   let allRowsData = []; 
 
+  // --- NOTIFICATION SYSTEM (TOAST) ---
+  function notify(msg, type = "info") {
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    
+    let icon = "info";
+    if (type === "success") icon = "check-circle";
+    if (type === "error") icon = "warning-circle";
+
+    toast.innerHTML = `<i class="ph ph-${icon}"></i> <span>${msg}</span>`;
+    
+    els.toastContainer.appendChild(toast);
+
+    // Auto remove after 4s
+    setTimeout(() => {
+      toast.style.opacity = "0";
+      setTimeout(() => toast.remove(), 300);
+    }, 4000);
+  }
+
+  // --- CUSTOM CONFIRM MODAL ---
+  function askConfirm(message) {
+    return new Promise((resolve) => {
+      els.confirmText.textContent = message;
+      els.confirmModal.classList.add("open");
+
+      // Handler untuk tombol
+      const handleYes = () => {
+        cleanup();
+        resolve(true);
+      };
+      
+      const handleNo = () => {
+        cleanup();
+        resolve(false);
+      };
+
+      // Cleanup event listeners agar tidak menumpuk
+      function cleanup() {
+        els.btnConfirmYes.removeEventListener("click", handleYes);
+        els.btnConfirmNo.removeEventListener("click", handleNo);
+        els.confirmModal.classList.remove("open");
+      }
+
+      els.btnConfirmYes.addEventListener("click", handleYes);
+      els.btnConfirmNo.addEventListener("click", handleNo);
+    });
+  }
+
+  // Utils
   function safeText(x) {
     return (x ?? "").toString().replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
@@ -88,12 +145,9 @@
     };
   }
 
-  // --- MODAL & EDIT LOGIC ---
-  
-  // Fungsi Buka Modal (Bisa untuk Edit atau Tambah Baru)
+  // --- MODAL & DATA LOGIC ---
   function openModal(row) {
     if (row) {
-      // MODE EDIT
       els.modalTitle.textContent = "Edit Data";
       els.e_id.value = row.id;
       els.e_profil.value = row.profil || "";
@@ -103,13 +157,10 @@
       els.e_penilaian.value = row.penilaian || "";
       els.e_tahapan.value = row.tahapan || "";
       els.e_pic.value = row.pic || "";
-      
-      // Tampilkan tombol hapus
       els.btnDeleteData.classList.remove("hidden");
     } else {
-      // MODE TAMBAH BARU
       els.modalTitle.textContent = "Tambah Data Baru";
-      els.e_id.value = ""; // ID Kosong = Tanda Insert
+      els.e_id.value = "";
       els.e_profil.value = "";
       els.e_definisi.value = "";
       els.e_indikator.value = "";
@@ -117,11 +168,8 @@
       els.e_penilaian.value = "";
       els.e_tahapan.value = "";
       els.e_pic.value = "";
-
-      // Sembunyikan tombol hapus (belum ada data)
       els.btnDeleteData.classList.add("hidden");
     }
-    
     els.modal.classList.add("open");
   }
 
@@ -131,7 +179,6 @@
 
   async function saveChanges() {
     const id = els.e_id.value;
-    
     const dataToSave = {
       profil: els.e_profil.value.trim(),
       definisi: els.e_definisi.value.trim(),
@@ -142,44 +189,38 @@
       pic: els.e_pic.value.trim(),
     };
 
-    // Validasi Minimal 1 Kolom
     const hasData = Object.values(dataToSave).some(val => val !== "");
     if (!hasData) {
-      alert("Harap isi minimal 1 kolom!");
+      notify("Harap isi minimal 1 kolom!", "error");
       return;
     }
 
     if (id) {
-      // --- LOGIKA UPDATE ---
-      if (!confirm("Simpan perubahan data ini?")) return;
+      const confirm = await askConfirm("Simpan perubahan pada data ini?");
+      if (!confirm) return;
+
       setStatus("Menyimpan...", "load");
       dataToSave.updated_at = new Date();
-
       const { error } = await db.from("program_pontren").update(dataToSave).eq("id", id);
       
       if (error) {
-        console.error(error);
-        alert("Gagal update: " + error.message);
-        setStatus("Gagal Update", "err");
+        notify("Gagal update: " + error.message, "error");
+        setStatus("Gagal", "err");
       } else {
         closeModal();
-        alert("Data berhasil diperbarui!");
+        notify("Data berhasil diperbarui!", "success");
         await fetchData(); 
       }
-
     } else {
-      // --- LOGIKA INSERT BARU ---
       setStatus("Menambahkan...", "load");
-      
       const { error } = await db.from("program_pontren").insert(dataToSave);
       
       if (error) {
-        console.error(error);
-        alert("Gagal menambah: " + error.message);
-        setStatus("Gagal Insert", "err");
+        notify("Gagal tambah: " + error.message, "error");
+        setStatus("Gagal", "err");
       } else {
         closeModal();
-        alert("Data baru berhasil ditambahkan!");
+        notify("Data baru berhasil ditambahkan!", "success");
         await fetchData();
       }
     }
@@ -188,23 +229,24 @@
   async function deleteData() {
     const id = els.e_id.value;
     if (!id) return;
-    if (!confirm("PERINGATAN: Hapus permanen data ini?")) return;
-    setStatus("Menghapus...", "load");
+    
+    const confirm = await askConfirm("PERINGATAN: Apakah Anda yakin ingin menghapus data ini secara permanen?");
+    if (!confirm) return;
 
+    setStatus("Menghapus...", "load");
     const { error } = await db.from("program_pontren").delete().eq("id", id);
+    
     if (error) {
-      console.error(error);
-      alert("Gagal menghapus: " + error.message);
-      setStatus("Gagal Hapus", "err");
+      notify("Gagal hapus: " + error.message, "error");
+      setStatus("Gagal", "err");
     } else {
       closeModal();
-      alert("Data berhasil dihapus.");
+      notify("Data berhasil dihapus.", "success");
       await fetchData(); 
     }
   }
 
-  // --- DATA LOADING & TABLE RENDER ---
-
+  // --- DATA LOADING ---
   async function loadFilterOptions(currentFilters) {
     const f = currentFilters;
     const { data, error } = await db.rpc("get_program_pontren_options", {
@@ -276,17 +318,11 @@
     `).join("");
 
     document.querySelectorAll('tr[data-index]').forEach(row => {
-      row.addEventListener('click', () => {
-        const idx = row.getAttribute('data-index');
-        openModal(allRowsData[idx]); // Buka Modal Edit
-      });
+      row.addEventListener('click', () => openModal(allRowsData[row.getAttribute('data-index')]));
     });
     
     document.querySelectorAll('.m-card[data-index]').forEach(card => {
-      card.addEventListener('click', () => {
-        const idx = card.getAttribute('data-index');
-        openModal(allRowsData[idx]); // Buka Modal Edit
-      });
+      card.addEventListener('click', () => openModal(allRowsData[card.getAttribute('data-index')]));
     });
   }
 
@@ -294,9 +330,7 @@
     const f = readFilters();
     setStatus("Syncing...", "load");
     await loadFilterOptions(f);
-    let q = db.from("program_pontren")
-      .select("id, profil, definisi, indikator, pic, program, penilaian, tahapan")
-      .order("profil", { ascending: true });
+    let q = db.from("program_pontren").select("*").order("profil", { ascending: true });
 
     if (f.profil) q = q.eq("profil", f.profil);
     if (f.indikator) q = q.eq("indikator", f.indikator);
@@ -311,8 +345,8 @@
     }
     const { data, error } = await q;
     if (error) {
-      console.error(error);
-      setStatus("Error mengambil data", "err");
+      notify("Gagal ambil data", "error");
+      setStatus("Error", "err");
     } else {
       renderRows(data || []);
       setStatus("Ready", "ok");
@@ -329,13 +363,13 @@
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!confirm(`Import "${file.name}"?\n\nKUNCI UNIK: 'PROGRAM' dan 'PIC'.\nJika ditemukan Program & PIC yang sama, data kolom lain (Profil, Indikator, dll) akan dilengkapi/diupdate.`)) {
+    const confirm = await askConfirm(`Import file "${file.name}"?\nData duplikat (Program & PIC sama) akan di-merge.`);
+    if (!confirm) {
       els.fileExcel.value = ""; 
       return;
     }
 
-    setStatus("Reading & Comparing...", "load");
-
+    setStatus("Reading...", "load");
     try {
       const buffer = await file.arrayBuffer();
       const workbook = XLSX.read(buffer);
@@ -394,22 +428,19 @@
         }
       }
 
-      setStatus(`Processing: ${insertCount} New, ${updateCount} Updates...`, "load");
       await Promise.all(promises);
-      alert(`Selesai!\n- Data Baru: ${insertCount}\n- Data Diupdate (Merge): ${updateCount}`);
+      notify(`Selesai! Baru: ${insertCount}, Update: ${updateCount}`, "success");
       els.fileExcel.value = "";
       await fetchData();
 
     } catch (err) {
       console.error(err);
-      alert("Gagal Import: " + err.message);
-      setStatus("Error Import", "err");
+      notify("Gagal Import: " + err.message, "error");
+      setStatus("Error", "err");
     }
   });
 
-  // Events
-  els.btnAddData.addEventListener("click", () => openModal(null)); // Klik Tambah Baru
-
+  els.btnAddData.addEventListener("click", () => openModal(null));
   els.btnApply.addEventListener("click", () => {
     if (window.innerWidth < 1024) els.filtersPanel.open = false;
     fetchData();
@@ -428,7 +459,6 @@
     el && el.addEventListener("change", fetchData)
   );
 
-  // Modal Events
   els.btnCloseModal.addEventListener("click", closeModal);
   els.btnCancelEdit.addEventListener("click", closeModal);
   els.btnSaveEdit.addEventListener("click", saveChanges);
