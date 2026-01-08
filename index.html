@@ -423,12 +423,12 @@
         </summary>
         <div class="filter-body">
           <div class="grid-filters">
-            <div class="form-group"><label>1. Profil</label><div class="input-wrapper"><select id="f_profil"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
-            <div class="form-group"><label>2. Indikator</label><div class="input-wrapper"><select id="f_indikator"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>1. Profil (Utama)</label><div class="input-wrapper"><select id="f_profil_utama"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>2. Profil (Pendukung)</label><div class="input-wrapper"><select id="f_profil_pendukung"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
             <div class="form-group"><label>3. Program</label><div class="input-wrapper"><select id="f_program"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
-            <div class="form-group"><label>4. Penilaian</label><div class="input-wrapper"><select id="f_penilaian"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
-            <div class="form-group"><label>5. Tahapan</label><div class="input-wrapper"><select id="f_tahapan"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
-            <div class="form-group"><label>6. PIC</label><div class="input-wrapper"><select id="f_pic"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>4. PIC</label><div class="input-wrapper"><select id="f_pic"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>5. Bukti</label><div class="input-wrapper"><select id="f_bukti"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>6. Frekuensi</label><div class="input-wrapper"><select id="f_frekuensi"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
           </div>
           <div class="action-bar">
             <div class="search-box form-group">
@@ -450,12 +450,14 @@
         <table>
           <thead>
             <tr>
-              <th width="20%">PROFIL & DEFINISI</th>
-              <th width="20%">INDIKATOR</th>
-              <th width="20%">PROGRAM</th>
-              <th width="15%">PENILAIAN</th>
-              <th width="15%">TAHAPAN</th>
+              <th width="8%">PROFIL (UTAMA)</th>
+              <th width="10%">PROFIL (PENDUKUNG)</th>
+              <th width="18%">DEFINISI</th>
+              <th width="18%">INDIKATOR</th>
+              <th width="18%">PROGRAM</th>
               <th width="10%">PIC</th>
+              <th width="10%">BUKTI</th>
+              <th width="8%">FREKUENSI</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -474,8 +476,12 @@
       <div class="modal-body">
         <input type="hidden" id="e_id">
         <div class="form-group">
-          <label>Profil</label>
-          <input type="text" id="e_profil" placeholder="Wajib diisi...">
+          <label>Profil (Utama)</label>
+          <input type="text" id="e_profil_utama" placeholder="A / Q / I / L">
+        </div>
+        <div class="form-group">
+          <label>Profil (Pendukung)</label>
+          <input type="text" id="e_profil_pendukung" placeholder="Opsional (contoh: A+L)">
         </div>
         <div class="form-group">
           <label>Definisi</label>
@@ -490,12 +496,12 @@
           <input type="text" id="e_program">
         </div>
         <div class="form-group">
-          <label>Penilaian</label>
-          <input type="text" id="e_penilaian">
+          <label>Bukti</label>
+          <input type="text" id="e_bukti">
         </div>
         <div class="form-group">
-          <label>Tahapan</label>
-          <input type="text" id="e_tahapan">
+          <label>Frekuensi</label>
+          <input type="text" id="e_frekuensi">
         </div>
         <div class="form-group">
           <label>PIC</label>
