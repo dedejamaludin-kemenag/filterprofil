@@ -15,6 +15,9 @@
     program: document.getElementById("f_program"),
     bukti: document.getElementById("f_bukti"),
     frekuensi: document.getElementById("f_frekuensi"),
+    sop: document.getElementById("f_sop"),
+    instruksi_kerja: document.getElementById("f_instruksi_kerja"),
+    
     pic: document.getElementById("f_pic"),
     q: document.getElementById("q"),
     btnApply: document.getElementById("btn_apply"),
@@ -42,9 +45,12 @@
     e_definisi: document.getElementById("e_definisi"),
     e_indikator: document.getElementById("e_indikator"),
     e_program: document.getElementById("e_program"),
+    e_sasaran: document.getElementById("e_sasaran"),
     e_bukti: document.getElementById("e_bukti"),
     e_frekuensi: document.getElementById("e_frekuensi"),
     e_pic: document.getElementById("e_pic"),
+    e_sop: document.getElementById("e_sop"),
+    e_instruksi_kerja: document.getElementById("e_instruksi_kerja"),
 
     // Toast & Confirm
     toastContainer: document.getElementById("toastContainer"),
@@ -145,25 +151,27 @@
   }
 
   function readFilters() {
-    return {
-      profil: norm(els.profil.value),
-      indikator: norm(els.indikator.value),
-      program: els.program.value.trim(),
-      bukti: norm(els.bukti.value),
-      frekuensi: norm(els.frekuensi.value),
-      pic: els.pic.value.trim(),
-      q: els.q.value.trim().toLowerCase(),
-    };
-  }
+  return {
+    profil: norm(els.profil.value),
+    indikator: norm(els.indikator.value),
+    program: els.program.value.trim(),
+    pic: els.pic.value.trim(),
+    q: els.q.value.trim(),
+  };
+}
 
   // --- MODAL & DATA LOGIC ---
   function openModal(row) {
     if (row) {
       els.modalTitle.textContent = "Edit Data";
       els.e_id.value = row.id;
-      els.e_profil.value = row.profil || row.profil_utama || "";      els.e_definisi.value = row.definisi || "";
+      els.e_profil.value = row.profil || row.profil_utama || "";
+      els.e_definisi.value = row.definisi || "";
       els.e_indikator.value = row.indikator || "";
       els.e_program.value = row.program || "";
+      els.e_sasaran.value = row.sasaran || "";
+      els.e_sop.value = row.sop || "";
+      els.e_instruksi_kerja.value = row.instruksi_kerja || "";
       els.e_bukti.value = row.bukti || "";
       els.e_frekuensi.value = row.frekuensi || "";
       els.e_pic.value = row.pic || "";
@@ -171,9 +179,13 @@
     } else {
       els.modalTitle.textContent = "Tambah Data Baru";
       els.e_id.value = "";
-      els.e_profil.value = "";      els.e_definisi.value = "";
+      els.e_profil.value = "";
+      els.e_definisi.value = "";
       els.e_indikator.value = "";
       els.e_program.value = "";
+      els.e_sasaran.value = "";
+      els.e_sop.value = "";
+      els.e_instruksi_kerja.value = "";
       els.e_bukti.value = "";
       els.e_frekuensi.value = "";
       els.e_pic.value = "";
@@ -193,6 +205,9 @@
       definisi: els.e_definisi.value.trim(),
       indikator: els.e_indikator.value.trim(),
       program: els.e_program.value.trim(),
+      sasaran: els.e_sasaran.value.trim(),
+      sop: els.e_sop.value.trim(),
+      instruksi_kerja: els.e_instruksi_kerja.value.trim(),
       bukti: norm(els.e_bukti.value),
       frekuensi: norm(els.e_frekuensi.value),
       pic: els.e_pic.value.trim(),
@@ -283,44 +298,46 @@
   }
 
   function applyFilters(rows, f, skipKey = null) {
-    const q = normLower(f.q);
-    return (rows || []).filter(r => {
-      if (skipKey !== "profil" && f.profil && norm(r.profil || r.profil_utama) !== f.profil) return false;
-      if (skipKey !== "indikator" && f.indikator && norm(r.indikator) !== f.indikator) return false;
-      if (skipKey !== "program" && f.program && norm(r.program) !== f.program) return false;
-      if (skipKey !== "pic" && f.pic && norm(r.pic) !== f.pic) return false;
-      if (skipKey !== "bukti" && f.bukti && norm(r.bukti) !== f.bukti) return false;
-      if (skipKey !== "frekuensi" && f.frekuensi && norm(r.frekuensi) !== f.frekuensi) return false;
+  const q = normLower(f.q);
 
-      if (!q) return true;
-      const hay = [
-        r.profil || r.profil_utama,
-        r.definisi,
-        r.indikator,
-        r.program,
-        r.pic,
-        r.bukti,
-        r.frekuensi
-      ].map(normLower).join(" | ");
-      return hay.includes(q);
-    });
-  }
+  return (rows || []).filter(r => {
+    // Hanya 4 filter yang aktif: Profil, Indikator, Program, PIC
+    if (skipKey !== "profil" && f.profil && norm(r.profil || r.profil_utama) !== f.profil) return false;
+    if (skipKey !== "indikator" && f.indikator && norm(r.indikator) !== f.indikator) return false;
+    if (skipKey !== "program" && f.program && norm(r.program) !== f.program) return false;
+    if (skipKey !== "pic" && f.pic && norm(r.pic) !== norm(f.pic)) return false;
+
+    // Search (q) tetap nyapu semua kolom (biar enak)
+    if (!q) return true;
+
+    const hay = [
+      r.profil || r.profil_utama,
+      r.definisi,
+      r.indikator,
+      r.program,
+      r.sasaran,
+      r.pic,
+      r.frekuensi,
+      r.sop,
+      r.instruksi_kerja,
+      r.bukti,
+    ].map(normLower).join(" | ");
+
+    return hay.includes(q);
+  });
+}
 
   function updateFilterOptions(f) {
-    const rowsForProfil = applyFilters(allRowsData, f, "profil");
-    const rowsForIndikator = applyFilters(allRowsData, f, "indikator");
-    const rowsForProgram = applyFilters(allRowsData, f, "program");
-    const rowsForPic = applyFilters(allRowsData, f, "pic");
-    const rowsForBukti = applyFilters(allRowsData, f, "bukti");
-    const rowsForFrekuensi = applyFilters(allRowsData, f, "frekuensi");
+  const rowsForProfil = applyFilters(allRowsData, f, "profil");
+  const rowsForIndikator = applyFilters(allRowsData, f, "indikator");
+  const rowsForProgram = applyFilters(allRowsData, f, "program");
+  const rowsForPic = applyFilters(allRowsData, f, "pic");
 
-    setOptions(els.profil, uniqueSorted(rowsForProfil.map(r => r.profil || r.profil_utama)));
-    setOptions(els.indikator, uniqueSorted(rowsForIndikator.map(r => r.indikator)));
-    setOptions(els.program, uniqueSorted(rowsForProgram.map(r => r.program)));
-    setOptions(els.pic, uniqueSorted(rowsForPic.map(r => r.pic)));
-    setOptions(els.bukti, uniqueSorted(rowsForBukti.map(r => r.bukti)));
-    setOptions(els.frekuensi, uniqueSorted(rowsForFrekuensi.map(r => r.frekuensi)));
-  }
+  setOptions(els.profil, uniqueSorted(rowsForProfil.map(r => r.profil || r.profil_utama)));
+  setOptions(els.indikator, uniqueSorted(rowsForIndikator.map(r => r.indikator)));
+  setOptions(els.program, uniqueSorted(rowsForProgram.map(r => r.program)));
+  setOptions(els.pic, uniqueSorted(rowsForPic.map(r => r.pic)));
+}
 
   function renderRows(rows) {
     viewRowsData = rows || [];
@@ -328,35 +345,42 @@
     const empty = `<div style="padding:40px;text-align:center;color:var(--text-muted)">Data tidak ditemukan.</div>`;
 
     if (!viewRowsData.length) {
-      els.tbody.innerHTML = `<tr><td colspan="6">${empty}</td></tr>`;
+      els.tbody.innerHTML = `<tr><td colspan="10">${empty}</td></tr>`;
       els.cards.innerHTML = empty;
       return;
     }
 
     els.tbody.innerHTML = viewRowsData.map((r, i) => `
-      <tr data-index="${i}">
-        <td><span class="cell-profil">${safeText(r.profil || r.profil_utama || "-")}</span><span class="cell-def">${safeText(r.definisi || "-")}</span></td>
-        <td>${safeText(r.indikator || "-")}</td>
-        <td>${safeText(r.program || "-")}</td>
-        <td>${safeText(r.pic || "-")}</td>
-        <td>${safeText(r.bukti || "-")}</td>
-        <td>${safeText(r.frekuensi || "-")}</td>
-      </tr>
-    `).join("");
+  <tr data-index="${i}">
+    <td>${i + 1}</td>
+    <td><span class="cell-profil">${safeText(r.profil || r.profil_utama || "-")}</span><span class="cell-def">${safeText(r.definisi || "-")}</span></td>
+    <td>${safeText(r.indikator || "-")}</td>
+    <td>${safeText(r.program || "-")}</td>
+    <td>${safeText(r.sasaran || "-")}</td>
+    <td>${safeText(r.pic || "-")}</td>
+    <td>${safeText(r.frekuensi || "-")}</td>
+    <td>${safeText(r.sop || "-")}</td>
+    <td>${safeText(r.instruksi_kerja || "-")}</td>
+    <td>${safeText(r.bukti || "-")}</td>
+  </tr>
+`).join("");
 
     els.cards.innerHTML = viewRowsData.map((r, i) => `
-      <div class="m-card" data-index="${i}">
-        <div class="m-header">
-          <div class="m-title">${safeText(r.profil || r.profil_utama || "-")}</div>
-          <div class="m-sub">${safeText(r.definisi || "-")}</div>
-        </div>
-        <div class="m-row"><div class="m-label">Indikator</div><div>${safeText(r.indikator || "-")}</div></div>
-        <div class="m-row"><div class="m-label">Program</div><div>${safeText(r.program || "-")}</div></div>
-        <div class="m-row"><div class="m-label">PIC</div><div>${safeText(r.pic || "-")}</div></div>
-        <div class="m-row"><div class="m-label">Bukti</div><div>${safeText(r.bukti || "-")}</div></div>
-        <div class="m-row"><div class="m-label">Frekuensi</div><div>${safeText(r.frekuensi || "-")}</div></div>
-      </div>
-    `).join("");
+  <div class="m-card" data-index="${i}">
+    <div class="m-header">
+      <div class="m-title">${safeText(r.profil || r.profil_utama || "-")}</div>
+      <div class="m-sub">${safeText(r.definisi || "-")}</div>
+    </div>
+    <div class="m-row"><div class="m-label">Indikator</div><div>${safeText(r.indikator || "-")}</div></div>
+    <div class="m-row"><div class="m-label">Program</div><div>${safeText(r.program || "-")}</div></div>
+    <div class="m-row"><div class="m-label">Sasaran</div><div>${safeText(r.sasaran || "-")}</div></div>
+    <div class="m-row"><div class="m-label">PIC</div><div>${safeText(r.pic || "-")}</div></div>
+    <div class="m-row"><div class="m-label">Frekuensi</div><div>${safeText(r.frekuensi || "-")}</div></div>
+    <div class="m-row"><div class="m-label">SOP</div><div>${safeText(r.sop || "-")}</div></div>
+    <div class="m-row"><div class="m-label">Instruksi Kerja</div><div>${safeText(r.instruksi_kerja || "-")}</div></div>
+    <div class="m-row"><div class="m-label">Bukti</div><div>${safeText(r.bukti || "-")}</div></div>
+  </div>
+`).join("");
 
     document.querySelectorAll('tr[data-index]').forEach(row => {
       row.addEventListener('click', () => openModal(viewRowsData[row.getAttribute('data-index')]));
@@ -376,97 +400,175 @@
   }
 
   function resetFilters() {
-    els.profil.value = "";    els.indikator.value = "";
-    els.program.value = "";
-    els.pic.value = "";
-    els.bukti.value = "";
-    els.frekuensi.value = "";
-    els.q.value = "";
+  els.profil.value = "";
+  els.indikator.value = "";
+  els.program.value = "";
+  els.pic.value = "";
+  els.q.value = "";
+  fetchData();
+}
+
+  // --- IMPORT EXCEL (Matriks_Program_AQIL) ---
+function normHeader(s) {
+  return String(s ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^\w]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+const HEADER_TO_DB = {
+  // Profil / Kategori
+  profil: "profil",
+  kategori: "profil",
+  kategori_aqil: "profil",
+  profil_utama: "profil",
+
+  // Kolom utama
+  program: "program",
+  definisi: "definisi",
+  indikator: "indikator",
+  sop: "sop",
+  instruksi_kerja: "instruksi_kerja",
+  instruksi: "instruksi_kerja",
+  instruksi_kerja_ik: "instruksi_kerja",
+
+  pic: "pic",
+  pj: "pic",
+  penanggung_jawab: "pic",
+
+  bukti: "bukti",
+  eviden: "bukti",
+  penilaian: "bukti",
+
+  frekuensi: "frekuensi",
+  tahapan: "frekuensi",
+};
+
+function makeKey(profil, program) {
+  return `${normLower(profil)}||${normLower(program)}`;
+}
+
+els.fileExcel.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const confirm = await askConfirm(
+    `Import file "${file.name}"?\nDuplikat (Profil & Program sama) akan di-merge (update otomatis).`
+  );
+  if (!confirm) {
+    els.fileExcel.value = "";
+    return;
   }
 
-  // --- IMPORT EXCEL ---
-  els.fileExcel.addEventListener("change", async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  setStatus("Reading...", "load");
+  try {
+    const buffer = await file.arrayBuffer();
+    const workbook = XLSX.read(buffer, { type: "array" });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
 
-    const confirm = await askConfirm(`Import file "${file.name}"?\nData duplikat (Program & PIC sama) akan di-merge.`);
-    if (!confirm) {
-      els.fileExcel.value = ""; 
-      return;
-    }
+    const aoa = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
+    if (!aoa.length) throw new Error("File kosong");
 
-    setStatus("Reading...", "load");
-    try {
-      const buffer = await file.arrayBuffer();
-      const workbook = XLSX.read(buffer);
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rawExcel = XLSX.utils.sheet_to_json(worksheet);
+    const rawHeaders = aoa[0] || [];
+    const headerMap = rawHeaders.map((h) => HEADER_TO_DB[normHeader(h)] || null);
 
-      if (!rawExcel.length) throw new Error("File kosong");
+    // Ambil DB sekali untuk merge kosong -> tetap pakai data lama
+    const { data: dbData, error: dbErr } = await db.from("program_pontren").select("*");
+    if (dbErr) throw dbErr;
 
-      const { data: dbData, error: dbErr } = await db.from("program_pontren").select("*");
-      if (dbErr) throw dbErr;
+    const existingMap = new Map();
+    (dbData || []).forEach((r) => {
+      const p = r.profil || r.profil_utama || "";
+      const pr = r.program || "";
+      if (!p || !pr) return;
+      existingMap.set(makeKey(p, pr), r);
+    });
 
-      let insertCount = 0;
-      let updateCount = 0;
-      const promises = [];
+    const stagedMap = new Map(); // key -> merged row (last win)
+    let skipped = 0;
 
-      for (let row of rawExcel) {
-        // Wajib
-        const newProgram = norm(row['Program'] || row['program']);
-        const newPic = norm(row['PIC'] || row['pic']);
-        if (!newProgram || !newPic) continue;
+    for (let i = 1; i < aoa.length; i++) {
+      const line = aoa[i];
+      if (!line || line.every((c) => String(c ?? "").trim() === "")) continue;
 
-        // Template baru (Matriks_Program_AQIL.xlsx)
-        const newProfil = norm(row['Profil'] || row['Profil (Utama)'] || row['Profil Utama'] || row['profil'] || row['profil_utama']);
-                const newDefinisi = norm(row['Definisi'] || row['definisi']);
-        const newIndikator = norm(row['Indikator'] || row['indikator']);
-        const newBukti = norm(row['Bukti'] || row['Penilaian'] || row['penilaian'] || row['bukti']);
-        const newFrekuensi = norm(row['Frekuensi'] || row['Tahapan'] || row['tahapan'] || row['frekuensi']);
-
-        const match = dbData.find(d => 
-          (d.program || '').toLowerCase() === newProgram.toLowerCase() && 
-          (d.pic || '').toLowerCase() === newPic.toLowerCase()
-        );
-
-        if (match) {
-          const updates = {
-            profil: newProfil || match.profil || match.profil_utama,
-            definisi: newDefinisi || match.definisi,
-            indikator: newIndikator || match.indikator,
-            bukti: newBukti || match.bukti,
-            frekuensi: newFrekuensi || match.frekuensi,
-            updated_at: new Date()
-          };
-          promises.push(db.from("program_pontren").update(updates).eq("id", match.id));
-          updateCount++;
-        } else {
-          const newData = {
-            program: newProgram,
-            pic: newPic,
-            profil: newProfil,
-            definisi: newDefinisi,
-            indikator: newIndikator,
-            bukti: newBukti,
-            frekuensi: newFrekuensi
-          };
-          promises.push(db.from("program_pontren").insert(newData));
-          insertCount++;
-        }
+      const obj = {};
+      for (let c = 0; c < headerMap.length; c++) {
+        const k = headerMap[c];
+        if (!k) continue;
+        const val = norm(line[c]);
+        obj[k] = val;
       }
 
-      await Promise.all(promises);
-      notify(`Selesai! Baru: ${insertCount}, Update: ${updateCount}`, "success");
-      els.fileExcel.value = "";
-      await refreshAllData();
-      fetchData();
+      // Wajib: profil & program (mengikuti unique key)
+      const profil = obj.profil || "";
+      const program = obj.program || "";
 
-    } catch (err) {
-      console.error(err);
-      notify("Gagal Import: " + err.message, "error");
-      setStatus("Error", "err");
+      if (!profil || !program) {
+        skipped++;
+        continue;
+      }
+
+      const key = makeKey(profil, program);
+      const old = existingMap.get(key);
+
+      const merged = {
+        profil,
+        program,
+        definisi: obj.definisi || (old ? (old.definisi || "") : ""),
+        indikator: obj.indikator || (old ? (old.indikator || "") : ""),
+        sop: obj.sop || (old ? (old.sop || "") : ""),
+        instruksi_kerja: obj.instruksi_kerja || (old ? (old.instruksi_kerja || "") : ""),
+        pic: obj.pic || (old ? (old.pic || "") : ""),
+        bukti: obj.bukti || (old ? (old.bukti || "") : ""),
+        frekuensi: obj.frekuensi || (old ? (old.frekuensi || "") : ""),
+      };
+
+      // Rapikan indikator multiline (kalau user pakai ; / newline)
+      if (typeof merged.indikator === "string" && merged.indikator) {
+        merged.indikator = merged.indikator
+          .split(/\r?\n|;/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .join("\n");
+      }
+
+      stagedMap.set(key, merged);
     }
-  });
+
+    const stagedRows = Array.from(stagedMap.values());
+    if (!stagedRows.length) throw new Error("Tidak ada baris valid untuk di-import (cek kolom Profil & Program).");
+
+    let insertCount = 0;
+    let updateCount = 0;
+
+    stagedMap.forEach((_, key) => {
+      if (existingMap.has(key)) updateCount++;
+      else insertCount++;
+    });
+
+    // Upsert bertahap agar tidak terlalu besar
+    const CHUNK = 200;
+    for (let i = 0; i < stagedRows.length; i += CHUNK) {
+      const chunk = stagedRows.slice(i, i + CHUNK);
+      const { error } = await db
+        .from("program_pontren")
+        .upsert(chunk, { onConflict: "profil,program" });
+      if (error) throw error;
+    }
+
+    const skippedNote = skipped ? ` (skip ${skipped} baris: profil/program kosong)` : "";
+    notify(`Selesai! Baru: ${insertCount}, Update: ${updateCount}${skippedNote}`, "success");
+    els.fileExcel.value = "";
+    await refreshAllData();
+    fetchData();
+  } catch (err) {
+    console.error(err);
+    notify("Gagal Import: " + (err?.message || String(err)), "error");
+    setStatus("Error", "err");
+    els.fileExcel.value = "";
+  }
+});
 
   els.btnAddData.addEventListener("click", () => openModal(null));
   els.btnApply.addEventListener("click", () => {
@@ -491,6 +593,21 @@
     els.bukti,
     els.frekuensi,
   ].forEach(el => el && el.addEventListener("change", fetchData));
+
+
+  // Filter text inputs (SOP & Instruksi Kerja)
+  [els.sop, els.instruksi_kerja].forEach(el => {
+    if (!el) return;
+    el.addEventListener("input", () => {
+      fetchData();
+    });
+    el.addEventListener("keyup", (e) => {
+      if (e.key === "Enter") {
+        if (window.innerWidth < 1024) els.filtersPanel.open = false;
+        fetchData();
+      }
+    });
+  });
 
   els.btnCloseModal.addEventListener("click", closeModal);
   els.btnCancelEdit.addEventListener("click", closeModal);

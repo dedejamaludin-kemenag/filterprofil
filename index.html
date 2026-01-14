@@ -423,13 +423,11 @@
         </summary>
         <div class="filter-body">
           
-          <div class="grid-filters">
-            <div class="form-group"><label>1. Profil</label><div class="input-wrapper"><select id="f_profil"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
-            <div class="form-group"><label>2. Indikator</label><div class="input-wrapper"><select id="f_indikator"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
-            <div class="form-group"><label>3. Program</label><div class="input-wrapper"><select id="f_program"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
-            <div class="form-group"><label>4. PIC</label><div class="input-wrapper"><select id="f_pic"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
-            <div class="form-group"><label>5. Bukti</label><div class="input-wrapper"><select id="f_bukti"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
-            <div class="form-group"><label>6. Frekuensi</label><div class="input-wrapper"><select id="f_frekuensi"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+                              <div class="grid-filters" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
+            <div class="form-group"><label>Profil</label><div class="input-wrapper"><select id="f_profil"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>Indikator</label><div class="input-wrapper"><select id="f_indikator"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>Program</label><div class="input-wrapper"><select id="f_program"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>PIC</label><div class="input-wrapper"><select id="f_pic"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
           </div>
           <div class="action-bar">
             <div class="search-box form-group">
@@ -449,14 +447,18 @@
       </div>
       <div class="table-responsive">
         <table>
-          <thead>
+                    <thead>
             <tr>
-              <th width="22%">PROFIL</th>
-              <th width="22%">INDIKATOR</th>
-              <th width="22%">PROGRAM</th>
-              <th width="12%">PIC</th>
-              <th width="12%">BUKTI</th>
-              <th width="10%">FREKUENSI</th>
+              <th width="4%">NO</th>
+              <th width="18%">PROFIL &amp; DEFINISI</th>
+              <th width="16%">INDIKATOR</th>
+              <th width="12%">PROGRAM</th>
+              <th width="10%">SASARAN</th>
+              <th width="8%">PIC</th>
+              <th width="8%">FREKUENSI</th>
+              <th width="10%">SOP</th>
+              <th width="10%">INSTRUKSI KERJA</th>
+              <th width="8%">BUKTI</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -489,6 +491,18 @@
         <div class="form-group">
           <label>Program</label>
           <input type="text" id="e_program">
+        </div>
+        <div class="form-group">
+          <label>Sasaran</label>
+          <input type="text" id="e_sasaran" placeholder="Contoh: Santri kelas X, Tim Bahasa, dll">
+        </div>
+        <div class="form-group">
+          <label>SOP</label>
+          <textarea id="e_sop" placeholder="Tulis SOP / ringkas SOP di sini..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Instruksi Kerja</label>
+          <textarea id="e_instruksi_kerja" placeholder="Tulis instruksi kerja / langkah kerja di sini..."></textarea>
         </div>
         <div class="form-group">
           <label>Bukti</label>
