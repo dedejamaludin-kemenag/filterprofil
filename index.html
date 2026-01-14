@@ -15,45 +15,44 @@
 
   <style>
     :root {
-      /* --- TEMA BARU: CERAH (60% Putih : 20% Hijau : 20% Biru) --- */
+  /* --- TEMA: SOFT KONTRAS (background lebih gelap tipis, kartu lebih terang) --- */
 
-      /* 60% BASE (White/Light Slate) */
-      --bg-body: #f8fafc;       /* Background utama (Slate-50) */
-      --bg-surface: #ffffff;    /* Card/Panel background (Putih Murni) */
-      --bg-surface-glass: rgba(255, 255, 255, 0.90); /* Glass Effect Putih */
-      --bg-input: #f1f5f9;      /* Input background (Slate-100) */
-      
-      --border: #e2e8f0;        /* Border halus (Slate-200) */
-      --border-light: #cbd5e1;  /* Border hover (Slate-300) */
-      
-      /* TEXT (Nuansa Biru Gelap agar kontras di background putih) */
-      --text-main: #0f172a;     /* Slate-900 */
-      --text-muted: #475569;    /* Slate-600 */
-      --text-dim: #94a3b8;      /* Slate-400 */
+  /* BASE */
+  --bg-body: #e9eff7;            /* background halaman (soft cool) */
+  --bg-surface: #ffffff;         /* kartu/panel */
+  --bg-surface-glass: rgba(255, 255, 255, 0.88);
+  --bg-input: #e3ebf5;           /* input/field */
 
-      /* 20% PRIMARY (Fresh Green) */
-      --primary: #10b981;       /* Emerald-500 */
-      --primary-hover: #059669; /* Emerald-600 */
-      --primary-glow: rgba(16, 185, 129, 0.25);
+  --border: #cfd9e6;             /* border default */
+  --border-light: #b8c6d8;       /* border hover/focus */
 
-      /* 20% ACCENT (Blue) */
-      --accent-blue: #3b82f6;   /* Blue-500 */
-      --accent-glow: rgba(59, 130, 246, 0.15);
+  /* TEXT */
+  --text-main: #0f172a;          /* slate-900 */
+  --text-muted: #334155;         /* slate-700 (lebih tegas) */
+  --text-dim: #64748b;           /* slate-500 */
 
-      /* Status Colors */
-      --success: #10b981;
-      --danger: #ef4444;        /* Red-500 */
-      --warning: #f59e0b;       /* Amber-500 */
+  /* PRIMARY (tetap hijau + biru, tapi sedikit lebih "pop") */
+  --primary: #22c55e;            /* green-500 */
+  --primary-hover: #16a34a;      /* green-600 */
+  --primary-glow: rgba(34, 197, 94, 0.20);
 
-      /* Radius & Shadows (Shadow lebih soft untuk light mode) */
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 16px;
-      --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-      --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
-      
-      --font-sans: 'Inter', sans-serif;
-    }
+  --accent-blue: #3b82f6;        /* blue-500 */
+
+  /* Status */
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+
+  /* Radius & Shadows (lebih kontras tapi tetap soft) */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --shadow-soft: 0 6px 16px rgba(15, 23, 42, 0.06);
+  --shadow-card: 0 16px 40px rgba(15, 23, 42, 0.10);
+
+  --font-sans: 'Inter', sans-serif;
+}
 
     * { box-sizing: border-box; outline: none; }
     
