@@ -383,7 +383,15 @@
       .toast-container { left: 24px; right: 24px; top: 12px; }
       .toast { width: 100%; min-width: auto; }
     }
-  </style>
+  
+
+    /* Mobile: filter grid jadi 1 kolom (4 baris) */
+    @media (max-width: 640px) {
+      .grid-filters {
+        grid-template-columns: 1fr !important;
+      }
+    }
+</style>
 </head>
 <body>
 
