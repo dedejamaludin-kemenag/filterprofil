@@ -470,6 +470,38 @@ table.data-table th, table.data-table td{
     max-height: clamp(280px, 55vh, 640px);
   }
 }
+
+
+/* Layout: header tetap, scroll di konten (filter ikut tergulir) */
+html, body{ height: 100%; }
+body{ overflow: hidden; }
+.wrap{
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.content{
+  flex: 1;
+  overflow: auto;
+  padding-bottom: 18px;
+}
+
+/* Matikan sticky di panel filter */
+.filter-panel{
+  position: relative !important;
+  top: auto !important;
+  z-index: auto !important;
+}
+
+/* Judul hasil filter tetap terlihat saat scroll */
+.table-header-info{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--bg-body);
+  padding: 8px 0;
+  backdrop-filter: blur(6px);
+}
 </style>
 </head>
 <body>
@@ -499,7 +531,9 @@ table.data-table th, table.data-table td{
       </div>
     </header>
 
-    <div class="filter-panel">
+
+    <div class="content">
+      <div class="filter-panel">
       <details id="filtersPanel" open>
         <summary>
           <div class="sum-title">
@@ -557,7 +591,9 @@ table.data-table th, table.data-table td{
     </div>
   </div>
 
-  <div class="modal-overlay" id="editModal">
+      </div>
+
+    <div class="modal-overlay" id="editModal">
     <div class="modal-box">
       <div class="modal-head">
         <div class="modal-title" id="modalTitle">Edit Data</div>
