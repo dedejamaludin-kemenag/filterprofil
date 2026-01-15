@@ -449,6 +449,19 @@ table.data-table th, table.data-table td{
   max-width: none !important;
   box-sizing: border-box;
 }
+
+
+/* Tabel: header (judul kolom) tetap di atas saat scroll vertikal */
+.table-wrap{
+  overflow: auto;
+}
+table.data-table thead th{
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--bg-surface);
+  box-shadow: 0 1px 0 var(--border);
+}
 </style>
 </head>
 <body>
@@ -511,7 +524,8 @@ table.data-table th, table.data-table td{
         <span>Menampilkan <b id="count">0</b> data <span style="font-size:12px; margin-left:10px; opacity:0.7">(Klik baris untuk mengedit)</span></span>
       </div>
       <div class="table-responsive">
-        <table>
+        <div class="table-wrap">
+          <table class="data-table">
                               <thead>
             <tr>
               <th width="4%">NO</th>
@@ -531,6 +545,7 @@ table.data-table th, table.data-table td{
           </thead>
           <tbody id="tbody"></tbody>
         </table>
+        </div>
       </div>
       <div class="cards-container" id="cards"></div>
     </div>
