@@ -451,16 +451,24 @@ table.data-table th, table.data-table td{
 }
 
 
-/* Tabel: header (judul kolom) tetap di atas saat scroll vertikal */
+/* Hasil filter: scroll masuk ke tabel (judul tetap) */
+.results-area{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.table-responsive{
+  flex: 1;
+}
 .table-wrap{
   overflow: auto;
+  max-height: clamp(320px, 65vh, 760px); /* bikin body tabel scroll */
+  border-radius: var(--radius-lg);
 }
-table.data-table thead th{
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  background: var(--bg-surface);
-  box-shadow: 0 1px 0 var(--border);
+@media (max-width: 640px){
+  .table-wrap{
+    max-height: clamp(280px, 55vh, 640px);
+  }
 }
 </style>
 </head>
@@ -524,8 +532,7 @@ table.data-table thead th{
         <span>Menampilkan <b id="count">0</b> data <span style="font-size:12px; margin-left:10px; opacity:0.7">(Klik baris untuk mengedit)</span></span>
       </div>
       <div class="table-responsive">
-        <div class="table-wrap">
-          <table class="data-table">
+        <table>
                               <thead>
             <tr>
               <th width="4%">NO</th>
@@ -545,7 +552,6 @@ table.data-table thead th{
           </thead>
           <tbody id="tbody"></tbody>
         </table>
-        </div>
       </div>
       <div class="cards-container" id="cards"></div>
     </div>
