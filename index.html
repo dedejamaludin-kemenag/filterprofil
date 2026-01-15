@@ -430,6 +430,32 @@
   padding-top: 12px;
   margin-top: 12px;
 }
+
+
+/* --- PATCH: Modal edit full width (desktop) --- */
+.modal-box{
+  width: min(1100px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+}
+.modal-body{
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+.modal-body .form-group{
+  width: 100%;
+  max-width: none !important;
+  margin: 0 !important;
+}
+.modal-body input[type="text"],
+.modal-body textarea,
+.modal-body select{
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box;
+}
 </style>
 </head>
 <body>
