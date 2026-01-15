@@ -15,44 +15,45 @@
 
   <style>
     :root {
-  /* --- TEMA: SOFT KONTRAS (background lebih gelap tipis, kartu lebih terang) --- */
+      /* --- TEMA BARU: CERAH (60% Putih : 20% Hijau : 20% Biru) --- */
 
-  /* BASE */
-  --bg-body: #e9eff7;            /* background halaman (soft cool) */
-  --bg-surface: #ffffff;         /* kartu/panel */
-  --bg-surface-glass: rgba(255, 255, 255, 0.88);
-  --bg-input: #e3ebf5;           /* input/field */
+      /* 60% BASE (White/Light Slate) */
+      --bg-body: #f8fafc;       /* Background utama (Slate-50) */
+      --bg-surface: #ffffff;    /* Card/Panel background (Putih Murni) */
+      --bg-surface-glass: rgba(255, 255, 255, 0.90); /* Glass Effect Putih */
+      --bg-input: #f1f5f9;      /* Input background (Slate-100) */
+      
+      --border: #e2e8f0;        /* Border halus (Slate-200) */
+      --border-light: #cbd5e1;  /* Border hover (Slate-300) */
+      
+      /* TEXT (Nuansa Biru Gelap agar kontras di background putih) */
+      --text-main: #0f172a;     /* Slate-900 */
+      --text-muted: #475569;    /* Slate-600 */
+      --text-dim: #94a3b8;      /* Slate-400 */
 
-  --border: #cfd9e6;             /* border default */
-  --border-light: #b8c6d8;       /* border hover/focus */
+      /* 20% PRIMARY (Fresh Green) */
+      --primary: #10b981;       /* Emerald-500 */
+      --primary-hover: #059669; /* Emerald-600 */
+      --primary-glow: rgba(16, 185, 129, 0.25);
 
-  /* TEXT */
-  --text-main: #0f172a;          /* slate-900 */
-  --text-muted: #334155;         /* slate-700 (lebih tegas) */
-  --text-dim: #64748b;           /* slate-500 */
+      /* 20% ACCENT (Blue) */
+      --accent-blue: #3b82f6;   /* Blue-500 */
+      --accent-glow: rgba(59, 130, 246, 0.15);
 
-  /* PRIMARY (tetap hijau + biru, tapi sedikit lebih "pop") */
-  --primary: #22c55e;            /* green-500 */
-  --primary-hover: #16a34a;      /* green-600 */
-  --primary-glow: rgba(34, 197, 94, 0.20);
+      /* Status Colors */
+      --success: #10b981;
+      --danger: #ef4444;        /* Red-500 */
+      --warning: #f59e0b;       /* Amber-500 */
 
-  --accent-blue: #3b82f6;        /* blue-500 */
-
-  /* Status */
-  --success: #10b981;
-  --danger: #ef4444;
-  --warning: #f59e0b;
-
-  /* Radius & Shadows (lebih kontras tapi tetap soft) */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-
-  --shadow-soft: 0 6px 16px rgba(15, 23, 42, 0.06);
-  --shadow-card: 0 16px 40px rgba(15, 23, 42, 0.10);
-
-  --font-sans: 'Inter', sans-serif;
-}
+      /* Radius & Shadows (Shadow lebih soft untuk light mode) */
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-soft: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+      
+      --font-sans: 'Inter', sans-serif;
+    }
 
     * { box-sizing: border-box; outline: none; }
     
@@ -385,117 +386,14 @@
     }
   
 
-    /* Mobile: filter grid jadi 1 kolom (4 baris) */
-    @media (max-width: 640px) {
-      .grid-filters {
-        grid-template-columns: 1fr !important;
-      }
-    }
-
-
-/* Modal edit: lebih lebar & nyaman di semua device */
-.modal-box{
-  width: min(980px, calc(100vw - 24px));
-  max-height: calc(100vh - 24px);
-  overflow: auto;
-}
-.modal-body{
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-.modal-body .form-group{
-  margin: 0;
-}
-.modal-body input[type="text"],
-.modal-body textarea{
+/* Tabel: pembagian lebar kolom lebih konsisten */
+table.data-table{
+  table-layout: fixed;
   width: 100%;
-  box-sizing: border-box;
-  padding: 12px 12px;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  background: var(--bg-input);
-  color: var(--text-main);
-  outline: none;
 }
-.modal-body textarea{
-  min-height: 120px;
-  resize: vertical;
-  line-height: 1.5;
-}
-.modal-actions{
-  position: sticky;
-  bottom: 0;
-  background: linear-gradient(to top, rgba(233,239,247,0.98), rgba(233,239,247,0.72));
-  padding-top: 12px;
-  margin-top: 12px;
-}
-
-
-/* --- PATCH: Modal edit full width (desktop) --- */
-.modal-box{
-  width: min(1100px, calc(100vw - 32px));
-  max-height: calc(100vh - 32px);
-  overflow: auto;
-}
-.modal-body{
-  width: 100%;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-.modal-body .form-group{
-  width: 100%;
-  max-width: none !important;
-  margin: 0 !important;
-}
-.modal-body input[type="text"],
-.modal-body textarea,
-.modal-body select{
-  width: 100% !important;
-  max-width: none !important;
-  box-sizing: border-box;
-}
-
-
-/* --- PATCH 2: Modal edit benar-benar lebar di desktop (override semua rule lama) --- */
-.modal .modal-box,
-.modal-box{
-  max-width: none !important;
-}
-
-@media (min-width: 900px){
-  .modal .modal-box{
-    width: calc(100vw - 80px) !important; /* hampir full kiri-kanan */
-    max-width: 1400px !important;        /* tapi masih ada batas aman */
-  }
-}
-
-@media (min-width: 1200px){
-  .modal .modal-box{
-    width: calc(100vw - 120px) !important;
-    max-width: 1600px !important;
-  }
-}
-
-/* Pastikan konten form tidak punya 'max-width' yang bikin ngumpul di tengah */
-.modal .modal-body,
-.modal-body{
-  width: 100% !important;
-  max-width: none !important;
-}
-
-.modal .modal-body .form-group,
-.modal-body .form-group{
-  width: 100% !important;
-  max-width: none !important;
-}
-
-.modal .modal-body input[type="text"],
-.modal .modal-body textarea,
-.modal .modal-body select{
-  width: 100% !important;
-  max-width: none !important;
+table.data-table th, table.data-table td{
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 </style>
 </head>
@@ -536,11 +434,17 @@
         </summary>
         <div class="filter-body">
           
-                              <div class="grid-filters" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
-            <div class="form-group"><label>Profil</label><div class="input-wrapper"><select id="f_profil"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
-            <div class="form-group"><label>Indikator</label><div class="input-wrapper"><select id="f_indikator"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
-            <div class="form-group"><label>Program</label><div class="input-wrapper"><select id="f_program"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
-            <div class="form-group"><label>PIC</label><div class="input-wrapper"><select id="f_pic"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+                    <div class="grid-filters">
+            <div class="form-group"><label>1. Profil</label><div class="input-wrapper"><select id="f_profil"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>2. Indikator</label><div class="input-wrapper"><select id="f_indikator"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>3. Program</label><div class="input-wrapper"><select id="f_program"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+
+            <div class="form-group"><label>4. SOP</label><div class="input-wrapper"><input id="f_sop" type="text" placeholder="Ketik potongan SOP..." autocomplete="off"></div></div>
+            <div class="form-group"><label>5. Instruksi Kerja</label><div class="input-wrapper"><input id="f_instruksi_kerja" type="text" placeholder="Ketik potongan instruksi kerja..." autocomplete="off"></div></div>
+
+            <div class="form-group"><label>6. PIC</label><div class="input-wrapper"><select id="f_pic"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>7. Bukti</label><div class="input-wrapper"><select id="f_bukti"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>8. Frekuensi</label><div class="input-wrapper"><select id="f_frekuensi"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
           </div>
           <div class="action-bar">
             <div class="search-box form-group">
@@ -563,15 +467,18 @@
                     <thead>
             <tr>
               <th width="4%">NO</th>
-              <th width="18%">PROFIL &amp; DEFINISI</th>
+
+              <th width="20%">PROFIL &amp; DEFINISI</th>
               <th width="16%">INDIKATOR</th>
-              <th width="12%">PROGRAM</th>
+
+              <th width="10%">PROGRAM</th>
               <th width="10%">SASARAN</th>
-              <th width="8%">PIC</th>
-              <th width="8%">FREKUENSI</th>
-              <th width="10%">SOP</th>
-              <th width="10%">INSTRUKSI KERJA</th>
-              <th width="8%">BUKTI</th>
+              <th width="6%">PIC</th>
+              <th width="6%">FREKUENSI</th>
+              <th width="6%">BUKTI</th>
+
+              <th width="12%">SOP</th>
+              <th width="12%">INSTRUKSI KERJA</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -588,59 +495,45 @@
         <button class="modal-close" id="btnCloseModal"><i class="ph ph-x"></i></button>
       </div>
       <div class="modal-body">
-  <input type="hidden" id="e_id">
-
-  <div class="form-group">
-    <label>Profil</label>
-    <input type="text" id="e_profil" placeholder="A / Q / I / L">
-  </div>
-
-  <div class="form-group">
-    <label>Definisi</label>
-    <textarea id="e_definisi" placeholder="Tulis definisi singkat sesuai profil..."></textarea>
-  </div>
-
-  <div class="form-group">
-    <label>Indikator</label>
-    <textarea id="e_indikator" placeholder="Boleh lebih dari satu (per baris)"></textarea>
-  </div>
-
-  <div class="form-group">
-    <label>Program</label>
-    <input type="text" id="e_program" placeholder="Nama program / kegiatan">
-  </div>
-
-  <div class="form-group">
-    <label>Sasaran</label>
-    <input type="text" id="e_sasaran" placeholder="Contoh: Santri kelas X, Tim Bahasa, dll">
-  </div>
-
-  <div class="form-group">
-    <label>PIC</label>
-    <input type="text" id="e_pic" placeholder="Penanggung jawab / unit">
-  </div>
-
-  <div class="form-group">
-    <label>Frekuensi</label>
-    <input type="text" id="e_frekuensi" placeholder="Harian / Pekanan / Bulanan / dsb">
-  </div>
-
-  <div class="form-group">
-    <label>SOP</label>
-    <textarea id="e_sop" placeholder="Tulis SOP / ringkas SOP di sini..."></textarea>
-  </div>
-
-  <div class="form-group">
-    <label>Instruksi Kerja</label>
-    <textarea id="e_instruksi_kerja" placeholder="Tulis instruksi kerja / langkah kerja di sini..."></textarea>
-  </div>
-
-  <div class="form-group">
-    <label>Bukti</label>
-    <input type="text" id="e_bukti" placeholder="Dokumentasi / eviden / laporan / dsb">
-  </div>
-</div>
-
+        <input type="hidden" id="e_id">
+        <div class="form-group">
+          <label>Profil</label>
+          <input type="text" id="e_profil" placeholder="A / Q / I / L">
+        </div>
+        <div class="form-group">
+          <label>Definisi</label>
+          <textarea id="e_definisi"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Indikator</label>
+          <textarea id="e_indikator"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Program</label>
+          <input type="text" id="e_program">
+        </div>
+        <div class="form-group">
+          <label>SOP</label>
+          <textarea id="e_sop" placeholder="Tulis SOP / ringkas SOP di sini..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Instruksi Kerja</label>
+          <textarea id="e_instruksi_kerja" placeholder="Tulis instruksi kerja / langkah kerja di sini..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Bukti</label>
+          <input type="text" id="e_bukti">
+        </div>
+        <div class="form-group">
+          <label>Frekuensi</label>
+          <input type="text" id="e_frekuensi">
+        </div>
+        <div class="form-group">
+          <label>PIC</label>
+          <input type="text" id="e_pic">
+        </div>
+      </div>
+      
       <div class="modal-actions">
         <button class="btn btn-danger" id="btnDeleteData" style="height:44px">
           <i class="ph ph-trash"></i> Hapus
