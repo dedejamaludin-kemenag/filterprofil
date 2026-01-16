@@ -67,9 +67,13 @@
         radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
       background-attachment: fixed;
       min-height: 100vh;
+      /* Kunci scroll halaman: scroll utama ada di panel filter & tabel */
+      overflow: hidden;
       font-size: 16px;
       -webkit-font-smoothing: antialiased;
     }
+
+    html, body { height: 100%; }
 
     .wrap {
       max-width: 1280px;
@@ -78,6 +82,8 @@
       display: flex;
       flex-direction: column;
       gap: 24px;
+      height: 100%;
+      min-height: 0;
     }
 
     /* HEADER */
@@ -157,13 +163,57 @@
     .dot.err { background: var(--danger); }
     @keyframes pulse { 0% {opacity: 1} 50% {opacity: .4} 100% {opacity: 1} }
 
-    /* FILTER PANEL (Sticky) */
+    /* Badge khusus untuk kolom Program & PIC */
+    .badge-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      max-width: 100%;
+    }
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 10px;
+      border-radius: 999px;
+      /* Jangan kecilkan font badge: samakan dengan teks tabel agar nyaman dibaca */
+      font-size: 14px;
+      font-weight: 800;
+      line-height: 1.15;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.8);
+      color: var(--text-main);
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .pill-badge.program {
+      background: rgba(59, 130, 246, 0.10);
+      border-color: rgba(59, 130, 246, 0.35);
+      color: #1e3a8a;
+    }
+    .pill-badge.pic {
+      background: rgba(34, 197, 94, 0.12);
+      border-color: rgba(34, 197, 94, 0.35);
+      color: #065f46;
+    }
+    .pill-badge.is-empty {
+      background: rgba(100, 116, 139, 0.08);
+      border-color: rgba(100, 116, 139, 0.22);
+      color: var(--text-dim);
+      font-weight: 700;
+    }
+
+    /* FILTER PANEL */
     .filter-panel {
       background: var(--bg-surface-glass);
       backdrop-filter: blur(16px);
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
-      position: sticky; top: 20px; z-index: 100;
+      /* jangan sticky: biar ikut tergulir bersama halaman */
+      position: relative;
       box-shadow: var(--shadow-card);
     }
     
@@ -186,6 +236,11 @@
     .filter-body {
       padding: 0 24px 24px;
       border-top: 1px solid var(--border);
+
+      /* biar isi filter bisa digulir kalau panjang */
+      max-height: calc(100vh - 220px);
+      overflow-y: auto;
+      overscroll-behavior: contain;
     }
 
     .grid-filters {
@@ -270,8 +325,13 @@
       border: 1px solid var(--border);
       border-radius: var(--radius-lg);
       overflow: hidden;
-      min-height: 300px;
+      /* penting untuk flex + overflow anak (table-scroll) */
+      min-height: 0;
       box-shadow: var(--shadow-card);
+      /* biar box hasil filter bisa memanjang sampai bawah layar */
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 auto;
     }
     .table-header-info {
       padding: 20px 24px;
@@ -280,13 +340,81 @@
       display: flex; justify-content: space-between; color: var(--text-muted); font-size: 14px;
     }
 
-    .table-responsive { width: 100%; overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 16px; min-width: 1000px; }
-    th {
-      text-align: left; padding: 18px 24px; background: #f1f5f9;
-      border-bottom: 1px solid var(--border); color: var(--text-muted);
-      font-weight: 700; font-size: 13px; text-transform: uppercase; white-space: nowrap;
+    /*
+      TABLE SCROLL AREA
+      - Scroll vertikal ada di dalam area tabel (bukan halaman)
+      - Header kolom berupa "box" yang tetap (sticky) saat scroll vertikal
+      - Header & tabel berada dalam container yang sama supaya tetap sejajar saat scroll horizontal
+    */
+    .table-scroll {
+      width: 100%;
+      overflow: auto;               /* scroll X & Y */
+      /* isi tabel mengisi sisa tinggi box hasil */
+      flex: 1 1 auto;
+      max-height: none;
+      min-height: 0;                /* kunci supaya scrollbar internal muncul */
+      border-top: 1px solid var(--border);
     }
+
+    /* box judul kolom */
+    .table-columns-header {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: grid;
+      grid-template-columns:
+        var(--col-no)
+        var(--col-profil)
+        var(--col-indikator)
+        var(--col-program)
+        var(--col-sasaran)
+        var(--col-pic)
+        var(--col-frekuensi)
+        var(--col-sop)
+        var(--col-ik)
+        var(--col-bukti);
+      min-width: var(--table-minwidth);
+      background: #f1f5f9;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+      font-weight: 800;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    .table-columns-header .hcell {
+      padding: 14px 24px;
+      border-right: 1px solid rgba(203,213,225,0.6);
+    }
+    .table-columns-header .hcell:last-child { border-right: none; }
+
+    /* table data */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 16px;
+      table-layout: fixed;
+      min-width: var(--table-minwidth);
+    }
+
+    /* pastikan kolom mengikuti header */
+    :root {
+      --col-no: 64px;
+      --col-profil: 360px;
+      --col-indikator: 320px;
+      --col-program: 240px;
+      --col-sasaran: 220px;
+      --col-pic: 180px;
+      --col-frekuensi: 160px;
+      --col-sop: 240px;
+      --col-ik: 260px;
+      --col-bukti: 200px;
+      --table-minwidth: 2200px;
+    }
+
+    /* thead lama disembunyikan (dipakai box header di atas) */
+    table.data-table thead { display: none; }
     td { padding: 20px 24px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.6; color: var(--text-main); }
     
     tbody tr, .m-card { cursor: pointer; transition: background 0.2s; }
@@ -296,6 +424,139 @@
 
     .cell-profil { color: var(--accent-blue); font-weight: 700; font-size: 17px; display: block; margin-bottom: 6px; }
     .cell-def { font-size: 15px; color: var(--text-muted); }
+
+    .cell-excerpt {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .mini-chips { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .chip-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .chip-btn:hover { border-color: var(--primary); color: var(--text-main); box-shadow: 0 0 0 3px var(--primary-glow); }
+    .chip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-blue); }
+    .chip-dot.sop { background: var(--accent-blue); }
+    .chip-dot.ik { background: var(--primary); }
+    .chip-dot.rec { background: var(--warning); }
+    .chip-count { color: var(--text-main); }
+
+    .inline-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .btn-mini {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text-muted);
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-mini:hover { border-color: var(--text-main); color: var(--text-main); background: #f8fafc; }
+    .btn-mini i { font-size: 16px; }
+
+    /* --- DOCS / RECORDS MODAL --- */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 12px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+    .tab-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: #fff;
+      border-color: var(--primary);
+      color: var(--text-main);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .doc-meta {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    @media (min-width: 768px) {
+      .doc-meta { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .file-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #fff;
+    }
+    .file-left { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .file-title { font-weight: 800; color: var(--text-main); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .file-sub { font-size: 12px; color: var(--text-dim); }
+    .file-actions { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text-muted);
+      font-weight: 800;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .link-btn:hover { border-color: var(--text-main); color: var(--text-main); background: #f8fafc; }
+    .link-btn.danger:hover { border-color: var(--danger); color: #fff; background: var(--danger); }
+
+    .list-stack { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
     
     .cards-container { display: none; padding: 20px; flex-direction: column; gap: 16px; }
     .m-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-soft); }
@@ -372,8 +633,8 @@
     }
 
     @media (max-width: 1024px) {
-      .table-responsive { display: none; }
-      .cards-container { display: flex; }
+      .table-scroll { display: none; }
+      .cards-container { display: flex; flex: 1 1 auto; overflow: auto; }
       .grid-filters { grid-template-columns: 1fr; } 
       .action-bar { flex-direction: column; align-items: stretch; }
       .btn { width: 100%; }
@@ -390,6 +651,62 @@
       .grid-filters {
         grid-template-columns: 1fr !important;
       }
+    }
+
+    /* ======================================================
+       COMPACT MODE (tanpa mengurangi fitur)
+       - Menghemat tinggi header + panel filter
+       - Input & tombol lebih ramping
+       - Tetap nyaman dibaca (line-height dijaga)
+       ====================================================== */
+
+    /* Layout utama lebih rapat */
+    .wrap { padding: 20px 18px; gap: 16px; }
+
+    /* Header halaman lebih compact */
+    .header { padding-bottom: 12px; }
+    .brand h1 { font-size: 26px; }
+    .brand p { margin-top: 6px; font-size: 14px; }
+    .header-actions { gap: 10px; }
+    .status-badge { padding: 6px 12px; font-size: 13px; }
+    .btn-upload, .btn-add-new { padding: 8px 14px; font-size: 13px; }
+
+    /* Panel filter: ringkas tapi tetap fungsional */
+    details summary { padding: 14px 16px; }
+    .sum-title { gap: 10px; font-size: 16px; }
+    .sum-title i { font-size: 20px; }
+
+    .filter-body {
+      padding: 0 16px 16px;
+      max-height: calc(100vh - 190px); /* hemat tinggi total */
+    }
+
+    .grid-filters { gap: 12px; margin-top: 14px; }
+    .form-group label { font-size: 11px; margin-bottom: 6px; }
+
+    /* Input lebih ramping */
+    select, input, textarea {
+      padding: 10px 12px;
+      font-size: 14px;
+      border-radius: 10px;
+    }
+    textarea { min-height: 88px; }
+    select { padding-right: 36px; }
+    .select-arrow { right: 12px; font-size: 16px; }
+
+    .action-bar { gap: 10px; margin-top: 14px; }
+    .btn { padding: 10px 14px; font-size: 14px; height: 44px; }
+
+    /* Area tabel: info bar lebih tipis */
+    .table-header-info { padding: 12px 16px; font-size: 13px; }
+    .table-scroll { flex: 1 1 auto; max-height: none; }
+    .table-columns-header .hcell { padding: 10px 16px; }
+    td { padding: 14px 16px; line-height: 1.55; }
+
+    /* Mobile: tetap aman (tombol full width sudah di media query existing) */
+    @media (max-width: 1024px) {
+      .wrap { padding: 16px 14px; }
+      .brand h1 { font-size: 22px; }
     }
 
 
@@ -558,20 +875,46 @@
       <div class="table-header-info">
         <span>Menampilkan <b id="count">0</b> data <span style="font-size:12px; margin-left:10px; opacity:0.7">(Klik baris untuk mengedit)</span></span>
       </div>
-      <div class="table-responsive">
-        <table>
-                    <thead>
+      <div class="table-scroll" id="tableScroll">
+        <!-- Box judul kolom (tetap saat scroll vertikal) -->
+        <div class="table-columns-header" aria-hidden="true">
+          <div class="hcell">NO</div>
+          <div class="hcell">PROFIL &amp; DEFINISI</div>
+          <div class="hcell">INDIKATOR</div>
+          <div class="hcell">PROGRAM</div>
+          <div class="hcell">SASARAN</div>
+          <div class="hcell">PIC</div>
+          <div class="hcell">FREKUENSI</div>
+          <div class="hcell">SOP</div>
+          <div class="hcell">INSTRUKSI KERJA</div>
+          <div class="hcell">BUKTI</div>
+        </div>
+
+        <table class="data-table">
+          <colgroup>
+            <col style="width: var(--col-no)">
+            <col style="width: var(--col-profil)">
+            <col style="width: var(--col-indikator)">
+            <col style="width: var(--col-program)">
+            <col style="width: var(--col-sasaran)">
+            <col style="width: var(--col-pic)">
+            <col style="width: var(--col-frekuensi)">
+            <col style="width: var(--col-sop)">
+            <col style="width: var(--col-ik)">
+            <col style="width: var(--col-bukti)">
+          </colgroup>
+          <thead>
             <tr>
-              <th width="4%">NO</th>
-              <th width="18%">PROFIL &amp; DEFINISI</th>
-              <th width="16%">INDIKATOR</th>
-              <th width="12%">PROGRAM</th>
-              <th width="10%">SASARAN</th>
-              <th width="8%">PIC</th>
-              <th width="8%">FREKUENSI</th>
-              <th width="10%">SOP</th>
-              <th width="10%">INSTRUKSI KERJA</th>
-              <th width="8%">BUKTI</th>
+              <th>NO</th>
+              <th>PROFIL &amp; DEFINISI</th>
+              <th>INDIKATOR</th>
+              <th>PROGRAM</th>
+              <th>SASARAN</th>
+              <th>PIC</th>
+              <th>FREKUENSI</th>
+              <th>SOP</th>
+              <th>INSTRUKSI KERJA</th>
+              <th>BUKTI</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -639,6 +982,18 @@
     <label>Bukti</label>
     <input type="text" id="e_bukti" placeholder="Dokumentasi / eviden / laporan / dsb">
   </div>
+
+  <div class="inline-actions">
+    <button class="btn-mini" id="btnManageSOP" type="button">
+      <i class="ph ph-file-text"></i> Kelola Dokumen SOP
+    </button>
+    <button class="btn-mini" id="btnManageIK" type="button">
+      <i class="ph ph-list-checks"></i> Kelola Dokumen IK
+    </button>
+    <button class="btn-mini" id="btnManageBukti" type="button">
+      <i class="ph ph-paperclip"></i> Kelola Record Bukti
+    </button>
+  </div>
 </div>
 
       <div class="modal-actions">
@@ -650,6 +1005,136 @@
           <button class="btn btn-primary" id="btnSaveEdit" style="height:44px">Simpan</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- MODAL: DOKUMEN (SOP/IK) & RECORD BUKTI -->
+  <div class="modal-overlay" id="docsModal">
+    <div class="modal-box" style="max-width: 920px;">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="docsModalTitle">Dokumen & Bukti</div>
+          <div id="docsModalSubtitle" style="margin-top:6px; color:var(--text-muted); font-size:13px; font-weight:600"></div>
+        </div>
+        <button class="modal-close" id="btnCloseDocsModal"><i class="ph ph-x"></i></button>
+      </div>
+
+      <div class="tabs" role="tablist">
+        <button class="tab-btn active" id="tabBtnSOP" data-tab="SOP" type="button"><i class="ph ph-file-text"></i> SOP</button>
+        <button class="tab-btn" id="tabBtnIK" data-tab="IK" type="button"><i class="ph ph-list-checks"></i> Instruksi Kerja</button>
+        <button class="tab-btn" id="tabBtnREC" data-tab="REC" type="button"><i class="ph ph-paperclip"></i> Bukti (Record)</button>
+      </div>
+
+      <!-- TAB: SOP -->
+      <div class="tab-panel active" id="tabPanelSOP">
+        <div class="doc-meta">
+          <div class="form-group">
+            <label>Judul Dokumen</label>
+            <input id="doc_title" type="text" placeholder="Contoh: SOP Pelaksanaan Program" />
+          </div>
+          <div class="form-group">
+            <label>Nomor Dokumen</label>
+            <input id="doc_no" type="text" placeholder="Contoh: SOP/UPMP/001" />
+          </div>
+          <div class="form-group">
+            <label>Revisi</label>
+            <input id="doc_revision" type="text" placeholder="Contoh: Rev.02" />
+          </div>
+          <div class="form-group">
+            <label>Tanggal Berlaku</label>
+            <input id="doc_effective" type="date" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Catatan</label>
+          <textarea id="doc_notes" placeholder="Catatan singkat (opsional)"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Upload File (PDF/DOCX)</label>
+          <input id="doc_file" type="file" accept=".pdf,.doc,.docx" />
+        </div>
+
+        <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:12px; flex-wrap:wrap;">
+          <a class="btn btn-secondary" href="./templates/Template_SOP.xlsx" download style="height:44px"><i class="ph ph-download-simple"></i> Template SOP</a>
+          <button class="btn btn-secondary" id="btnTemplateSOPPrefill" type="button" style="height:44px"><i class="ph ph-magic-wand"></i> Template SOP (Isi Otomatis)</button>
+          <button class="btn btn-primary" id="btnUploadSOP" type="button" style="height:44px"><i class="ph ph-upload"></i> Upload SOP</button>
+        </div>
+
+        <div class="list-stack" id="docsListSOP"></div>
+      </div>
+
+      <!-- TAB: IK -->
+      <div class="tab-panel" id="tabPanelIK">
+        <div class="doc-meta">
+          <div class="form-group">
+            <label>Judul Dokumen</label>
+            <input id="ik_title" type="text" placeholder="Contoh: IK Input & Verifikasi" />
+          </div>
+          <div class="form-group">
+            <label>Nomor Dokumen</label>
+            <input id="ik_no" type="text" placeholder="Contoh: IK/UPMP/001" />
+          </div>
+          <div class="form-group">
+            <label>Revisi</label>
+            <input id="ik_revision" type="text" placeholder="Contoh: Rev.01" />
+          </div>
+          <div class="form-group">
+            <label>Tanggal Berlaku</label>
+            <input id="ik_effective" type="date" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Catatan</label>
+          <textarea id="ik_notes" placeholder="Catatan singkat (opsional)"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Upload File (PDF/DOCX)</label>
+          <input id="ik_file" type="file" accept=".pdf,.doc,.docx" />
+        </div>
+
+        <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:12px; flex-wrap:wrap;">
+          <a class="btn btn-secondary" href="./templates/Template_IK.xlsx" download style="height:44px"><i class="ph ph-download-simple"></i> Template IK</a>
+          <button class="btn btn-secondary" id="btnTemplateIKPrefill" type="button" style="height:44px"><i class="ph ph-magic-wand"></i> Template IK (Isi Otomatis)</button>
+          <button class="btn btn-primary" id="btnUploadIK" type="button" style="height:44px"><i class="ph ph-upload"></i> Upload IK</button>
+        </div>
+
+        <div class="list-stack" id="docsListIK"></div>
+      </div>
+
+      <!-- TAB: RECORD -->
+      <div class="tab-panel" id="tabPanelREC">
+        <div class="doc-meta">
+          <div class="form-group">
+            <label>Tanggal</label>
+            <input id="rec_date" type="date" />
+          </div>
+          <div class="form-group">
+            <label>Judul</label>
+            <input id="rec_title" type="text" placeholder="Contoh: Laporan Monev Januari" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Deskripsi</label>
+          <textarea id="rec_desc" placeholder="Ringkasan bukti/rekaman (opsional)"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Lampiran (opsional)</label>
+          <input id="rec_file" type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+        </div>
+
+        <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:12px; flex-wrap:wrap;">
+          <a class="btn btn-secondary" href="./templates/Template_Record.xlsx" download style="height:44px"><i class="ph ph-download-simple"></i> Template Record</a>
+          <button class="btn btn-secondary" id="btnTemplateRECPrefill" type="button" style="height:44px"><i class="ph ph-magic-wand"></i> Template Record (Isi Otomatis)</button>
+          <button class="btn btn-primary" id="btnAddRecord" type="button" style="height:44px"><i class="ph ph-plus"></i> Tambah Record</button>
+        </div>
+
+        <div class="list-stack" id="recordsList"></div>
+      </div>
+
     </div>
   </div>
 
