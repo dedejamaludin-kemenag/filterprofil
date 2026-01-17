@@ -163,7 +163,7 @@
     .dot.err { background: var(--danger); }
     @keyframes pulse { 0% {opacity: 1} 50% {opacity: .4} 100% {opacity: 1} }
 
-    /* Badge khusus untuk kolom Program & PIC */
+    /* Badge khusus untuk kolom PIC */
     .badge-wrap {
       display: flex;
       flex-wrap: wrap;
@@ -188,11 +188,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-    .pill-badge.program {
-      background: rgba(59, 130, 246, 0.10);
-      border-color: rgba(59, 130, 246, 0.35);
-      color: #1e3a8a;
     }
     .pill-badge.pic {
       background: rgba(34, 197, 94, 0.12);
@@ -479,12 +474,13 @@
       --col-indikator: 320px;
       --col-program: 240px;
       --col-sasaran: 220px;
-      --col-pic: 180px;
+      /* PIC dibuat lebih lebar agar badge tidak mudah terpotong */
+      --col-pic: 300px;
       --col-frekuensi: 160px;
       --col-sop: 240px;
       --col-ik: 260px;
       --col-bukti: 200px;
-      --table-minwidth: 2200px;
+      --table-minwidth: 2320px;
     }
 
     /* thead lama disembunyikan (dipakai box header di atas) */
