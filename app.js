@@ -58,10 +58,8 @@
     e_sop: document.getElementById("e_sop"),
     e_instruksi_kerja: document.getElementById("e_instruksi_kerja"),
 
-    // Quick links: kelola dokumen & bukti
-    btnManageSOP: document.getElementById("btnManageSOP"),
-    btnManageIK: document.getElementById("btnManageIK"),
-    btnManageBukti: document.getElementById("btnManageBukti"),
+    // Quick link: kelola dokumen (SOP/IK/Record)
+    btnManageDocs: document.getElementById("btnManageDocs"),
 
     // Modal Dokumen & Record
     docsModal: document.getElementById("docsModal"),
@@ -83,8 +81,14 @@
     doc_effective: document.getElementById("doc_effective"),
     doc_notes: document.getElementById("doc_notes"),
     doc_file: document.getElementById("doc_file"),
+    doc_tpl_file: document.getElementById("doc_tpl_file"),
+    sopParsePreview: document.getElementById("sopParsePreview"),
+    // Actions SOP (merged)
+    btnTplSOP: document.getElementById("btnTplSOP"),
+    menuTplSOP: document.getElementById("menuTplSOP"),
     btnTemplateSOPPrefill: document.getElementById("btnTemplateSOPPrefill"),
-    btnUploadSOP: document.getElementById("btnUploadSOP"),
+    sop_smart_file: document.getElementById("sop_smart_file"),
+    btnUploadSOPSmart: document.getElementById("btnUploadSOPSmart"),
     docsListSOP: document.getElementById("docsListSOP"),
 
     // Input IK
@@ -94,8 +98,14 @@
     ik_effective: document.getElementById("ik_effective"),
     ik_notes: document.getElementById("ik_notes"),
     ik_file: document.getElementById("ik_file"),
+    ik_tpl_file: document.getElementById("ik_tpl_file"),
+    ikParsePreview: document.getElementById("ikParsePreview"),
+    // Actions IK (merged)
+    btnTplIK: document.getElementById("btnTplIK"),
+    menuTplIK: document.getElementById("menuTplIK"),
     btnTemplateIKPrefill: document.getElementById("btnTemplateIKPrefill"),
-    btnUploadIK: document.getElementById("btnUploadIK"),
+    ik_smart_file: document.getElementById("ik_smart_file"),
+    btnUploadIKSmart: document.getElementById("btnUploadIKSmart"),
     docsListIK: document.getElementById("docsListIK"),
 
     // Record bukti
@@ -103,7 +113,16 @@
     rec_title: document.getElementById("rec_title"),
     rec_desc: document.getElementById("rec_desc"),
     rec_file: document.getElementById("rec_file"),
+    rec_tpl_file: document.getElementById("rec_tpl_file"),
+    recParsePreview: document.getElementById("recParsePreview"),
+    // Actions REC (merged-ish)
+    btnTplREC: document.getElementById("btnTplREC"),
+    menuTplREC: document.getElementById("menuTplREC"),
     btnTemplateRECPrefill: document.getElementById("btnTemplateRECPrefill"),
+    btnRecAddMenu: document.getElementById("btnRecAddMenu"),
+    menuRecAdd: document.getElementById("menuRecAdd"),
+    rec_smart_file: document.getElementById("rec_smart_file"),
+    btnImportREC: document.getElementById("btnImportREC"),
     btnAddRecord: document.getElementById("btnAddRecord"),
     recordsList: document.getElementById("recordsList"),
 
@@ -123,6 +142,7 @@
   let activeProgramRow = null;
   let docsCountsByProgram = new Map(); // program_id -> { sop: n, ik: n, rec: n }
   let warnedMissingDocsTables = false;
+  let lastDocsTab = "SOP";
 
   // Normalisasi string
   function norm(x) {
@@ -274,8 +294,8 @@
       els.e_pic.value = row.pic || "";
       els.btnDeleteData.classList.remove("hidden");
 
-      // tombol kelola dokumen/bukti aktif
-      [els.btnManageSOP, els.btnManageIK, els.btnManageBukti].forEach(b => {
+      // tombol kelola dokumen aktif
+      [els.btnManageDocs].forEach(b => {
         if (!b) return;
         b.disabled = false;
         b.style.opacity = "1";
@@ -295,8 +315,8 @@
       els.e_pic.value = "";
       els.btnDeleteData.classList.add("hidden");
 
-      // tombol kelola dokumen/bukti nonaktif sampai data dibuat
-      [els.btnManageSOP, els.btnManageIK, els.btnManageBukti].forEach(b => {
+      // tombol kelola dokumen nonaktif sampai data dibuat
+      [els.btnManageDocs].forEach(b => {
         if (!b) return;
         b.disabled = true;
         b.style.opacity = "0.6";
@@ -342,6 +362,7 @@
   }
 
   function setDocsTab(tab) {
+    lastDocsTab = tab || "SOP";
     const allBtns = [els.tabBtnSOP, els.tabBtnIK, els.tabBtnREC];
     const allPanels = [els.tabPanelSOP, els.tabPanelIK, els.tabPanelREC];
     allBtns.forEach(b => b && b.classList.remove("active"));
@@ -568,9 +589,302 @@
     URL.revokeObjectURL(url);
   }
 
+  // ----------------------------
+  // PARSE TEMPLATE XLSX (UPLOAD + PREFILL INPUT)
+  // ----------------------------
+  function getFileExt(nameOrPath) {
+    const s = norm(nameOrPath).toLowerCase();
+    const m = s.match(/\.([a-z0-9]+)(?:\?|#|$)/i);
+    return m ? m[1] : "";
+  }
+
+  function isTemplateXlsx(nameOrPath) {
+    const ext = getFileExt(nameOrPath);
+    return ext === "xlsx" || ext === "xls" || ext === "xlsm";
+  }
+
+  function excelDateToISO(v) {
+    if (!v && v !== 0) return "";
+    // Sudah ISO
+    if (typeof v === "string") {
+      const s = v.trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      // Kadang dd/mm/yyyy
+      const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (m) {
+        const dd = String(m[1]).padStart(2, "0");
+        const mm = String(m[2]).padStart(2, "0");
+        return `${m[3]}-${mm}-${dd}`;
+      }
+      return s;
+    }
+    if (typeof v === "number") {
+      const d = XLSX.SSF.parse_date_code(v);
+      if (!d || !d.y) return "";
+      const mm = String(d.m).padStart(2, "0");
+      const dd = String(d.d).padStart(2, "0");
+      return `${d.y}-${mm}-${dd}`;
+    }
+    return "";
+  }
+
+  function getCell(ws, addr) {
+    const c = ws?.[addr];
+    return c ? c.v : "";
+  }
+
+  async function parseSopIkTemplate(file, kind) {
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type: "array" });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+
+    const doc_no = norm(getCell(ws, "B5"));
+    const title = norm(getCell(ws, "B6"));
+    const revision = norm(getCell(ws, "B7"));
+    const effective_date = excelDateToISO(getCell(ws, "B8"));
+    const pic = norm(getCell(ws, "B9"));
+
+    // ringkasan isi (opsional): ambil beberapa sel yang memang kita isi saat prefill
+    const ringkas1 = norm(getCell(ws, kind === "SOP" ? "B15" : "B14"));
+    const ringkas2 = norm(getCell(ws, kind === "SOP" ? "B16" : "B15"));
+    const ringkas3 = norm(getCell(ws, kind === "SOP" ? "B19" : "B16"));
+    const notes_from_file = [ringkas1, ringkas2, ringkas3].filter(Boolean).join("\n");
+
+    return { title, doc_no, revision, effective_date, pic, notes_from_file };
+  }
+
+  function showParsePreview(previewEl, meta, extraHtml = "") {
+    if (!previewEl) return;
+    previewEl.style.display = "block";
+    previewEl.innerHTML = `
+      <div><strong>Hasil Parse</strong></div>
+      <div style="margin-top:6px">
+        ${meta.doc_no ? `<div>No Dok: <strong>${safeText(meta.doc_no)}</strong></div>` : ""}
+        ${meta.title ? `<div>Judul: <strong>${safeText(meta.title)}</strong></div>` : ""}
+        ${meta.revision ? `<div>Revisi: <strong>${safeText(meta.revision)}</strong></div>` : ""}
+        ${meta.effective_date ? `<div>Berlaku: <strong>${safeText(meta.effective_date)}</strong></div>` : ""}
+        ${meta.pic ? `<div>PIC (dari template): <strong>${safeText(meta.pic)}</strong></div>` : ""}
+      </div>
+      ${extraHtml}
+    `;
+  }
+
+  function hideParsePreview(previewEl) {
+    if (!previewEl) return;
+    previewEl.style.display = "none";
+    previewEl.innerHTML = "";
+  }
+
+  async function uploadTemplateParsed(docType, fileOverride = null) {
+    if (!activeProgramRow?.id) return;
+    const pid = activeProgramRow.id;
+    const isSOP = docType === "SOP";
+    const fileEl = isSOP ? els.doc_tpl_file : els.ik_tpl_file;
+    const previewEl = isSOP ? els.sopParsePreview : els.ikParsePreview;
+    const file = fileOverride || fileEl?.files?.[0];
+    if (!file) {
+      notify("Pilih file template XLSX dulu.", "error");
+      return;
+    }
+
+    setStatus("Parsing template...", "load");
+    try {
+      const meta = await parseSopIkTemplate(file, docType);
+
+      // isi input box (boleh diedit sebelum simpan)
+      if (isSOP) {
+        if (meta.title) els.doc_title.value = meta.title;
+        if (meta.doc_no) els.doc_no.value = meta.doc_no;
+        if (meta.revision) els.doc_revision.value = meta.revision;
+        if (meta.effective_date) els.doc_effective.value = meta.effective_date;
+        if (!norm(els.doc_notes.value) && meta.notes_from_file) els.doc_notes.value = meta.notes_from_file;
+      } else {
+        if (meta.title) els.ik_title.value = meta.title;
+        if (meta.doc_no) els.ik_no.value = meta.doc_no;
+        if (meta.revision) els.ik_revision.value = meta.revision;
+        if (meta.effective_date) els.ik_effective.value = meta.effective_date;
+        if (!norm(els.ik_notes.value) && meta.notes_from_file) els.ik_notes.value = meta.notes_from_file;
+      }
+
+      showParsePreview(previewEl, meta);
+
+      const ok = await askConfirm(`Upload template ${docType} ini dan simpan sebagai sumber (XLSX)?`);
+      if (!ok) {
+        setStatus("Ready", "ok");
+        return;
+      }
+
+      setStatus("Uploading...", "load");
+      const path = buildStoragePath(pid, docType, file.name);
+      const { error: upErr } = await db.storage.from(STORAGE_BUCKET).upload(path, file, { upsert: false });
+      if (upErr) throw upErr;
+
+      // payload seperti dokumen biasa, tapi kita tandai sebagai sumber template
+      const title = norm(isSOP ? els.doc_title.value : els.ik_title.value);
+      const doc_no = norm(isSOP ? els.doc_no.value : els.ik_no.value);
+      const revision = norm(isSOP ? els.doc_revision.value : els.ik_revision.value);
+      const effective_date = (isSOP ? els.doc_effective.value : els.ik_effective.value) || null;
+      const notesRaw = norm(isSOP ? els.doc_notes.value : els.ik_notes.value);
+      const notes = (notesRaw ? notesRaw + "\n" : "") + "[SOURCE_XLSX]";
+
+      const payload = {
+        program_id: pid,
+        doc_type: docType,
+        title: title || null,
+        doc_no: doc_no || null,
+        revision: revision || null,
+        effective_date,
+        notes,
+        file_path: path,
+        is_active: true,
+      };
+      const { error: insErr } = await db.from(DOCS_TABLE).insert(payload);
+      if (insErr) throw insErr;
+
+      // reset
+      if (!fileOverride && fileEl) fileEl.value = "";
+      notify(`Template ${docType} berhasil diupload & diparse.`, "success");
+      await loadDocsAndRecords();
+      await refreshCountsForViewRows();
+    } catch (err) {
+      console.error(err);
+      notify("Gagal parse/upload template: " + (err?.message || String(err)), "error");
+    } finally {
+      setStatus("Ready", "ok");
+    }
+  }
+
+  async function parseRecordTemplate(file) {
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type: "array" });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true });
+
+    // Cari header tabel log (kolom A = Tanggal)
+    let headerIdx = -1;
+    for (let i = 0; i < Math.min(rows.length, 60); i++) {
+      const a = norm(rows[i]?.[0]);
+      if (/tanggal/i.test(a)) {
+        headerIdx = i;
+        break;
+      }
+    }
+    const start = headerIdx >= 0 ? headerIdx + 1 : 15; // fallback
+
+    const parsed = [];
+    for (let i = start; i < rows.length; i++) {
+      const r = rows[i] || [];
+      const dateISO = excelDateToISO(r[0]);
+      const program = norm(r[1]);
+      const title = norm(r[2]);
+      const desc = norm(r[3]);
+      const pic = norm(r[5]);
+      if (!dateISO && !title && !desc && !program) {
+        // stop kalau sudah kosong beruntun
+        continue;
+      }
+      if (!dateISO) continue; // tanggal wajib
+
+      parsed.push({
+        record_date: dateISO,
+        title: title || (program ? `Record ${program}` : "Record"),
+        description: desc || (program ? `Program: ${program}${pic ? ` • PIC: ${pic}` : ""}` : (pic ? `PIC: ${pic}` : "")),
+      });
+    }
+
+    // identitas ringkas dari sel B5 (judul), B8 (PIC)
+    const identTitle = norm(getCell(ws, "B5"));
+    const identPIC = norm(getCell(ws, "B8"));
+
+    return { identTitle, identPIC, parsed };
+  }
+
+  async function uploadRecordTemplateParsed(fileOverride = null) {
+    if (!activeProgramRow?.id) return;
+    const pid = activeProgramRow.id;
+    const file = fileOverride || els.rec_tpl_file?.files?.[0];
+    if (!file) {
+      notify("Pilih file Template Record XLSX dulu.", "error");
+      return;
+    }
+
+    setStatus("Parsing template record...", "load");
+    try {
+      const { identTitle, identPIC, parsed } = await parseRecordTemplate(file);
+      const count = parsed.length;
+      if (!count) {
+        hideParsePreview(els.recParsePreview);
+        notify("Tidak menemukan baris record yang valid. Pastikan kolom Tanggal terisi.", "error");
+        setStatus("Ready", "ok");
+        return;
+      }
+
+      // prefill input ringkas kalau masih kosong
+      if (!norm(els.rec_title.value) && identTitle) els.rec_title.value = identTitle;
+      if (!norm(els.rec_desc.value) && identPIC) els.rec_desc.value = `PIC (dari template): ${identPIC}`;
+
+      const previewRows = parsed.slice(0, 4).map(p => `<div>• <strong>${safeText(p.record_date)}</strong> — ${safeText(p.title)}</div>`).join("");
+      showParsePreview(els.recParsePreview, { title: identTitle, doc_no: "", revision: "", effective_date: "", pic: identPIC }, `<div style="margin-top:8px">Ditemukan <strong>${count}</strong> record.</div><div style="margin-top:6px">${previewRows}${count > 4 ? `<div style=\"margin-top:6px\">…dan ${count - 4} record lainnya</div>` : ""}</div>`);
+
+      const ok = await askConfirm(`Tambah ${count} record dari template ini?`);
+      if (!ok) {
+        setStatus("Ready", "ok");
+        return;
+      }
+
+      setStatus("Uploading template & saving records...", "load");
+      // Upload file template sebagai bukti sumber (opsional) dan attach ke semua record
+      const path = buildStoragePath(pid, "REC", file.name);
+      const { error: upErr } = await db.storage.from(STORAGE_BUCKET).upload(path, file, { upsert: false });
+      if (upErr) throw upErr;
+
+      // Insert records (batch)
+      const payloads = parsed.map(p => ({
+        program_id: pid,
+        record_date: p.record_date,
+        title: p.title,
+        description: p.description,
+        file_path: path, // bukti sumber template
+      }));
+
+      const { error: insErr } = await db.from(RECORDS_TABLE).insert(payloads);
+      if (insErr) throw insErr;
+
+      // reset
+      if (!fileOverride) els.rec_tpl_file.value = "";
+      notify("Record dari template berhasil ditambahkan.", "success");
+      await loadDocsAndRecords();
+      await refreshCountsForViewRows();
+    } catch (err) {
+      console.error(err);
+      notify("Gagal parse/upload record: " + (err?.message || String(err)), "error");
+    } finally {
+      setStatus("Ready", "ok");
+    }
+  }
+
+  function docGroupKey(d) {
+    const k = [
+      norm(d.doc_no),
+      norm(d.revision),
+      norm(d.effective_date),
+      norm(d.title),
+    ].join("|");
+    // fallback agar tidak kosong total
+    return k !== "|||" ? k : norm(d.file_path) || String(d.id);
+  }
+
+  function countDocGroups(docs, docType) {
+    const set = new Set();
+    (docs || [])
+      .filter(d => d.doc_type === docType)
+      .forEach(d => set.add(docGroupKey(d)));
+    return set.size;
+  }
+
   function updateCountsCacheFromLists(pid, docs, recs) {
-    const sop = (docs || []).filter(d => d.doc_type === "SOP").length;
-    const ik = (docs || []).filter(d => d.doc_type === "IK").length;
+    const sop = countDocGroups(docs, "SOP");
+    const ik = countDocGroups(docs, "IK");
     const rec = (recs || []).length;
     docsCountsByProgram.set(String(pid), { sop, ik, rec });
   }
@@ -583,7 +897,7 @@
     }
 
     const docs = await safeSelect(DOCS_TABLE, (t) =>
-      t.select("program_id,doc_type").in("program_id", ids)
+      t.select("program_id,doc_type,doc_no,revision,effective_date,title,file_path").in("program_id", ids)
     );
     const recs = await safeSelect(RECORDS_TABLE, (t) =>
       t.select("program_id").in("program_id", ids)
@@ -591,12 +905,22 @@
 
     const map = new Map();
     ids.forEach(id => map.set(String(id), { sop: 0, ik: 0, rec: 0 }));
+    // hitung unik per kelompok dokumen (agar SOURCE+FINAL tidak jadi dobel)
+    const groupMap = new Map();
+    ids.forEach(id => groupMap.set(String(id), { sop: new Set(), ik: new Set() }));
+
     (docs || []).forEach(d => {
-      const key = String(d.program_id);
-      if (!map.has(key)) map.set(key, { sop: 0, ik: 0, rec: 0 });
-      const obj = map.get(key);
-      if (d.doc_type === "SOP") obj.sop += 1;
-      if (d.doc_type === "IK") obj.ik += 1;
+      const pid = String(d.program_id);
+      if (!groupMap.has(pid)) groupMap.set(pid, { sop: new Set(), ik: new Set() });
+      const key = docGroupKey(d);
+      if (d.doc_type === "SOP") groupMap.get(pid).sop.add(key);
+      if (d.doc_type === "IK") groupMap.get(pid).ik.add(key);
+    });
+
+    groupMap.forEach((sets, pid) => {
+      if (!map.has(pid)) map.set(pid, { sop: 0, ik: 0, rec: 0 });
+      map.get(pid).sop = sets.sop.size;
+      map.get(pid).ik = sets.ik.size;
     });
     (recs || []).forEach(r => {
       const key = String(r.program_id);
@@ -627,14 +951,51 @@
       return;
     }
 
-    container.innerHTML = list.map(d => {
-      const title = safeText(d.title || (docType === "SOP" ? "Dokumen SOP" : "Dokumen IK"));
+    // Group berdasarkan identitas dokumen (agar SOURCE_XLSX dan FINAL PDF/DOCX tampil 1 baris)
+    const groups = new Map();
+    list.forEach(d => {
+      const k = docGroupKey(d);
+      if (!groups.has(k)) groups.set(k, []);
+      groups.get(k).push(d);
+    });
+
+    // sort: group yang terbaru di atas (pakai created_at terbaru dari anggota group)
+    const groupArr = Array.from(groups.entries()).map(([k, arr]) => {
+      const newest = arr
+        .map(x => x.created_at || x.updated_at || "")
+        .sort()
+        .slice(-1)[0] || "";
+      return { k, arr, newest };
+    }).sort((a, b) => (a.newest < b.newest ? 1 : -1));
+
+    container.innerHTML = groupArr.map(({ arr }) => {
+      const ids = arr.map(x => x.id).filter(Boolean);
+      const idsCsv = ids.join(",");
+      const anyActive = arr.some(x => !!x.is_active);
+
+      // pilih source xlsx dan final non-xlsx (ambil yang paling baru)
+      const sorted = [...arr].sort((a, b) => (String(a.created_at) < String(b.created_at) ? 1 : -1));
+      const source = sorted.find(x => isTemplateXlsx(x.file_path)) || null;
+      const final = sorted.find(x => !isTemplateXlsx(x.file_path)) || null;
+      const main = final || source || sorted[0];
+
+      const title = safeText(main.title || (docType === "SOP" ? "Dokumen SOP" : "Dokumen IK"));
       const sub = [
-        d.doc_no ? `No: ${safeText(d.doc_no)}` : null,
-        d.revision ? `Revisi: ${safeText(d.revision)}` : null,
-        d.effective_date ? `Berlaku: ${safeText(d.effective_date)}` : null,
-        d.is_active ? "Aktif" : "Arsip",
+        main.doc_no ? `No: ${safeText(main.doc_no)}` : null,
+        main.revision ? `Revisi: ${safeText(main.revision)}` : null,
+        main.effective_date ? `Berlaku: ${safeText(main.effective_date)}` : null,
+        anyActive ? "Aktif" : "Arsip",
       ].filter(Boolean).join(" • ");
+
+      const parts = [];
+      if (final) parts.push(`<button class="link-btn" type="button" data-doc-view="${final.id}"><i class="ph ph-eye"></i> Lihat Final</button>`);
+      if (source) parts.push(`<button class="link-btn" type="button" data-doc-view="${source.id}"><i class="ph ph-file-arrow-up"></i> Lihat Source</button>`);
+      if (!final && !source) parts.push(`<button class="link-btn" type="button" data-doc-view="${main.id}"><i class="ph ph-eye"></i> Lihat</button>`);
+
+      parts.push(
+        `<button class="link-btn" type="button" data-doc-toggle-group="${idsCsv}">${anyActive ? '<i class="ph ph-archive"></i> Arsip' : '<i class="ph ph-check"></i> Aktifkan'}</button>`
+      );
+      parts.push(`<button class="link-btn danger" type="button" data-doc-del-group="${idsCsv}"><i class="ph ph-trash"></i></button>`);
 
       return `
         <div class="file-row">
@@ -643,9 +1004,7 @@
             <div class="file-sub">${sub}</div>
           </div>
           <div class="file-actions">
-            <button class="link-btn" type="button" data-doc-view="${d.id}"><i class="ph ph-eye"></i> Lihat</button>
-            <button class="link-btn" type="button" data-doc-toggle="${d.id}">${d.is_active ? '<i class="ph ph-archive"></i> Arsip' : '<i class="ph ph-check"></i> Aktifkan'}</button>
-            <button class="link-btn danger" type="button" data-doc-del="${d.id}"><i class="ph ph-trash"></i></button>
+            ${parts.join("")}
           </div>
         </div>
       `;
@@ -680,7 +1039,7 @@
     }).join("");
   }
 
-  async function uploadDoc(docType) {
+  async function uploadDoc(docType, fileOverride = null) {
     if (!activeProgramRow?.id) return;
     const pid = activeProgramRow.id;
 
@@ -689,9 +1048,9 @@
     const doc_no = norm(isSOP ? els.doc_no.value : els.ik_no.value);
     const revision = norm(isSOP ? els.doc_revision.value : els.ik_revision.value);
     const effective_date = (isSOP ? els.doc_effective.value : els.ik_effective.value) || null;
-    const notes = norm(isSOP ? els.doc_notes.value : els.ik_notes.value);
+    const notesRaw = norm(isSOP ? els.doc_notes.value : els.ik_notes.value);
     const fileEl = isSOP ? els.doc_file : els.ik_file;
-    const file = fileEl?.files?.[0];
+    const file = fileOverride || fileEl?.files?.[0];
     if (!file) {
       notify("Pilih file dulu.", "error");
       return;
@@ -705,6 +1064,9 @@
       const path = buildStoragePath(pid, docType, file.name);
       const { error: upErr } = await db.storage.from(STORAGE_BUCKET).upload(path, file, { upsert: false });
       if (upErr) throw upErr;
+
+      const kindTag = isTemplateXlsx(file.name) ? "[SOURCE_XLSX]" : "[FINAL]";
+      const notes = (notesRaw ? notesRaw + "\n" : "") + kindTag;
 
       const payload = {
         program_id: pid,
@@ -722,10 +1084,12 @@
       if (insErr) throw insErr;
 
       // reset inputs
-      if (isSOP) {
-        els.doc_file.value = "";
-      } else {
-        els.ik_file.value = "";
+      if (!fileOverride) {
+        if (isSOP) {
+          els.doc_file.value = "";
+        } else {
+          els.ik_file.value = "";
+        }
       }
 
       notify(`Dokumen ${docType} berhasil diupload.`, "success");
@@ -824,6 +1188,56 @@
         await db.storage.from(STORAGE_BUCKET).remove([data.file_path]);
       }
       const { error: delErr } = await db.from(DOCS_TABLE).delete().eq("id", docId);
+      if (delErr) throw delErr;
+      notify("Dokumen dihapus.", "success");
+      await loadDocsAndRecords();
+      await refreshCountsForViewRows();
+    } catch (err) {
+      console.error(err);
+      notify("Gagal hapus: " + (err?.message || String(err)), "error");
+    } finally {
+      setStatus("Ready", "ok");
+    }
+  }
+
+  async function toggleDocActiveGroup(idsCsv) {
+    const ids = (idsCsv || "").split(",").map(x => x.trim()).filter(Boolean);
+    if (!ids.length) return;
+    const ok = await askConfirm("Ubah status dokumen ini? (Aktif/Arsip)");
+    if (!ok) return;
+    setStatus("Updating...", "load");
+    try {
+      const { data, error } = await db.from(DOCS_TABLE).select("id,is_active").in("id", ids);
+      if (error) throw error;
+      const anyActive = (data || []).some(x => !!x.is_active);
+      const next = !anyActive;
+      const { error: upErr } = await db.from(DOCS_TABLE).update({ is_active: next }).in("id", ids);
+      if (upErr) throw upErr;
+      notify("Status dokumen diperbarui.", "success");
+      await loadDocsAndRecords();
+      await refreshCountsForViewRows();
+    } catch (err) {
+      console.error(err);
+      notify("Gagal update: " + (err?.message || String(err)), "error");
+    } finally {
+      setStatus("Ready", "ok");
+    }
+  }
+
+  async function deleteDocGroup(idsCsv) {
+    const ids = (idsCsv || "").split(",").map(x => x.trim()).filter(Boolean);
+    if (!ids.length) return;
+    const ok = await askConfirm("Hapus dokumen ini? (semua file SOURCE/FINAL akan dihapus)");
+    if (!ok) return;
+    setStatus("Deleting...", "load");
+    try {
+      const { data, error } = await db.from(DOCS_TABLE).select("id,file_path").in("id", ids);
+      if (error) throw error;
+      const paths = (data || []).map(x => x.file_path).filter(Boolean);
+      if (paths.length) {
+        await db.storage.from(STORAGE_BUCKET).remove(paths);
+      }
+      const { error: delErr } = await db.from(DOCS_TABLE).delete().in("id", ids);
       if (delErr) throw delErr;
       notify("Dokumen dihapus.", "success");
       await loadDocsAndRecords();
@@ -1390,18 +1804,11 @@ els.fileExcel.addEventListener("change", async (e) => {
     if (e.target === els.modal) closeModal();
   });
 
-  // Quick links: kelola dokumen/record dari modal edit
-  els.btnManageSOP?.addEventListener("click", () => {
+  // Quick link: kelola dokumen/record dari modal edit
+  els.btnManageDocs?.addEventListener("click", () => {
     closeModal();
-    openDocsModal(activeProgramRow, "SOP");
-  });
-  els.btnManageIK?.addEventListener("click", () => {
-    closeModal();
-    openDocsModal(activeProgramRow, "IK");
-  });
-  els.btnManageBukti?.addEventListener("click", () => {
-    closeModal();
-    openDocsModal(activeProgramRow, "REC");
+    // buka tab terakhir yang dipakai (kalau ada), default SOP
+    openDocsModal(activeProgramRow, lastDocsTab || "SOP");
   });
 
   // Docs modal interactions
@@ -1418,8 +1825,75 @@ els.fileExcel.addEventListener("change", async (e) => {
   els.btnTemplateIKPrefill?.addEventListener("click", () => downloadTemplatePrefilled("IK"));
   els.btnTemplateRECPrefill?.addEventListener("click", () => downloadTemplatePrefilled("REC"));
 
-  els.btnUploadSOP?.addEventListener("click", () => uploadDoc("SOP"));
-  els.btnUploadIK?.addEventListener("click", () => uploadDoc("IK"));
+  // Dropdown template: toggle + close on outside
+  const dropdownPairs = [
+    { btn: els.btnTplSOP, menu: els.menuTplSOP },
+    { btn: els.btnTplIK, menu: els.menuTplIK },
+    { btn: els.btnTplREC, menu: els.menuTplREC },
+    { btn: els.btnRecAddMenu, menu: els.menuRecAdd },
+  ].filter(x => x.btn && x.menu);
+
+  function closeAllDropdowns() {
+    dropdownPairs.forEach(({ menu }) => menu.classList.remove("open"));
+  }
+
+  dropdownPairs.forEach(({ btn, menu }) => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const nextOpen = !menu.classList.contains("open");
+      closeAllDropdowns();
+      if (nextOpen) menu.classList.add("open");
+    });
+    menu.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const hit = e.target.closest(".dd-item");
+      if (hit) closeAllDropdowns();
+    });
+  });
+  document.addEventListener("click", closeAllDropdowns);
+  window.addEventListener("resize", closeAllDropdowns);
+
+  // Upload pintar: satu tombol untuk XLSX (parse/source) atau PDF/DOCX (final)
+  async function handleSmartUpload(kind, file) {
+    if (!file) return;
+    const name = file.name || "";
+    const isXlsx = isTemplateXlsx(name);
+    if (isXlsx) {
+      await uploadTemplateParsed(kind, file);
+    } else {
+      await uploadDoc(kind, file);
+    }
+  }
+
+  els.btnUploadSOPSmart?.addEventListener("click", () => {
+    els.sop_smart_file?.click();
+  });
+  els.sop_smart_file?.addEventListener("change", async () => {
+    const file = els.sop_smart_file?.files?.[0];
+    await handleSmartUpload("SOP", file);
+    els.sop_smart_file.value = "";
+  });
+
+  els.btnUploadIKSmart?.addEventListener("click", () => {
+    els.ik_smart_file?.click();
+  });
+  els.ik_smart_file?.addEventListener("change", async () => {
+    const file = els.ik_smart_file?.files?.[0];
+    await handleSmartUpload("IK", file);
+    els.ik_smart_file.value = "";
+  });
+
+  // Record: import XLSX via tombol, tambah manual tetap ada
+  els.btnImportREC?.addEventListener("click", () => {
+    els.rec_smart_file?.click();
+  });
+  els.rec_smart_file?.addEventListener("change", async () => {
+    const file = els.rec_smart_file?.files?.[0];
+    await uploadRecordTemplateParsed(file);
+    els.rec_smart_file.value = "";
+  });
+
   els.btnAddRecord?.addEventListener("click", addRecord);
 
   // Delegasi klik untuk list SOP/IK
@@ -1429,6 +1903,8 @@ els.fileExcel.addEventListener("change", async (e) => {
     if (t.hasAttribute("data-doc-view")) return viewDoc(t.getAttribute("data-doc-view"));
     if (t.hasAttribute("data-doc-toggle")) return toggleDocActive(t.getAttribute("data-doc-toggle"));
     if (t.hasAttribute("data-doc-del")) return deleteDoc(t.getAttribute("data-doc-del"));
+    if (t.hasAttribute("data-doc-toggle-group")) return toggleDocActiveGroup(t.getAttribute("data-doc-toggle-group"));
+    if (t.hasAttribute("data-doc-del-group")) return deleteDocGroup(t.getAttribute("data-doc-del-group"));
   }
   els.docsListSOP?.addEventListener("click", handleDocsListClick);
   els.docsListIK?.addEventListener("click", handleDocsListClick);

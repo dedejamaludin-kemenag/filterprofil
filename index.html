@@ -199,12 +199,86 @@
       border-color: rgba(34, 197, 94, 0.35);
       color: #065f46;
     }
+
+    /* Dropdown mini untuk aksi template */
+    .dd {
+      position: relative;
+      display: inline-block;
+    }
+    .dd-menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      min-width: 260px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-card);
+      padding: 8px;
+      z-index: 50;
+      display: none;
+    }
+    .dd-menu.open { display: block; }
+    .dd-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 10px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-main);
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+    }
+    .dd-item:hover {
+      background: rgba(59,130,246,0.08);
+      border-color: rgba(59,130,246,0.18);
+    }
+    .dd-sep {
+      height: 1px;
+      background: var(--border);
+      margin: 6px 0;
+      opacity: 0.75;
+    }
+
+    .action-row {
+      display:flex;
+      gap:12px;
+      justify-content:flex-end;
+      margin-top:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .hint {
+      margin-top: 10px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
     .pill-badge.is-empty {
       background: rgba(100, 116, 139, 0.08);
       border-color: rgba(100, 116, 139, 0.22);
       color: var(--text-dim);
       font-weight: 700;
     }
+
+    .parse-preview {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,0.8);
+      color: var(--text-muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .parse-preview strong { color: var(--text-main); }
 
     /* FILTER PANEL */
     .filter-panel {
@@ -984,14 +1058,8 @@
   </div>
 
   <div class="inline-actions">
-    <button class="btn-mini" id="btnManageSOP" type="button">
-      <i class="ph ph-file-text"></i> Kelola Dokumen SOP
-    </button>
-    <button class="btn-mini" id="btnManageIK" type="button">
-      <i class="ph ph-list-checks"></i> Kelola Dokumen IK
-    </button>
-    <button class="btn-mini" id="btnManageBukti" type="button">
-      <i class="ph ph-paperclip"></i> Kelola Record Bukti
+    <button class="btn-mini" id="btnManageDocs" type="button">
+      <i class="ph ph-folder-open"></i> Kelola Dokumen
     </button>
   </div>
 </div>
@@ -1051,16 +1119,23 @@
           <textarea id="doc_notes" placeholder="Catatan singkat (opsional)"></textarea>
         </div>
 
-        <div class="form-group">
-          <label>Upload File (PDF/DOCX)</label>
-          <input id="doc_file" type="file" accept=".pdf,.doc,.docx" />
-        </div>
+        <!-- file input lama tetap ada (dipakai programmatically), tapi disembunyikan -->
+        <input id="doc_file" type="file" accept=".pdf,.doc,.docx" style="display:none" />
+        <input id="doc_tpl_file" type="file" accept=".xlsx" style="display:none" />
+        <input id="sop_smart_file" type="file" accept=".xlsx,.pdf,.doc,.docx" style="display:none" />
 
-        <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:12px; flex-wrap:wrap;">
-          <a class="btn btn-secondary" href="./templates/Template_SOP.xlsx" download style="height:44px"><i class="ph ph-download-simple"></i> Template SOP</a>
-          <button class="btn btn-secondary" id="btnTemplateSOPPrefill" type="button" style="height:44px"><i class="ph ph-magic-wand"></i> Template SOP (Isi Otomatis)</button>
-          <button class="btn btn-primary" id="btnUploadSOP" type="button" style="height:44px"><i class="ph ph-upload"></i> Upload SOP</button>
+        <div class="action-row">
+          <div class="dd" id="ddSOP">
+            <button class="btn btn-secondary" id="btnTplSOP" type="button" style="height:44px"><i class="ph ph-download-simple"></i> Unduh Template <i class="ph ph-caret-down"></i></button>
+            <div class="dd-menu" id="menuTplSOP">
+              <a class="dd-item" href="./templates/Template_SOP.xlsx" download><i class="ph ph-file-xls"></i> Template SOP (Kosong)</a>
+              <button class="dd-item" id="btnTemplateSOPPrefill" type="button"><i class="ph ph-magic-wand"></i> Template SOP (Isi Otomatis)</button>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="btnUploadSOPSmart" type="button" style="height:44px"><i class="ph ph-upload"></i> Unggah Dokumen</button>
         </div>
+        <div class="hint">Unggah <strong>XLSX</strong> untuk <em>parse</em> otomatis (source). Unggah <strong>PDF/DOCX</strong> untuk dokumen final.</div>
+        <div class="parse-preview" id="sopParsePreview" style="display:none"></div>
 
         <div class="list-stack" id="docsListSOP"></div>
       </div>
@@ -1091,16 +1166,23 @@
           <textarea id="ik_notes" placeholder="Catatan singkat (opsional)"></textarea>
         </div>
 
-        <div class="form-group">
-          <label>Upload File (PDF/DOCX)</label>
-          <input id="ik_file" type="file" accept=".pdf,.doc,.docx" />
-        </div>
+        <!-- file input lama tetap ada (dipakai programmatically), tapi disembunyikan -->
+        <input id="ik_file" type="file" accept=".pdf,.doc,.docx" style="display:none" />
+        <input id="ik_tpl_file" type="file" accept=".xlsx" style="display:none" />
+        <input id="ik_smart_file" type="file" accept=".xlsx,.pdf,.doc,.docx" style="display:none" />
 
-        <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:12px; flex-wrap:wrap;">
-          <a class="btn btn-secondary" href="./templates/Template_IK.xlsx" download style="height:44px"><i class="ph ph-download-simple"></i> Template IK</a>
-          <button class="btn btn-secondary" id="btnTemplateIKPrefill" type="button" style="height:44px"><i class="ph ph-magic-wand"></i> Template IK (Isi Otomatis)</button>
-          <button class="btn btn-primary" id="btnUploadIK" type="button" style="height:44px"><i class="ph ph-upload"></i> Upload IK</button>
+        <div class="action-row">
+          <div class="dd" id="ddIK">
+            <button class="btn btn-secondary" id="btnTplIK" type="button" style="height:44px"><i class="ph ph-download-simple"></i> Unduh Template <i class="ph ph-caret-down"></i></button>
+            <div class="dd-menu" id="menuTplIK">
+              <a class="dd-item" href="./templates/Template_IK.xlsx" download><i class="ph ph-file-xls"></i> Template IK (Kosong)</a>
+              <button class="dd-item" id="btnTemplateIKPrefill" type="button"><i class="ph ph-magic-wand"></i> Template IK (Isi Otomatis)</button>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="btnUploadIKSmart" type="button" style="height:44px"><i class="ph ph-upload"></i> Unggah Dokumen</button>
         </div>
+        <div class="hint">Unggah <strong>XLSX</strong> untuk <em>parse</em> otomatis (source). Unggah <strong>PDF/DOCX</strong> untuk dokumen final.</div>
+        <div class="parse-preview" id="ikParsePreview" style="display:none"></div>
 
         <div class="list-stack" id="docsListIK"></div>
       </div>
@@ -1126,11 +1208,28 @@
           <input id="rec_file" type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
         </div>
 
-        <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:12px; flex-wrap:wrap;">
-          <a class="btn btn-secondary" href="./templates/Template_Record.xlsx" download style="height:44px"><i class="ph ph-download-simple"></i> Template Record</a>
-          <button class="btn btn-secondary" id="btnTemplateRECPrefill" type="button" style="height:44px"><i class="ph ph-magic-wand"></i> Template Record (Isi Otomatis)</button>
-          <button class="btn btn-primary" id="btnAddRecord" type="button" style="height:44px"><i class="ph ph-plus"></i> Tambah Record</button>
+        <!-- file input template record (dipakai programmatically) -->
+        <input id="rec_tpl_file" type="file" accept=".xlsx" style="display:none" />
+        <input id="rec_smart_file" type="file" accept=".xlsx" style="display:none" />
+
+        <div class="action-row">
+          <div class="dd" id="ddREC">
+            <button class="btn btn-secondary" id="btnTplREC" type="button" style="height:44px"><i class="ph ph-download-simple"></i> Unduh Template <i class="ph ph-caret-down"></i></button>
+            <div class="dd-menu" id="menuTplREC">
+              <a class="dd-item" href="./templates/Template_Record.xlsx" download><i class="ph ph-file-xls"></i> Template Record (Kosong)</a>
+              <button class="dd-item" id="btnTemplateRECPrefill" type="button"><i class="ph ph-magic-wand"></i> Template Record (Isi Otomatis)</button>
+            </div>
+          </div>
+          <div class="dd" id="ddRECAdd">
+            <button class="btn btn-primary" id="btnRecAddMenu" type="button" style="height:44px"><i class="ph ph-plus"></i> Tambah Bukti <i class="ph ph-caret-down"></i></button>
+            <div class="dd-menu" id="menuRecAdd">
+              <button class="dd-item" id="btnAddRecord" type="button"><i class="ph ph-plus"></i> Tambah Manual</button>
+              <button class="dd-item" id="btnImportREC" type="button"><i class="ph ph-file-arrow-up"></i> Impor dari Template (XLSX)</button>
+            </div>
+          </div>
         </div>
+        <div class="hint">Klik <strong>Tambah Bukti</strong> untuk pilih: tambah manual atau impor banyak record dari template (XLSX).</div>
+        <div class="parse-preview" id="recParsePreview" style="display:none"></div>
 
         <div class="list-stack" id="recordsList"></div>
       </div>
