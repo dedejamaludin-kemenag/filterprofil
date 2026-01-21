@@ -484,6 +484,13 @@
     .table-scroll {
       width: 100%;
       overflow: auto;               /* scroll X & Y */
+      /*
+        Prevent the rightmost column from being hidden behind overlay scrollbars.
+        - padding-right: creates a safe area for overlay scrollbars
+        - scrollbar-gutter: reserves space for classic scrollbars (no layout shift)
+      */
+      padding-right: 14px;
+      scrollbar-gutter: stable both-edges;
       /* isi tabel mengisi sisa tinggi box hasil */
       flex: 1 1 auto;
       max-height: none;
@@ -1167,11 +1174,70 @@
 
 
 /* Collapsible ISO-ready identity fields (kept, but not in your face) */
-.iso-details{ margin-top: 10px; border: 1px dashed rgba(255,255,255,0.18); border-radius: 14px; padding: 10px 10px 6px; background: rgba(255,255,255,0.03); }
-.iso-details > summary{ cursor: pointer; font-weight: 800; font-size: 12px; color: rgba(255,255,255,0.88); list-style: none; display:flex; align-items:center; gap:8px; }
+.iso-details{
+  margin-top: 12px;
+  border: 1px solid rgba(20,40,80,0.14);
+  border-radius: 14px;
+  padding: 10px 12px 10px;
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(6px);
+}
+.iso-details > summary{
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 12px;
+  color: var(--text-dim);
+  list-style: none;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap:10px;
+}
 .iso-details > summary::-webkit-details-marker{ display:none; }
-.iso-details[open] > summary{ margin-bottom: 8px; }
+.iso-details > summary .chev{
+  width: 16px; height: 16px; flex: 0 0 16px;
+  opacity: .7;
+  transform: rotate(-90deg);
+}
+.iso-details[open] > summary .chev{ transform: rotate(0deg); }
+.iso-details[open] > summary{ margin-bottom: 10px; }.chev{
+  display:inline-block;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='black' d='M181.66 101.66L128 155.31l-53.66-53.65a8 8 0 0 0-11.32 11.31l59.32 59.32a8 8 0 0 0 11.32 0l59.32-59.32a8 8 0 0 0-11.32-11.31Z'/%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='black' d='M181.66 101.66L128 155.31l-53.66-53.65a8 8 0 0 0-11.32 11.31l59.32 59.32a8 8 0 0 0 11.32 0l59.32-59.32a8 8 0 0 0-11.32-11.31Z'/%3E%3C/svg%3E");
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-position: center;
+  mask-size: 16px 16px;
+  -webkit-mask-size: 16px 16px;
+  background: currentColor;
+}
+/* collapsible content blocks inside cards */
+.card-collapse{ width:100%; }
+.card-collapse > summary{
+  cursor:pointer;
+  list-style:none;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap:10px;
+}
+.card-collapse > summary::-webkit-details-marker{ display:none; }
+.card-collapse > summary.docs-card-title{ margin-bottom: 0; }
+.card-collapse > summary.docs-card-title .chev{
+  width: 16px; height: 16px; flex: 0 0 16px;
+  opacity: .8;
+  transform: rotate(-90deg);
+}
+.card-collapse[open] > summary.docs-card-title .chev{ transform: rotate(0deg); }
+.card-collapse[open] > summary.docs-card-title{ margin-bottom: 12px; }
 
+/* keep action row tight in record log */
+.rec-default-row{ justify-content:flex-end; margin-top: 10px; }
+@media (max-width: 720px){
+  .rec-default-row{ justify-content: stretch; }
+  .rec-default-row .btn{ width: 100%; }
+}
 </style>
 </head>
 <body>
@@ -1408,7 +1474,7 @@
           </div>
                   </div>
         <details class="iso-details">
-          <summary>Detail Identitas (opsional, siap ISO)</summary>
+          <summary>Detail Identitas (opsional, siap ISO)<span class="chev"></span></summary>
           <div class="doc-meta doc-meta-auto">
 <div class="form-group">
             <label>Kode/No Dokumen</label>
@@ -1434,7 +1500,8 @@
       </section>
 
       <section class="docs-card">
-        <div class="docs-card-title"><i class="ph ph-file-text"></i> Isi SOP (sesuai template)</div>
+        <details class="card-collapse">
+<summary class="docs-card-title"><i class="ph ph-file-text"></i> Isi SOP (sesuai template)<span class="chev"></span></summary>
         <div class="form-group">
           <label>Tujuan</label>
           <textarea id="sop_tujuan" placeholder="Tujuan SOP..."></textarea>
@@ -1460,10 +1527,12 @@
           <textarea id="sop_rekaman" placeholder="Bukti/record yang dihasilkan dari SOP ini..."></textarea>
         </div>
       </section>
+</details>
     </div>
 
     <section class="docs-card">
-      <div class="docs-card-title"><i class="ph ph-list-numbers"></i> Langkah/Alur SOP</div>
+      <details class="card-collapse">
+<summary class="docs-card-title"><i class="ph ph-list-numbers"></i> Langkah/Alur SOP<span class="chev"></span></summary>
       <div class="sil-table-wrap">
         <table class="sil-table">
           <thead>
@@ -1491,9 +1560,11 @@
       </div>
       <div id="sopStatus" style="margin-top:8px; color: var(--text-dim); font-weight: 600; font-size: 13px;"></div>
     </section>
+</details>
 
     <section class="docs-card">
-      <div class="docs-card-title"><i class="ph ph-paperclip"></i> Lampiran SOP (opsional)</div>
+      <details class="card-collapse">
+<summary class="docs-card-title"><i class="ph ph-paperclip"></i> Lampiran SOP (opsional)<span class="chev"></span></summary>
       <div class="hint">Kalau SOP sudah ditulis langsung di aplikasi, lampiran bisa dikosongkan. Kalau butuh dokumen final (PDF/DOCX) untuk audit/arsip, unggah di sini.</div>
       <input id="sop_final_file" type="file" accept=".pdf,.doc,.docx" />
       <div class="action-row" style="margin-top:10px">
@@ -1501,6 +1572,7 @@
       </div>
       <div class="list-stack" id="docsListSOP"></div>
     </section>
+</details>
   </div>
 </div>
 <div class="template-dock">
@@ -1533,7 +1605,7 @@
           </div>
                   </div>
         <details class="iso-details">
-          <summary>Detail Identitas (opsional, siap ISO)</summary>
+          <summary>Detail Identitas (opsional, siap ISO)<span class="chev"></span></summary>
           <div class="doc-meta doc-meta-auto">
 <div class="form-group">
             <label>Kode/No Dokumen</label>
@@ -1559,7 +1631,8 @@
       </section>
 
       <section class="docs-card">
-        <div class="docs-card-title"><i class="ph ph-list-checks"></i> Isi IK (sesuai template)</div>
+        <details class="card-collapse">
+<summary class="docs-card-title"><i class="ph ph-list-checks"></i> Isi IK (sesuai template)<span class="chev"></span></summary>
 
         <div class="form-group">
           <label>Kapan Digunakan</label>
@@ -1578,10 +1651,12 @@
           <textarea id="ik_trouble" placeholder="Jika gagal, apa yang dicek..."></textarea>
         </div>
       </section>
+</details>
     </div>
 
     <section class="docs-card">
-      <div class="docs-card-title"><i class="ph ph-list-numbers"></i> Langkah IK</div>
+      <details class="card-collapse">
+<summary class="docs-card-title"><i class="ph ph-list-numbers"></i> Langkah IK<span class="chev"></span></summary>
       <div class="sil-table-wrap">
         <table class="sil-table">
           <thead>
@@ -1606,9 +1681,11 @@
       </div>
       <div id="ikStatus" style="margin-top:8px; color: var(--text-dim); font-weight: 600; font-size: 13px;"></div>
     </section>
+</details>
 
     <section class="docs-card">
-      <div class="docs-card-title"><i class="ph ph-paperclip"></i> Lampiran IK (opsional)</div>
+      <details class="card-collapse">
+<summary class="docs-card-title"><i class="ph ph-paperclip"></i> Lampiran IK (opsional)<span class="chev"></span></summary>
       <div class="hint">Kalau IK ditulis langsung di aplikasi, lampiran bisa dikosongkan. Kalau butuh dokumen final (PDF/DOCX) untuk audit/arsip, unggah di sini.</div>
       <input id="ik_final_file" type="file" accept=".pdf,.doc,.docx" />
       <div class="action-row" style="margin-top:10px">
@@ -1616,6 +1693,7 @@
       </div>
       <div class="list-stack" id="docsListIK"></div>
     </section>
+</details>
   </div>
 </div>
 
@@ -1763,17 +1841,16 @@
       <div class="docs-card-title"><i class="ph ph-notebook"></i> Silabus Non-Akademik (sederhana)</div>
 
       <div class="action-row" style="justify-content: space-between; gap: 12px; align-items: flex-end; margin: 10px 0 12px; flex-wrap: wrap;">
-        <div class="form-group" style="flex: 1 1 320px; margin: 0;">
-          <label>Pilih Silabus</label>
+        <div class="form-group" style="flex: 1 1 520px; margin: 0;">
+          <label>Judul Silabus (pilih / buat)</label>
           <div class="input-wrapper">
-            <select id="silNA_select"></select>
-            <i class="ph ph-caret-down select-arrow"></i>
+            <input id="silNA_title" type="text" placeholder="Ketik judul untuk memilih yang sudah ada, atau isi judul baru" autocomplete="off" list="silNA_titles">
           </div>
+          <datalist id="silNA_titles"></datalist>
+          <div class="hint" style="margin-top:8px">Tip: ketik beberapa huruf untuk melihat daftar judul yang sudah ada.</div>
         </div>
-        <div class="form-group" style="flex: 0 0 320px; margin: 0;">
-          <label>Judul Silabus</label>
-          <input id="silNA_title" type="text" placeholder="Misal: Semester 1 / Pekanan / Program Khusus" autocomplete="off">
-        </div>
+        <!-- select lama disimpan sebagai fallback (hidden) untuk kompatibilitas logic lama -->
+        <select id="silNA_select" style="display:none"></select>
         <button class="btn btn-secondary" id="btnSilNANew" type="button" style="height:44px"><i class="ph ph-plus"></i> Buat Baru</button>
       </div>
 
@@ -1835,27 +1912,7 @@
     <section class="docs-card">
       <div class="docs-card-title"><i class="ph ph-clipboard-text"></i> Register Record (Identitas Bukti)</div>
       <div class="hint">Bagian ini mengikuti template Record (register). Diisi sekali per program, lalu dipakai untuk kontrol bukti.</div>
-      <div class="doc-meta doc-meta-auto">
-        <div class="form-group">
-          <label>Nama Register</label>
-          <input id="recReg_nama" type="text" placeholder="Contoh: Register Bukti Program ..." />
-        </div>
-        <div class="form-group">
-          <label>Kode Register</label>
-          <input id="recReg_kode" type="text" placeholder="Contoh: REC/UPMP/001" />
-        </div>
-        <div class="form-group">
-          <label>Revisi</label>
-          <input id="recReg_revisi" type="text" placeholder="Rev.01" />
-        </div>
-        <div class="form-group">
-          <label>Pengelola Arsip</label>
-          <input id="recReg_pengelola" type="text" placeholder="Unit / Bagian" />
-        </div>
-        <div class="form-group">
-          <label>Verifikator</label>
-          <input id="recReg_verifikator" type="text" placeholder="Unit / Bagian" />
-        </div>
+            <div class="doc-meta doc-meta-auto">
         <div class="form-group">
           <label>Lokasi Arsip</label>
           <input id="recReg_lokasi" type="text" placeholder="Drive/lemari/tautan" />
@@ -1864,11 +1921,37 @@
           <label>Retensi</label>
           <input id="recReg_retensi" type="text" placeholder="Contoh: 2 tahun" />
         </div>
-        <div class="form-group">
-          <label>Klasifikasi</label>
-          <input id="recReg_klasifikasi" type="text" placeholder="Internal/Publik/dll" />
-        </div>
       </div>
+
+      <details class="iso-details">
+        <summary>Identitas & Kontrol (opsional)<span class="chev"></span></summary>
+        <div class="doc-meta doc-meta-auto">
+          <div class="form-group">
+            <label>Nama Register</label>
+            <input id="recReg_nama" type="text" placeholder="Contoh: Register Bukti Program ..." />
+          </div>
+          <div class="form-group">
+            <label>Kode Register</label>
+            <input id="recReg_kode" type="text" placeholder="Contoh: REC/UPMP/001" />
+          </div>
+          <div class="form-group">
+            <label>Revisi</label>
+            <input id="recReg_revisi" type="text" placeholder="Rev.01" />
+          </div>
+          <div class="form-group">
+            <label>Pengelola Arsip</label>
+            <input id="recReg_pengelola" type="text" placeholder="Unit / Bagian" />
+          </div>
+          <div class="form-group">
+            <label>Verifikator</label>
+            <input id="recReg_verifikator" type="text" placeholder="Unit / Bagian" />
+          </div>
+          <div class="form-group">
+            <label>Klasifikasi</label>
+            <input id="recReg_klasifikasi" type="text" placeholder="Internal/Publik/dll" />
+          </div>
+        </div>
+      </details>
       <div class="action-row" style="justify-content:flex-end; margin-top: 12px; gap:10px">
         <button class="btn btn-secondary" id="btnRecRegReset" type="button" style="height:44px"><i class="ph ph-eraser"></i> Reset</button>
         <button class="btn btn-primary" id="btnRecRegSave" type="button" style="height:44px"><i class="ph ph-floppy-disk"></i> Simpan Register</button>
@@ -1879,47 +1962,54 @@
     <section class="docs-card">
       <div class="docs-card-title"><i class="ph ph-paperclip"></i> Tambah Bukti (Record Log)</div>
       <div class="doc-meta doc-meta-auto">
-        <div class="form-group">
-          <label>Tanggal Kejadian</label>
-          <input id="rec_date" type="date" />
-        </div>
-        <div class="form-group">
-          <label>Judul Bukti</label>
-          <input id="rec_title" type="text" placeholder="Contoh: Laporan Monev Januari" />
-        </div>
-        <div class="form-group">
-          <label>PIC Bukti</label>
-          <input id="rec_pic" type="text" placeholder="Default: PIC Program" />
-        </div>
-        <div class="form-group">
-          <label>Status Verifikasi</label>
-          <input id="rec_status" type="text" placeholder="Draft / Final / Verified" />
-        </div>
-        <div class="form-group">
-          <label>Lokasi Kegiatan</label>
-          <input id="rec_tempat" type="text" placeholder="Lokasi kegiatan" />
-        </div>
-        <div class="form-group">
-          <label>Sasaran</label>
-          <input id="rec_sasaran" type="text" placeholder="Default: Sasaran Program" />
-        </div>
-      </div>
+  <div class="form-group">
+    <label>Tanggal Kejadian</label>
+    <input id="rec_date" type="date" />
+  </div>
+  <div class="form-group">
+    <label>Judul Bukti</label>
+    <input id="rec_title" type="text" placeholder="Contoh: Laporan Monev Januari" />
+  </div>
+  <div class="form-group">
+    <label>Status Verifikasi</label>
+    <input id="rec_status" type="text" placeholder="Draft / Final / Verified" />
+  </div>
+  <div class="form-group">
+    <label>Lampiran (opsional)</label>
+    <input id="rec_file" type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+  </div>
+</div>
 
-      <div class="action-row" style="justify-content:flex-end; margin-top: 8px;">
-        <button class="btn btn-secondary" id="btnRecDefault" type="button" style="height:38px"><i class="ph ph-magic-wand"></i> Ambil default dari Program</button>
-      </div>
+<div class="action-row rec-default-row">
+  <button class="btn btn-secondary" id="btnRecDefault" type="button" style="height:38px">
+    <i class="ph ph-magic-wand"></i> Ambil default dari Program
+  </button>
+</div>
 
-      <div class="form-group">
-        <label>Catatan</label>
-        <textarea id="rec_desc" placeholder="Catatan (opsional)"></textarea>
-      </div>
+<details class="iso-details">
+  <summary>Detail Lanjutan (opsional)<span class="chev"></span></summary>
+  <div class="doc-meta doc-meta-auto" style="margin-top:10px">
+    <div class="form-group">
+      <label>PIC Bukti</label>
+      <input id="rec_pic" type="text" placeholder="Default: PIC Program" />
+    </div>
+    <div class="form-group">
+      <label>Sasaran</label>
+      <input id="rec_sasaran" type="text" placeholder="Default: Sasaran Program" />
+    </div>
+    <div class="form-group">
+      <label>Lokasi Kegiatan</label>
+      <input id="rec_tempat" type="text" placeholder="Lokasi kegiatan" />
+    </div>
+  </div>
 
-      <div class="form-group">
-        <label>Lampiran (opsional)</label>
-        <input id="rec_file" type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
-      </div>
+  <div class="form-group" style="margin-top:12px">
+    <label>Catatan</label>
+    <textarea id="rec_desc" placeholder="Catatan (opsional)"></textarea>
+  </div>
+</details>
 
-      <div class="action-row" style="justify-content: flex-end;">
+<div class="action-row" style="justify-content: flex-end;">
         <button class="btn btn-primary" id="btnAddRecord" type="button" style="height:44px"><i class="ph ph-plus"></i> Simpan Bukti</button>
       </div>
       <div class="hint">Bukti/record disimpan sebagai log per kejadian. Lampiran file akan diunggah bila bucket Storage sudah siap.</div>

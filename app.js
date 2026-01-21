@@ -110,6 +110,7 @@ const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
     silTbody: document.getElementById("silTbody"),
     silNA_select: document.getElementById("silNA_select"),
     silNA_title: document.getElementById("silNA_title"),
+    silNA_titles: document.getElementById("silNA_titles"),
     btnSilNANew: document.getElementById("btnSilNANew"),
     btnSilAddRow: document.getElementById("btnSilAddRow"),
     btnSilNADefault: document.getElementById("btnSilNADefault"),
@@ -272,6 +273,9 @@ const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
   // state silabus (non-akademik)
   let activeSilabusId = null;
   let activeSilabusSubtype = null;
+
+  // cache judul -> id untuk silabus non-akademik (buat input datalist)
+  let silNATitleToId = new Map();
 
   // default cepat (auto-fill) untuk item Silabus NA & Record Log
   let silItemDefaults = { pic: "", sasaran: "", tempat: "" };
@@ -901,20 +905,36 @@ if (subtype === "AKADEMIK") {
       return;
     }
 
-    // render dropdown
+    // cache judul -> id + render daftar judul (datalist) untuk input "Judul Silabus"
+    silNATitleToId = new Map();
+    if (els.silNA_titles) els.silNA_titles.innerHTML = "";
+
+    // select lama disimpan tersembunyi sebagai fallback (kompatibilitas), tetap diisi
     if (els.silNA_select) {
       els.silNA_select.innerHTML = "";
       const optEmpty = document.createElement("option");
       optEmpty.value = "";
       optEmpty.textContent = nonList.length ? "-- pilih --" : "(belum ada)";
       els.silNA_select.appendChild(optEmpty);
-      nonList.forEach(x => {
+    }
+
+    nonList.forEach((x) => {
+      const title = norm(x.title) || `Silabus #${x.id}`;
+      silNATitleToId.set(normLower(title), x.id);
+
+      if (els.silNA_titles) {
+        const opt = document.createElement("option");
+        opt.value = title;
+        els.silNA_titles.appendChild(opt);
+      }
+
+      if (els.silNA_select) {
         const o = document.createElement("option");
         o.value = String(x.id);
-        o.textContent = x.title || `Silabus #${x.id}`;
+        o.textContent = title;
         els.silNA_select.appendChild(o);
-      });
-    }
+      }
+    });
 
     // tentukan pilihan aktif
     const stillExists = nonList.some(x => String(x.id) === String(activeSilabusId));
@@ -964,6 +984,16 @@ if (subtype === "AKADEMIK") {
     let baseTitle = norm(els.silNA_title?.value);
     if (!baseTitle) {
       notify("Isi dulu judul silabus (misal: Semester 1 / Pekanan / Program Khusus).", "error");
+      return;
+    }
+
+    // jika judul sudah ada, cukup buka silabus itu (tidak bikin duplikat)
+    const existingId = silNATitleToId.get(normLower(baseTitle)) || null;
+    if (existingId) {
+      activeSilabusId = Number(existingId);
+      if (els.silNA_select) els.silNA_select.value = String(existingId);
+      await loadSilabusForSelectedSubtype();
+      setSilStatus("Judul sudah ada. Membuka silabus yang sudah tersimpan.", "info");
       return;
     }
     const notes = norm(els.sil_notes?.value);
@@ -2597,6 +2627,27 @@ els.fileExcel.addEventListener("change", async (e) => {
     activeSilabusId = v ? Number(v) : null;
     loadSilabusForSelectedSubtype();
   });
+
+  // Input "Judul Silabus" berfungsi ganda: pilih yang sudah ada (via datalist) atau ketik judul baru
+  const syncSilabusFromTitle = () => {
+    const title = norm(els.silNA_title?.value);
+    if (!title) return;
+    const hitId = silNATitleToId.get(normLower(title)) || null;
+    if (hitId) {
+      if (els.silNA_select) els.silNA_select.value = String(hitId);
+      activeSilabusId = Number(hitId);
+      loadSilabusForSelectedSubtype();
+    } else {
+      // judul baru: jangan sampai tersimpan ke silabus lama
+      if (els.silNA_select) els.silNA_select.value = "";
+      activeSilabusId = null;
+      // kosongkan tabel (biar tidak "nyangkut" isi silabus yang lain)
+      renderSilabusItems([]);
+      setSilStatus("Judul baru belum dibuat. Klik 'Buat Baru' untuk menyimpan silabus baru.", "info");
+    }
+  };
+  els.silNA_title?.addEventListener("change", syncSilabusFromTitle);
+  els.silNA_title?.addEventListener("blur", syncSilabusFromTitle);
   els.btnSilNANew?.addEventListener("click", () => createNewNonAcademicSilabus());
   els.btnSilAddRow?.addEventListener("click", addSilabusRow);
   els.btnSilNADefault?.addEventListener("click", () => {
