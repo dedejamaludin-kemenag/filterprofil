@@ -945,9 +945,9 @@
   flex-direction: column;
 }
 .modal-box.docs-modal-box .tabs{ flex: 0 0 auto; }
-.modal-box.docs-modal-box .tab-panel{ flex: 1 1 auto; min-height: 0; }
+.modal-box.docs-modal-box .tab-panel{ flex: 1 1 auto; min-height: 0; position: relative; }
 .docs-scroll-area{
-  padding: 16px 18px 18px;
+  padding: 16px 18px 96px; /* extra bottom space for template dock */
   overflow: auto;
   max-height: calc(96vh - 140px);
 }
@@ -979,6 +979,94 @@
 /* Untuk kebutuhan 1–3 input per baris di dalam satu kartu */
 @media (min-width: 1100px){
   .doc-meta-3{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+}
+
+
+/* --- Template sebagai opsi sekunder (minim membingungkan) --- */
+.template-details{ margin-top: 10px; }
+.template-details summary{
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  color: var(--accent-blue);
+  user-select: none;
+}
+.template-details summary::-webkit-details-marker{ display:none; }
+.template-details[open] summary{ color: var(--primary-hover); }
+.template-menu{
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.template-link{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  color: var(--text-main);
+  text-decoration: none;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  padding: 9px 12px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+}
+.template-link:hover{ border-color: var(--accent-blue); }
+
+/* --- Template dock: seragam kanan-bawah (di dalam popup) --- */
+#docsModal .template-dock{
+  position: absolute;
+  right: 18px;
+  bottom: 14px;
+  z-index: 30;
+}
+#docsModal .template-details.dock{ margin: 0; }
+#docsModal .template-details.dock summary{
+  list-style: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 900;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  border-radius: 999px;
+  box-shadow: var(--shadow-soft);
+  color: var(--text-main);
+  user-select: none;
+}
+#docsModal .template-details.dock summary::-webkit-details-marker{ display:none; }
+#docsModal .template-details.dock summary:hover{ border-color: var(--accent-blue); }
+#docsModal .template-details.dock[open] summary{ border-color: var(--accent-blue); color: var(--accent-blue); }
+
+#docsModal .template-details.dock .template-menu{
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 10px);
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-soft);
+}
+
+#docsModal .template-details.dock .template-link{
+  width: 100%;
+  justify-content: flex-start;
+}
+
+@media (max-width: 520px){
+  #docsModal .template-dock{ right: 12px; bottom: 10px; }
+  #docsModal .template-details.dock .template-menu{ min-width: min(86vw, 320px); }
 }
 
 </style>
@@ -1291,6 +1379,15 @@
     </section>
   </div>
 </div>
+<div class="template-dock">
+        <details class="template-details dock">
+          <summary><i class="ph ph-download-simple"></i> Unduh format resmi</summary>
+          <div class="template-menu">
+            <a class="template-link" href="templates/Template_SOP.xlsx" download><i class="ph ph-file-xls"></i> Template SOP (XLSX)</a>
+          </div>
+        </details>
+      </div>
+
 
       <!-- TAB: IK -->
       <div class="tab-panel" id="tabPanelIK">
@@ -1387,7 +1484,16 @@
   </div>
 </div>
 
-      
+      <div class="template-dock">
+        <details class="template-details dock">
+          <summary><i class="ph ph-download-simple"></i> Unduh format resmi</summary>
+          <div class="template-menu">
+            <a class="template-link" href="templates/Template_IK.xlsx" download><i class="ph ph-file-xls"></i> Template IK (XLSX)</a>
+          </div>
+        </details>
+      </div>
+
+
 
       <!-- TAB: SILABUS (non-akademik) -->
       <div class="tab-panel" id="tabPanelSIL">
@@ -1411,7 +1517,7 @@
         <label>Keterangan (opsional)</label>
         <input id="sil_notes" type="text" placeholder="Contoh: Semester Genap 2026" />
       </div>
-    </div>
+      </div>
 
     <div class="docs-card" id="silAcademicBox" style="display:none">
       <div class="docs-card-title"><i class="ph ph-notebook"></i> Silabus Akademik (isi langsung seperti template)</div>
@@ -1542,7 +1648,17 @@
       <div id="silStatus" style="margin-top:8px; color: var(--text-dim); font-weight: 600; font-size: 13px;"></div>
     </div>
   </div>
-</div>
+</div><div class="template-dock">
+        <details class="template-details dock">
+          <summary><i class="ph ph-download-simple"></i> Unduh format resmi</summary>
+          <div class="template-menu">
+            <a class="template-link" href="templates/Template_Silabus_Akademik.docx" download><i class="ph ph-file-doc"></i> Silabus Akademik (DOCX)</a>
+            <a class="template-link" href="templates/Template_Silabus_NonAkademik.xlsx" download><i class="ph ph-file-xls"></i> Silabus Non-Akademik (XLSX)</a>
+          </div>
+        </details>
+      </div>
+
+
 
       <!-- TAB: RECORD -->
       <div class="tab-panel" id="tabPanelREC">
@@ -1641,7 +1757,16 @@
 </div>
 
     </div>
-  </div>
+  </div><div class="template-dock">
+        <details class="template-details dock">
+          <summary><i class="ph ph-download-simple"></i> Unduh format resmi</summary>
+          <div class="template-menu">
+            <a class="template-link" href="templates/Template_Record.xlsx" download><i class="ph ph-file-xls"></i> Template Record (XLSX)</a>
+          </div>
+        </details>
+      </div>
+
+
 
   <div class="modal-overlay" id="confirmModal">
     <div class="modal-box modal-sm">
