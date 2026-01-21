@@ -112,6 +112,7 @@ const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
     silNA_title: document.getElementById("silNA_title"),
     btnSilNANew: document.getElementById("btnSilNANew"),
     btnSilAddRow: document.getElementById("btnSilAddRow"),
+    btnSilNADefault: document.getElementById("btnSilNADefault"),
     btnSilSave: document.getElementById("btnSilSave"),
     silStatus: document.getElementById("silStatus"),
 
@@ -212,6 +213,7 @@ const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
     rec_status: document.getElementById("rec_status"),
     rec_tempat: document.getElementById("rec_tempat"),
     rec_sasaran: document.getElementById("rec_sasaran"),
+    btnRecDefault: document.getElementById("btnRecDefault"),
 
 
     // Input IK
@@ -271,6 +273,9 @@ const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
   let activeSilabusId = null;
   let activeSilabusSubtype = null;
 
+  // default cepat (auto-fill) untuk item Silabus NA & Record Log
+  let silItemDefaults = { pic: "", sasaran: "", tempat: "" };
+
 
   // Normalisasi string
   function norm(x) {
@@ -279,6 +284,41 @@ const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
 
   function normLower(x) {
     return norm(x).toLowerCase();
+  }
+
+  function getProgramDefaults() {
+    const pid = activeProgramRow?.id;
+    const pic = norm(activeProgramRow?.pic);
+    const sasaran = norm(activeProgramRow?.sasaran);
+    let tempat = "";
+    try {
+      if (pid) tempat = norm(localStorage.getItem(`pontren_last_lokasi_${pid}`));
+    } catch (_) {}
+    return { pic, sasaran, tempat };
+  }
+
+  function applyDefaultsToSilabusRows(d) {
+    if (!els.silTbody) return;
+    const pic = norm(d?.pic);
+    const sasaran = norm(d?.sasaran);
+    const tempat = norm(d?.tempat);
+    els.silTbody.querySelectorAll("tr").forEach((tr) => {
+      const ipic = tr.querySelector(".sil_pic");
+      const isas = tr.querySelector(".sil_sasaran");
+      const itmp = tr.querySelector(".sil_tempat");
+      if (ipic && !norm(ipic.value) && pic) ipic.value = pic;
+      if (isas && !norm(isas.value) && sasaran) isas.value = sasaran;
+      if (itmp && !norm(itmp.value) && tempat) itmp.value = tempat;
+    });
+  }
+
+  function applyDefaultsToRecordLog(d) {
+    const pic = norm(d?.pic);
+    const sasaran = norm(d?.sasaran);
+    const tempat = norm(d?.tempat);
+    if (els.rec_pic && !norm(els.rec_pic.value) && pic) els.rec_pic.value = pic;
+    if (els.rec_sasaran && !norm(els.rec_sasaran.value) && sasaran) els.rec_sasaran.value = sasaran;
+    if (els.rec_tempat && !norm(els.rec_tempat.value) && tempat) els.rec_tempat.value = tempat;
   }
 
   // --- NOTIFICATION SYSTEM (TOAST) ---
@@ -546,6 +586,7 @@ function buildStoragePathSilabus(programId, subtype, fileName) {
       return;
     }
     activeProgramRow = row;
+    silItemDefaults = getProgramDefaults();
     els.docsModalTitle.textContent = "Dokumen & Bukti";
     const profil = row.profil || row.profil_utama || "-";
     const program = row.program || "-";
@@ -772,7 +813,7 @@ async function uploadSilabusAcademic(file) {
         <td><input class="sil_referensi" type="text" placeholder="Referensi" value="${escapeHtmlLite(r.referensi || "")}"></td>
         <td><input class="sil_pic" type="text" placeholder="PIC" value="${escapeHtmlLite(r.pic || "")}"></td>
         <td><input class="sil_waktu" type="text" placeholder="Harian / Pekanan / dst" value="${escapeHtmlLite(r.waktu || "")}"></td>
-        <td><input class="sil_tempat" type="text" placeholder="Tempat" value="${escapeHtmlLite(r.tempat || "")}"></td>
+        <td><input class="sil_tempat" type="text" placeholder="Lokasi kegiatan" value="${escapeHtmlLite(r.tempat || "")}"></td>
         <td><input class="sil_sasaran" type="text" placeholder="Sasaran" value="${escapeHtmlLite(r.sasaran || "")}"></td>
         <td style="text-align:right"><button class="btn-row-del" type="button" data-sil-del="1" title="Hapus baris"><i class="ph ph-trash"></i></button></td>
       `;
@@ -799,7 +840,8 @@ async function uploadSilabusAcademic(file) {
 
   function addSilabusRow() {
     const current = readSilabusItemsFromDom();
-    current.push({ materi: "", tahapan: "", penilaian: "", referensi: "", pic: "", waktu: "", tempat: "", sasaran: "" });
+    const d = silItemDefaults || { pic: "", sasaran: "", tempat: "" };
+    current.push({ materi: "", tahapan: "", penilaian: "", referensi: "", pic: d.pic || "", waktu: "", tempat: d.tempat || "", sasaran: d.sasaran || "" });
     renderSilabusItems(current);
   }
 
@@ -992,6 +1034,12 @@ if (subtype === "AKADEMIK") {
         return;
       }
     }
+
+    // simpan lokasi kegiatan terakhir untuk auto-default (per program)
+    try {
+      const firstLok = (rows.find(r => r.tempat)?.tempat || "");
+      if (firstLok) localStorage.setItem(`pontren_last_lokasi_${programId}`, firstLok);
+    } catch (_) {}
 
     setSilStatus("Menyimpan...", "info");
 
@@ -1789,7 +1837,7 @@ if (subtype === "AKADEMIK") {
 
     const record_date = els.rec_date.value || null;
     if (!record_date) {
-      notify("Tanggal record wajib diisi.", "error");
+      notify("Tanggal kejadian wajib diisi.", "error");
       return;
     }
     const title = norm(els.rec_title.value) || null;
@@ -1800,9 +1848,9 @@ const pic = norm(els.rec_pic?.value) || null;
 const status = norm(els.rec_status?.value) || null;
 const tempat = norm(els.rec_tempat?.value) || null;
 const sasaran = norm(els.rec_sasaran?.value) || null;
-if (pic) metaParts.push(`PIC: ${pic}`);
-if (status) metaParts.push(`Status: ${status}`);
-if (tempat) metaParts.push(`Tempat: ${tempat}`);
+if (pic) metaParts.push(`PIC Bukti: ${pic}`);
+if (status) metaParts.push(`Status Verifikasi: ${status}`);
+if (tempat) metaParts.push(`Lokasi Kegiatan: ${tempat}`);
 if (sasaran) metaParts.push(`Sasaran: ${sasaran}`);
 
 const descMain = norm(els.rec_desc.value) || null;
@@ -1831,6 +1879,11 @@ const description = (metaParts.length ? metaParts.join(" | ") + (descMain ? " | 
       };
       const { error: insErr } = await db.from(RECORDS_TABLE).insert(payload);
       if (insErr) throw insErr;
+
+      // simpan lokasi kegiatan terakhir untuk auto-default (per program)
+      try {
+        if (tempat) localStorage.setItem(`pontren_last_lokasi_${pid}`, tempat);
+      } catch (_) {}
 
       // reset inputs
       els.rec_title.value = "";
@@ -2546,6 +2599,11 @@ els.fileExcel.addEventListener("change", async (e) => {
   });
   els.btnSilNANew?.addEventListener("click", () => createNewNonAcademicSilabus());
   els.btnSilAddRow?.addEventListener("click", addSilabusRow);
+  els.btnSilNADefault?.addEventListener("click", () => {
+    silItemDefaults = getProgramDefaults();
+    applyDefaultsToSilabusRows(silItemDefaults);
+    notify("Default dari program diterapkan ke kolom kosong (PIC/Sasaran/Lokasi Kegiatan).", "success");
+  });
   els.btnSilSave?.addEventListener("click", saveSilabus);
 
   // Silabus akademik upload (file)
@@ -2640,6 +2698,11 @@ els.fileExcel.addEventListener("change", async (e) => {
     els.rec_smart_file.value = "";
   });
 
+  els.btnRecDefault?.addEventListener("click", () => {
+    const d = getProgramDefaults();
+    applyDefaultsToRecordLog(d);
+    notify("Default dari program diterapkan ke kolom kosong (PIC Bukti/Sasaran/Lokasi Kegiatan).", "success");
+  });
   els.btnAddRecord?.addEventListener("click", addRecord);
 
   // Delegasi klik untuk list SOP/IK

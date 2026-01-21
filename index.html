@@ -1215,7 +1215,7 @@
             <div class="form-group"><label>Profil</label><div class="input-wrapper"><select id="f_profil"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
             <div class="form-group"><label>Indikator</label><div class="input-wrapper"><select id="f_indikator"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
             <div class="form-group"><label>Program</label><div class="input-wrapper"><select id="f_program"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
-            <div class="form-group"><label>PIC</label><div class="input-wrapper"><select id="f_pic"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
+            <div class="form-group"><label>PIC Program</label><div class="input-wrapper"><select id="f_pic"><option value="">Semua</option></select><i class="ph ph-caret-down select-arrow"></i></div></div>
           </div>
           <div class="action-bar">
             <div class="search-box form-group">
@@ -1242,7 +1242,7 @@
           <div class="hcell">PROGRAM</div>
           <div class="hcell">TARGET RENSTRA</div>
           <div class="hcell">SASARAN</div>
-          <div class="hcell">PIC</div>
+          <div class="hcell">PIC Program</div>
           <div class="hcell">FREKUENSI</div>
           <div class="hcell">SILABUS</div>
           <div class="hcell">SOP</div>
@@ -1273,7 +1273,7 @@
               <th>PROGRAM</th>
               <th>TARGET RENSTRA</th>
               <th>SASARAN</th>
-              <th>PIC</th>
+              <th>PIC Program</th>
               <th>FREKUENSI</th>
               <th>SILABUS</th>
               <th>SOP</th>
@@ -1329,7 +1329,7 @@
   </div>
 
   <div class="form-group">
-    <label>PIC</label>
+    <label>PIC Program</label>
     <input type="text" id="e_pic" placeholder="Penanggung jawab / unit">
   </div>
 
@@ -1411,7 +1411,7 @@
           <summary>Detail Identitas (opsional, siap ISO)</summary>
           <div class="doc-meta doc-meta-auto">
 <div class="form-group">
-            <label>Nomor Dokumen</label>
+            <label>Kode/No Dokumen</label>
             <input id="sop_no_dok" type="text" placeholder="Contoh: SOP/UPMP/001" />
           </div>
           <div class="form-group">
@@ -1423,11 +1423,11 @@
             <input id="sop_tgl_berlaku" type="date" />
           </div>
           <div class="form-group">
-            <label>Disusun oleh</label>
+            <label>Penyusun</label>
             <input id="sop_disusun" type="text" placeholder="Nama/Unit" />
           </div>
           <div class="form-group">
-            <label>Disahkan oleh</label>
+            <label>Pengesah</label>
             <input id="sop_disahkan" type="text" placeholder="Nama/Unit" />
           </div>          </div>
         </details>
@@ -1536,7 +1536,7 @@
           <summary>Detail Identitas (opsional, siap ISO)</summary>
           <div class="doc-meta doc-meta-auto">
 <div class="form-group">
-            <label>Nomor Dokumen</label>
+            <label>Kode/No Dokumen</label>
             <input id="ik_no_dok" type="text" placeholder="Contoh: IK/UPMP/001" />
           </div>
           <div class="form-group">
@@ -1548,11 +1548,11 @@
             <input id="ik_tgl_berlaku" type="date" />
           </div>
           <div class="form-group">
-            <label>Disusun oleh</label>
+            <label>Penyusun</label>
             <input id="ik_disusun" type="text" placeholder="Nama/Unit" />
           </div>
           <div class="form-group">
-            <label>Disahkan oleh</label>
+            <label>Pengesah</label>
             <input id="ik_disahkan" type="text" placeholder="Nama/Unit" />
           </div>          </div>
         </details>
@@ -1649,7 +1649,7 @@
         </select>
       </div>
       <div class="form-group">
-        <label>Keterangan (opsional)</label>
+        <label>Catatan (opsional)</label>
         <input id="sil_notes" type="text" placeholder="Contoh: Semester Genap 2026" />
       </div>
       </div>
@@ -1787,7 +1787,7 @@
               <th style="width:14%">Referensi</th>
               <th style="width:14%">PIC</th>
               <th style="width:10%">Waktu</th>
-              <th style="width:8%">Tempat</th>
+              <th style="width:8%">Lokasi Kegiatan</th>
               <th style="width:8%">Sasaran</th>
               <th style="width:52px"></th>
             </tr>
@@ -1797,10 +1797,13 @@
       </div>
 
       <div class="action-row" style="justify-content: space-between; margin-top: 12px;">
-        <button class="btn btn-secondary" id="btnSilAddRow" type="button" style="height:44px"><i class="ph ph-plus"></i> Tambah Baris</button>
+        <div style="display:flex; gap:10px; flex-wrap:wrap">
+          <button class="btn btn-secondary" id="btnSilAddRow" type="button" style="height:44px"><i class="ph ph-plus"></i> Tambah Baris</button>
+          <button class="btn btn-secondary" id="btnSilNADefault" type="button" style="height:44px"><i class="ph ph-magic-wand"></i> Ambil default dari Program</button>
+        </div>
         <button class="btn btn-primary" id="btnSilSave" type="button" style="height:44px"><i class="ph ph-floppy-disk"></i> Simpan Silabus</button>
       </div>
-      <div class="hint">Kolom disamakan dengan template non-akademik: Materi, Tahapan (target per jenjang), Penilaian, Referensi, PIC, Waktu (harian/pekanan), Tempat, Sasaran.</div>
+      <div class="hint">Kolom disamakan dengan template non-akademik: Materi, Tahapan (target per jenjang), Penilaian, Referensi, PIC, Waktu (harian/pekanan), Lokasi Kegiatan, Sasaran.</div>
       <div id="silStatus" style="margin-top:8px; color: var(--text-dim); font-weight: 600; font-size: 13px;"></div>
     </div>
   </div>
@@ -1846,15 +1849,15 @@
           <input id="recReg_revisi" type="text" placeholder="Rev.01" />
         </div>
         <div class="form-group">
-          <label>Pengelola</label>
-          <input id="recReg_pengelola" type="text" placeholder="Unit/PIC" />
+          <label>Pengelola Arsip</label>
+          <input id="recReg_pengelola" type="text" placeholder="Unit / Bagian" />
         </div>
         <div class="form-group">
           <label>Verifikator</label>
-          <input id="recReg_verifikator" type="text" placeholder="Unit/PIC" />
+          <input id="recReg_verifikator" type="text" placeholder="Unit / Bagian" />
         </div>
         <div class="form-group">
-          <label>Lokasi Simpan</label>
+          <label>Lokasi Arsip</label>
           <input id="recReg_lokasi" type="text" placeholder="Drive/lemari/tautan" />
         </div>
         <div class="form-group">
@@ -1877,34 +1880,38 @@
       <div class="docs-card-title"><i class="ph ph-paperclip"></i> Tambah Bukti (Record Log)</div>
       <div class="doc-meta doc-meta-auto">
         <div class="form-group">
-          <label>Tanggal</label>
+          <label>Tanggal Kejadian</label>
           <input id="rec_date" type="date" />
         </div>
         <div class="form-group">
-          <label>Judul</label>
+          <label>Judul Bukti</label>
           <input id="rec_title" type="text" placeholder="Contoh: Laporan Monev Januari" />
         </div>
         <div class="form-group">
-          <label>PIC</label>
-          <input id="rec_pic" type="text" placeholder="PIC bukti" />
+          <label>PIC Bukti</label>
+          <input id="rec_pic" type="text" placeholder="Default: PIC Program" />
         </div>
         <div class="form-group">
-          <label>Status</label>
-          <input id="rec_status" type="text" placeholder="Draft/Final/Verified" />
+          <label>Status Verifikasi</label>
+          <input id="rec_status" type="text" placeholder="Draft / Final / Verified" />
         </div>
         <div class="form-group">
-          <label>Tempat</label>
-          <input id="rec_tempat" type="text" placeholder="Lokasi kegiatan/penyimpanan" />
+          <label>Lokasi Kegiatan</label>
+          <input id="rec_tempat" type="text" placeholder="Lokasi kegiatan" />
         </div>
         <div class="form-group">
           <label>Sasaran</label>
-          <input id="rec_sasaran" type="text" placeholder="Sasaran kegiatan" />
+          <input id="rec_sasaran" type="text" placeholder="Default: Sasaran Program" />
         </div>
       </div>
 
+      <div class="action-row" style="justify-content:flex-end; margin-top: 8px;">
+        <button class="btn btn-secondary" id="btnRecDefault" type="button" style="height:38px"><i class="ph ph-magic-wand"></i> Ambil default dari Program</button>
+      </div>
+
       <div class="form-group">
-        <label>Deskripsi</label>
-        <textarea id="rec_desc" placeholder="Ringkasan bukti/rekaman (opsional)"></textarea>
+        <label>Catatan</label>
+        <textarea id="rec_desc" placeholder="Catatan (opsional)"></textarea>
       </div>
 
       <div class="form-group">
