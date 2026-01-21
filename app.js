@@ -13,6 +13,13 @@
   const STORAGE_BUCKET = "pontren_docs"; // bisa diganti sesuai bucket antum
   const DOCS_TABLE = "program_pontren_docs";
   const RECORDS_TABLE = "program_pontren_records";
+const REC_REGISTER_TABLE = "program_pontren_record_register";
+const SOP_TABLE = "program_pontren_sop";
+const SOP_STEPS_TABLE = "program_pontren_sop_steps";
+const IK_TABLE = "program_pontren_ik";
+const IK_STEPS_TABLE = "program_pontren_ik_steps";
+const SILABUS_AKADEMIK_TABLE = "program_pontren_silabus_akademik";
+const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
 
   // Silabus non-akademik (meta + items)
   const SILABUS_META_TABLE = "program_pontren_silabus";
@@ -107,18 +114,18 @@
     btnTplSIL: document.getElementById("btnTplSIL"),
     menuTplSIL: document.getElementById("menuTplSIL"),
     btnUploadSilAcademic: document.getElementById("btnUploadSilAcademic"),
-    sil_academic_file: document.getElementById("sil_academic_file"),
+    sil_academic_file: document.getElementById("silA_final_file"),
     silAcademicBox: document.getElementById("silAcademicBox"),
     silNonAcademicBox: document.getElementById("silNonAcademicBox"),
     silAcademicList: document.getElementById("silAcademicList"),
 
     // Input SOP
-    doc_title: document.getElementById("doc_title"),
-    doc_no: document.getElementById("doc_no"),
-    doc_revision: document.getElementById("doc_revision"),
-    doc_effective: document.getElementById("doc_effective"),
+    doc_title: document.getElementById("sop_judul"),
+    doc_no: document.getElementById("sop_no_dok"),
+    doc_revision: document.getElementById("sop_revisi"),
+    doc_effective: document.getElementById("sop_tgl_berlaku"),
     doc_notes: document.getElementById("doc_notes"),
-    doc_file: document.getElementById("doc_file"),
+    doc_file: document.getElementById("sop_final_file"),
     doc_tpl_file: document.getElementById("doc_tpl_file"),
     sopParsePreview: document.getElementById("sopParsePreview"),
     // Actions SOP (merged)
@@ -128,14 +135,87 @@
     sop_smart_file: document.getElementById("sop_smart_file"),
     btnUploadSOPSmart: document.getElementById("btnUploadSOPSmart"),
     docsListSOP: document.getElementById("docsListSOP"),
+    // SOP structured (new)
+    sop_judul: document.getElementById("sop_judul"),
+    sop_no_dok: document.getElementById("sop_no_dok"),
+    sop_revisi: document.getElementById("sop_revisi"),
+    sop_tgl_berlaku: document.getElementById("sop_tgl_berlaku"),
+    sop_disusun: document.getElementById("sop_disusun"),
+    sop_disahkan: document.getElementById("sop_disahkan"),
+    sop_tujuan: document.getElementById("sop_tujuan"),
+    sop_ruang_lingkup: document.getElementById("sop_ruang_lingkup"),
+    sop_definisi: document.getElementById("sop_definisi"),
+    sop_referensi: document.getElementById("sop_referensi"),
+    sop_peran: document.getElementById("sop_peran"),
+    sop_rekaman: document.getElementById("sop_rekaman"),
+    sopStepsTbody: document.getElementById("sopStepsTbody"),
+    btnSopAddStep: document.getElementById("btnSopAddStep"),
+    btnSopSave: document.getElementById("btnSopSave"),
+    btnSopReset: document.getElementById("btnSopReset"),
+    sopStatus: document.getElementById("sopStatus"),
+    btnUploadSOPFinal: document.getElementById("btnUploadSOPFinal"),
+
+    // IK structured (new)
+    ik_judul: document.getElementById("ik_judul"),
+    ik_no_dok: document.getElementById("ik_no_dok"),
+    ik_revisi: document.getElementById("ik_revisi"),
+    ik_tgl_berlaku: document.getElementById("ik_tgl_berlaku"),
+    ik_disusun: document.getElementById("ik_disusun"),
+    ik_disahkan: document.getElementById("ik_disahkan"),
+    ik_kapan: document.getElementById("ik_kapan"),
+    ik_peralatan: document.getElementById("ik_peralatan"),
+    ik_kriteria: document.getElementById("ik_kriteria"),
+    ik_trouble: document.getElementById("ik_trouble"),
+    ikStepsTbody: document.getElementById("ikStepsTbody"),
+    btnIkAddStep: document.getElementById("btnIkAddStep"),
+    btnIkSave: document.getElementById("btnIkSave"),
+    btnIkReset: document.getElementById("btnIkReset"),
+    ikStatus: document.getElementById("ikStatus"),
+    btnUploadIKFinal: document.getElementById("btnUploadIKFinal"),
+
+    // Silabus akademik (new)
+    silAcademicBox: document.getElementById("silAcademicBox"),
+    silNonAcademicBox: document.getElementById("silNonAcademicBox"),
+    silA_satpen: document.getElementById("silA_satpen"),
+    silA_mapel: document.getElementById("silA_mapel"),
+    silA_fase: document.getElementById("silA_fase"),
+    silA_tahun: document.getElementById("silA_tahun"),
+    silA_jp: document.getElementById("silA_jp"),
+    silA_karakter: document.getElementById("silA_karakter"),
+    silA_cp: document.getElementById("silA_cp"),
+    silA_sem1_tbody: document.getElementById("silA_sem1_tbody"),
+    silA_sem2_tbody: document.getElementById("silA_sem2_tbody"),
+    btnSilAAddSem1: document.getElementById("btnSilAAddSem1"),
+    btnSilAAddSem2: document.getElementById("btnSilAAddSem2"),
+    btnSilASave: document.getElementById("btnSilASave"),
+    btnSilAReset: document.getElementById("btnSilAReset"),
+    silAStatus: document.getElementById("silAStatus"),
+
+    // Record register (new)
+    recReg_nama: document.getElementById("recReg_nama"),
+    recReg_kode: document.getElementById("recReg_kode"),
+    recReg_revisi: document.getElementById("recReg_revisi"),
+    recReg_pengelola: document.getElementById("recReg_pengelola"),
+    recReg_verifikator: document.getElementById("recReg_verifikator"),
+    recReg_lokasi: document.getElementById("recReg_lokasi"),
+    recReg_retensi: document.getElementById("recReg_retensi"),
+    recReg_klasifikasi: document.getElementById("recReg_klasifikasi"),
+    btnRecRegSave: document.getElementById("btnRecRegSave"),
+    btnRecRegReset: document.getElementById("btnRecRegReset"),
+    recRegStatus: document.getElementById("recRegStatus"),
+    rec_pic: document.getElementById("rec_pic"),
+    rec_status: document.getElementById("rec_status"),
+    rec_tempat: document.getElementById("rec_tempat"),
+    rec_sasaran: document.getElementById("rec_sasaran"),
+
 
     // Input IK
-    ik_title: document.getElementById("ik_title"),
-    ik_no: document.getElementById("ik_no"),
-    ik_revision: document.getElementById("ik_revision"),
-    ik_effective: document.getElementById("ik_effective"),
+    ik_title: document.getElementById("ik_judul"),
+    ik_no: document.getElementById("ik_no_dok"),
+    ik_revision: document.getElementById("ik_revisi"),
+    ik_effective: document.getElementById("ik_tgl_berlaku"),
     ik_notes: document.getElementById("ik_notes"),
-    ik_file: document.getElementById("ik_file"),
+    ik_file: document.getElementById("ik_final_file"),
     ik_tpl_file: document.getElementById("ik_tpl_file"),
     ikParsePreview: document.getElementById("ikParsePreview"),
     // Actions IK (merged)
@@ -503,7 +583,12 @@ function buildStoragePathSilabus(programId, subtype, fileName) {
     // update counts cache & chips
     updateCountsCacheFromLists(pid, docs, recs);
     updateChipCountsInDom();
-  }
+
+    // load structured forms
+    await loadSopStructured(pid);
+    await loadIkStructured(pid);
+    await loadRecordRegister(pid);
+}
 
 
   // ----------------------------
@@ -1520,7 +1605,20 @@ if (subtype === "AKADEMIK") {
       return;
     }
     const title = norm(els.rec_title.value) || null;
-    const description = norm(els.rec_desc.value) || null;
+
+// gabungkan metadata tambahan ke description (supaya aman walau kolom DB belum ada)
+const metaParts = [];
+const pic = norm(els.rec_pic?.value) || null;
+const status = norm(els.rec_status?.value) || null;
+const tempat = norm(els.rec_tempat?.value) || null;
+const sasaran = norm(els.rec_sasaran?.value) || null;
+if (pic) metaParts.push(`PIC: ${pic}`);
+if (status) metaParts.push(`Status: ${status}`);
+if (tempat) metaParts.push(`Tempat: ${tempat}`);
+if (sasaran) metaParts.push(`Sasaran: ${sasaran}`);
+
+const descMain = norm(els.rec_desc.value) || null;
+const description = (metaParts.length ? metaParts.join(" | ") + (descMain ? " | " : "") : "") + (descMain || "");
     const file = els.rec_file?.files?.[0] || null;
 
     const ok = await askConfirm("Tambah record bukti untuk program ini?");
@@ -2349,8 +2447,604 @@ els.fileExcel.addEventListener("change", async (e) => {
     if (t.hasAttribute("data-rec-del")) return deleteRecord(t.getAttribute("data-rec-del"));
   });
 
-  (async function init() {
+  
+// =================== NEW: SOP / IK / Record Register / Silabus Akademik Structured ===================
+let sopCurrentId = null;
+let ikCurrentId = null;
+let silAcadCurrentId = null;
+
+function _clearChildren(el){ if(!el) return; while(el.firstChild) el.removeChild(el.firstChild); }
+
+function _makeInput(value="", placeholder=""){ 
+  const inp = document.createElement("input");
+  inp.type = "text";
+  inp.value = value ?? "";
+  if (placeholder) inp.placeholder = placeholder;
+  return inp;
+}
+function _makeTextarea(value="", placeholder=""){
+  const ta = document.createElement("textarea");
+  ta.value = value ?? "";
+  if (placeholder) ta.placeholder = placeholder;
+  ta.rows = 2;
+  return ta;
+}
+function _makeIconBtn(iconClass, title){
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "btn btn-danger";
+  b.style.height = "38px";
+  b.style.width = "40px";
+  b.style.padding = "0";
+  b.title = title || "";
+  b.innerHTML = `<i class="ph ${iconClass}"></i>`;
+  return b;
+}
+
+function addSopStepRow(data = {}){
+  const tb = els.sopStepsTbody;
+  if(!tb) return;
+  const tr = document.createElement("tr");
+
+  const tdNo = document.createElement("td");
+  tdNo.textContent = String(tb.children.length + 1);
+  tr.appendChild(tdNo);
+
+  const tdTahap = document.createElement("td");
+  tdTahap.appendChild(_makeInput(data.tahap || "", "Tahap"));
+  tr.appendChild(tdTahap);
+
+  const tdUraian = document.createElement("td");
+  tdUraian.appendChild(_makeTextarea(data.uraian || "", "Uraian"));
+  tr.appendChild(tdUraian);
+
+  const tdPelaksana = document.createElement("td");
+  tdPelaksana.appendChild(_makeInput(data.pelaksana || "", "Pelaksana"));
+  tr.appendChild(tdPelaksana);
+
+  const tdOutput = document.createElement("td");
+  tdOutput.appendChild(_makeInput(data.output || "", "Output"));
+  tr.appendChild(tdOutput);
+
+  const tdKontrol = document.createElement("td");
+  tdKontrol.appendChild(_makeInput(data.kontrol || "", "Kontrol"));
+  tr.appendChild(tdKontrol);
+
+  const tdBukti = document.createElement("td");
+  tdBukti.appendChild(_makeInput(data.bukti || "", "Bukti"));
+  tr.appendChild(tdBukti);
+
+  const tdAct = document.createElement("td");
+  const btnDel = _makeIconBtn("ph-trash", "Hapus");
+  btnDel.addEventListener("click", ()=>{
+    tr.remove();
+    // re-number
+    [...tb.children].forEach((row,i)=>{ row.children[0].textContent = String(i+1); });
+  });
+  tdAct.appendChild(btnDel);
+  tr.appendChild(tdAct);
+
+  tb.appendChild(tr);
+}
+
+function _readSopSteps(){
+  const tb = els.sopStepsTbody;
+  if(!tb) return [];
+  const rows = [...tb.querySelectorAll("tr")];
+  return rows.map((tr, idx)=>{
+    const tds = tr.querySelectorAll("td");
+    const getVal = (cellIdx)=>{
+      const el = tds[cellIdx]?.querySelector("input,textarea");
+      return norm(el?.value) || null;
+    };
+    return {
+      step_no: idx + 1,
+      tahap: getVal(1),
+      uraian: getVal(2),
+      pelaksana: getVal(3),
+      output: getVal(4),
+      kontrol: getVal(5),
+      bukti: getVal(6),
+    };
+  }).filter(r=> Object.values(r).some(v=>v && v!==r.step_no));
+}
+
+async function loadSopStructured(programId){
+  const pid = programId || activeProgramRow?.id;
+  if(!pid) return;
+  sopCurrentId = null;
+
+  // header fields
+  const { data: sop, error } = await db.from(SOP_TABLE).select("*").eq("program_id", pid).maybeSingle();
+  if(error){ console.warn("loadSopStructured error", error); return; }
+
+  if(!sop){
+    if(els.btnSopReset) els.btnSopReset.click();
+    addSopStepRow();
+    return;
+  }
+  sopCurrentId = sop.id;
+
+  // fill
+  els.sop_judul && (els.sop_judul.value = sop.doc_title || "");
+  els.sop_no_dok && (els.sop_no_dok.value = sop.doc_no || "");
+  els.sop_revisi && (els.sop_revisi.value = sop.revisi || "");
+  els.sop_tgl_berlaku && (els.sop_tgl_berlaku.value = sop.tgl_berlaku || "");
+  els.sop_disusun && (els.sop_disusun.value = sop.disusun_oleh || "");
+  els.sop_disahkan && (els.sop_disahkan.value = sop.disahkan_oleh || "");
+  els.sop_tujuan && (els.sop_tujuan.value = sop.tujuan || "");
+  els.sop_ruang_lingkup && (els.sop_ruang_lingkup.value = sop.ruang_lingkup || "");
+  els.sop_definisi && (els.sop_definisi.value = sop.definisi || "");
+  els.sop_referensi && (els.sop_referensi.value = sop.referensi || "");
+  els.sop_peran && (els.sop_peran.value = sop.peran_tanggung_jawab || "");
+  els.sop_rekaman && (els.sop_rekaman.value = sop.rekaman || "");
+
+  // steps
+  _clearChildren(els.sopStepsTbody);
+  const { data: steps, error: e2 } = await db.from(SOP_STEPS_TABLE).select("*").eq("sop_id", sop.id).order("step_no", { ascending: true });
+  if(e2){ console.warn("load sop steps error", e2); addSopStepRow(); return; }
+  if(steps?.length){
+    steps.forEach(s=> addSopStepRow(s));
+  }else{
+    addSopStepRow();
+  }
+}
+
+async function saveSopStructured(){
+  const pid = activeProgramRow?.id;
+  if(!pid) return notify("Pilih baris program dulu.", "warn");
+
+  const payload = {
+    id: sopCurrentId || undefined,
+    program_id: pid,
+    doc_title: norm(els.sop_judul?.value) || null,
+    doc_no: norm(els.sop_no_dok?.value) || null,
+    revisi: norm(els.sop_revisi?.value) || null,
+    tgl_berlaku: els.sop_tgl_berlaku?.value || null,
+    disusun_oleh: norm(els.sop_disusun?.value) || null,
+    disahkan_oleh: norm(els.sop_disahkan?.value) || null,
+    tujuan: norm(els.sop_tujuan?.value) || null,
+    ruang_lingkup: norm(els.sop_ruang_lingkup?.value) || null,
+    definisi: norm(els.sop_definisi?.value) || null,
+    referensi: norm(els.sop_referensi?.value) || null,
+    peran_tanggung_jawab: norm(els.sop_peran?.value) || null,
+    rekaman: norm(els.sop_rekaman?.value) || null,
+    updated_at: new Date().toISOString()
+  };
+
+  const { data, error } = await db.from(SOP_TABLE).upsert(payload, { onConflict: "program_id" }).select("*").single();
+  if(error){ console.error(error); return notify("Gagal simpan SOP.", "error"); }
+
+  sopCurrentId = data.id;
+
+  // steps replace
+  const steps = _readSopSteps();
+  await db.from(SOP_STEPS_TABLE).delete().eq("sop_id", sopCurrentId);
+  if(steps.length){
+    const stepsPayload = steps.map(s=> ({ ...s, sop_id: sopCurrentId }));
+    const { error: e2 } = await db.from(SOP_STEPS_TABLE).insert(stepsPayload);
+    if(e2){ console.error(e2); notify("SOP tersimpan, tapi langkah gagal disimpan.", "warn"); }
+  }
+  if(els.sopStatus) els.sopStatus.textContent = "✅ SOP tersimpan.";
+  notify("SOP tersimpan.", "success");
+}
+
+function resetSopStructured(){
+  sopCurrentId = null;
+  [
+    "sop_judul","sop_no_dok","sop_revisi","sop_tgl_berlaku","sop_disusun","sop_disahkan",
+    "sop_tujuan","sop_ruang_lingkup","sop_definisi","sop_referensi","sop_peran","sop_rekaman"
+  ].forEach(id=>{
+    const el = els[id];
+    if(!el) return;
+    el.value = "";
+  });
+  _clearChildren(els.sopStepsTbody);
+  addSopStepRow();
+  if(els.sopStatus) els.sopStatus.textContent = "";
+}
+
+// IK
+function addIkStepRow(data = {}){
+  const tb = els.ikStepsTbody;
+  if(!tb) return;
+  const tr = document.createElement("tr");
+
+  const tdNo = document.createElement("td");
+  tdNo.textContent = String(tb.children.length + 1);
+  tr.appendChild(tdNo);
+
+  const tdLangkah = document.createElement("td");
+  tdLangkah.appendChild(_makeInput(data.langkah || "", "Langkah"));
+  tr.appendChild(tdLangkah);
+
+  const tdDetail = document.createElement("td");
+  tdDetail.appendChild(_makeTextarea(data.detail || "", "Detail"));
+  tr.appendChild(tdDetail);
+
+  const tdCat = document.createElement("td");
+  tdCat.appendChild(_makeTextarea(data.catatan || "", "Catatan"));
+  tr.appendChild(tdCat);
+
+  const tdAct = document.createElement("td");
+  const btnDel = _makeIconBtn("ph-trash", "Hapus");
+  btnDel.addEventListener("click", ()=>{
+    tr.remove();
+    [...tb.children].forEach((row,i)=>{ row.children[0].textContent = String(i+1); });
+  });
+  tdAct.appendChild(btnDel);
+  tr.appendChild(tdAct);
+
+  tb.appendChild(tr);
+}
+
+function _readIkSteps(){
+  const tb = els.ikStepsTbody;
+  if(!tb) return [];
+  const rows = [...tb.querySelectorAll("tr")];
+  return rows.map((tr, idx)=>{
+    const tds = tr.querySelectorAll("td");
+    const getVal = (cellIdx)=>{
+      const el = tds[cellIdx]?.querySelector("input,textarea");
+      return norm(el?.value) || null;
+    };
+    return {
+      step_no: idx + 1,
+      langkah: getVal(1),
+      detail: getVal(2),
+      catatan: getVal(3),
+    };
+  }).filter(r=> Object.values(r).some(v=>v && v!==r.step_no));
+}
+
+async function loadIkStructured(programId){
+  const pid = programId || activeProgramRow?.id;
+  if(!pid) return;
+  ikCurrentId = null;
+
+  const { data: ik, error } = await db.from(IK_TABLE).select("*").eq("program_id", pid).maybeSingle();
+  if(error){ console.warn("loadIkStructured error", error); return; }
+
+  if(!ik){
+    resetIkStructured();
+    return;
+  }
+  ikCurrentId = ik.id;
+
+  els.ik_judul && (els.ik_judul.value = ik.doc_title || "");
+  els.ik_no_dok && (els.ik_no_dok.value = ik.doc_no || "");
+  els.ik_revisi && (els.ik_revisi.value = ik.revisi || "");
+  els.ik_tgl_berlaku && (els.ik_tgl_berlaku.value = ik.tgl_berlaku || "");
+  els.ik_disusun && (els.ik_disusun.value = ik.disusun_oleh || "");
+  els.ik_disahkan && (els.ik_disahkan.value = ik.disahkan_oleh || "");
+  els.ik_kapan && (els.ik_kapan.value = ik.kapan_digunakan || "");
+  els.ik_peralatan && (els.ik_peralatan.value = ik.peralatan || "");
+  els.ik_kriteria && (els.ik_kriteria.value = ik.kriteria_berhasil || "");
+  els.ik_trouble && (els.ik_trouble.value = ik.troubleshooting || "");
+
+  _clearChildren(els.ikStepsTbody);
+  const { data: steps, error: e2 } = await db.from(IK_STEPS_TABLE).select("*").eq("ik_id", ik.id).order("step_no", { ascending: true });
+  if(e2){ console.warn("load ik steps error", e2); addIkStepRow(); return; }
+  if(steps?.length){
+    steps.forEach(s=> addIkStepRow(s));
+  }else{
+    addIkStepRow();
+  }
+}
+
+async function saveIkStructured(){
+  const pid = activeProgramRow?.id;
+  if(!pid) return notify("Pilih baris program dulu.", "warn");
+
+  const payload = {
+    id: ikCurrentId || undefined,
+    program_id: pid,
+    doc_title: norm(els.ik_judul?.value) || null,
+    doc_no: norm(els.ik_no_dok?.value) || null,
+    revisi: norm(els.ik_revisi?.value) || null,
+    tgl_berlaku: els.ik_tgl_berlaku?.value || null,
+    disusun_oleh: norm(els.ik_disusun?.value) || null,
+    disahkan_oleh: norm(els.ik_disahkan?.value) || null,
+    kapan_digunakan: norm(els.ik_kapan?.value) || null,
+    peralatan: norm(els.ik_peralatan?.value) || null,
+    kriteria_berhasil: norm(els.ik_kriteria?.value) || null,
+    troubleshooting: norm(els.ik_trouble?.value) || null,
+    updated_at: new Date().toISOString()
+  };
+
+  const { data, error } = await db.from(IK_TABLE).upsert(payload, { onConflict: "program_id" }).select("*").single();
+  if(error){ console.error(error); return notify("Gagal simpan IK.", "error"); }
+
+  ikCurrentId = data.id;
+
+  const steps = _readIkSteps();
+  await db.from(IK_STEPS_TABLE).delete().eq("ik_id", ikCurrentId);
+  if(steps.length){
+    const stepsPayload = steps.map(s=> ({ ...s, ik_id: ikCurrentId }));
+    const { error: e2 } = await db.from(IK_STEPS_TABLE).insert(stepsPayload);
+    if(e2){ console.error(e2); notify("IK tersimpan, tapi langkah gagal disimpan.", "warn"); }
+  }
+  if(els.ikStatus) els.ikStatus.textContent = "✅ IK tersimpan.";
+  notify("IK tersimpan.", "success");
+}
+
+function resetIkStructured(){
+  ikCurrentId = null;
+  [
+    "ik_judul","ik_no_dok","ik_revisi","ik_tgl_berlaku","ik_disusun","ik_disahkan",
+    "ik_kapan","ik_peralatan","ik_kriteria","ik_trouble"
+  ].forEach(id=>{
+    const el = els[id];
+    if(!el) return;
+    el.value = "";
+  });
+  _clearChildren(els.ikStepsTbody);
+  addIkStepRow();
+  if(els.ikStatus) els.ikStatus.textContent = "";
+}
+
+// Record register
+async function loadRecordRegister(programId){
+  const pid = programId || activeProgramRow?.id;
+  if(!pid) return;
+  const { data, error } = await db.from(REC_REGISTER_TABLE).select("*").eq("program_id", pid).maybeSingle();
+  if(error){ console.warn("loadRecordRegister", error); return; }
+  if(!data){
+    resetRecordRegister();
+    return;
+  }
+  els.recReg_nama && (els.recReg_nama.value = data.nama || "");
+  els.recReg_kode && (els.recReg_kode.value = data.kode || "");
+  els.recReg_revisi && (els.recReg_revisi.value = data.revisi || "");
+  els.recReg_pengelola && (els.recReg_pengelola.value = data.pengelola || "");
+  els.recReg_verifikator && (els.recReg_verifikator.value = data.verifikator || "");
+  els.recReg_lokasi && (els.recReg_lokasi.value = data.lokasi_simpan || "");
+  els.recReg_retensi && (els.recReg_retensi.value = data.retensi || "");
+  els.recReg_klasifikasi && (els.recReg_klasifikasi.value = data.klasifikasi || "");
+  if(els.recRegStatus) els.recRegStatus.textContent = "";
+}
+
+async function saveRecordRegister(){
+  const pid = activeProgramRow?.id;
+  if(!pid) return notify("Pilih baris program dulu.", "warn");
+
+  const payload = {
+    program_id: pid,
+    nama: norm(els.recReg_nama?.value) || null,
+    kode: norm(els.recReg_kode?.value) || null,
+    revisi: norm(els.recReg_revisi?.value) || null,
+    pengelola: norm(els.recReg_pengelola?.value) || null,
+    verifikator: norm(els.recReg_verifikator?.value) || null,
+    lokasi_simpan: norm(els.recReg_lokasi?.value) || null,
+    retensi: norm(els.recReg_retensi?.value) || null,
+    klasifikasi: norm(els.recReg_klasifikasi?.value) || null,
+    updated_at: new Date().toISOString()
+  };
+
+  const { error } = await db.from(REC_REGISTER_TABLE).upsert(payload, { onConflict: "program_id" });
+  if(error){ console.error(error); return notify("Gagal simpan register.", "error"); }
+  if(els.recRegStatus) els.recRegStatus.textContent = "✅ Register tersimpan.";
+  notify("Register tersimpan.", "success");
+}
+
+function resetRecordRegister(){
+  [
+    "recReg_nama","recReg_kode","recReg_revisi","recReg_pengelola","recReg_verifikator","recReg_lokasi","recReg_retensi","recReg_klasifikasi"
+  ].forEach(id=>{ if(els[id]) els[id].value=""; });
+  if(els.recRegStatus) els.recRegStatus.textContent = "";
+}
+
+// Silabus akademik structured
+function addSilAsemRow(sem, data={}){
+  const tb = sem === 1 ? els.silA_sem1_tbody : els.silA_sem2_tbody;
+  if(!tb) return;
+  const tr = document.createElement("tr");
+  const tdNo = document.createElement("td");
+  tdNo.textContent = String(tb.children.length + 1);
+  tr.appendChild(tdNo);
+
+  const mk = (val, ph)=> _makeTextarea(val, ph);
+  const mkIn = (val, ph)=> _makeInput(val, ph);
+
+  const tdTP = document.createElement("td"); tdTP.appendChild(mk(data.tujuan_pembelajaran || "", "TP")); tr.appendChild(tdTP);
+  const tdMateri = document.createElement("td"); tdMateri.appendChild(mk(data.materi_inti || "", "Materi")); tr.appendChild(tdMateri);
+  const tdPM = document.createElement("td"); tdPM.appendChild(mk(data.pembelajaran_mendalam || "", "PM")); tr.appendChild(tdPM);
+  const tdF = document.createElement("td"); tdF.appendChild(mk(data.formatif || "", "Formatif")); tr.appendChild(tdF);
+  const tdS = document.createElement("td"); tdS.appendChild(mk(data.sumatif || "", "Sumatif")); tr.appendChild(tdS);
+  const tdAQ = document.createElement("td"); tdAQ.appendChild(mkIn(data.aqil || "", "AQIL")); tr.appendChild(tdAQ);
+  const tdJP = document.createElement("td"); 
+  const jp = document.createElement("input"); jp.type="number"; jp.min="0"; jp.value = (data.jp ?? ""); jp.placeholder="JP";
+  tdJP.appendChild(jp); tr.appendChild(tdJP);
+
+  const tdAct = document.createElement("td");
+  const btnDel = _makeIconBtn("ph-trash", "Hapus");
+  btnDel.addEventListener("click", ()=>{
+    tr.remove();
+    [...tb.children].forEach((row,i)=>{ row.children[0].textContent = String(i+1); });
+  });
+  tdAct.appendChild(btnDel);
+  tr.appendChild(tdAct);
+
+  tb.appendChild(tr);
+}
+
+function _readSilAsemRows(sem){
+  const tb = sem === 1 ? els.silA_sem1_tbody : els.silA_sem2_tbody;
+  if(!tb) return [];
+  const rows = [...tb.querySelectorAll("tr")];
+  return rows.map((tr, idx)=>{
+    const tds = tr.querySelectorAll("td");
+    const getVal = (cellIdx)=>{
+      const el = tds[cellIdx]?.querySelector("input,textarea");
+      return norm(el?.value) || null;
+    };
+    const jp = tds[7]?.querySelector("input")?.value;
+    return {
+      row_no: idx + 1,
+      semester: sem,
+      tujuan_pembelajaran: getVal(1),
+      materi_inti: getVal(2),
+      pembelajaran_mendalam: getVal(3),
+      formatif: getVal(4),
+      sumatif: getVal(5),
+      aqil: getVal(6),
+      jp: jp ? Number(jp) : null,
+    };
+  }).filter(r=> Object.values(r).some(v=>v && v!==r.row_no && v!==r.semester));
+}
+
+async function loadSilabusAkademikStructured(programId){
+  const pid = programId || activeProgramRow?.id;
+  if(!pid) return;
+  silAcadCurrentId = null;
+
+  const { data: sil, error } = await db.from(SILABUS_AKADEMIK_TABLE).select("*").eq("program_id", pid).maybeSingle();
+  if(error){ console.warn("loadSilabusAkademikStructured", error); return; }
+
+  if(!sil){
+    resetSilabusAkademikStructured();
+    return;
+  }
+  silAcadCurrentId = sil.id;
+
+  els.silA_satpen && (els.silA_satpen.value = sil.satpen || "");
+  els.silA_mapel && (els.silA_mapel.value = sil.mapel || "");
+  els.silA_fase && (els.silA_fase.value = sil.fase || "");
+  els.silA_tahun && (els.silA_tahun.value = sil.tahun_ajaran || "");
+  els.silA_jp && (els.silA_jp.value = sil.alokasi_waktu || "");
+  els.silA_karakter && (els.silA_karakter.value = sil.karakter || "");
+  els.silA_cp && (els.silA_cp.value = sil.cp || "");
+
+  _clearChildren(els.silA_sem1_tbody);
+  _clearChildren(els.silA_sem2_tbody);
+
+  const { data: rows, error: e2 } = await db.from(SILABUS_AKADEMIK_SEM_TABLE).select("*").eq("silabus_id", sil.id).order("semester", { ascending: true }).order("row_no", { ascending: true });
+  if(e2){ console.warn("load silabus sem rows error", e2); addSilAsemRow(1); addSilAsemRow(2); return; }
+
+  const sem1 = (rows||[]).filter(r=> Number(r.semester)===1);
+  const sem2 = (rows||[]).filter(r=> Number(r.semester)===2);
+  sem1.length ? sem1.forEach(r=> addSilAsemRow(1,r)) : addSilAsemRow(1);
+  sem2.length ? sem2.forEach(r=> addSilAsemRow(2,r)) : addSilAsemRow(2);
+}
+
+async function saveSilabusAkademikStructured(){
+  const pid = activeProgramRow?.id;
+  if(!pid) return notify("Pilih baris program dulu.", "warn");
+
+  const payload = {
+    id: silAcadCurrentId || undefined,
+    program_id: pid,
+    satpen: norm(els.silA_satpen?.value) || null,
+    mapel: norm(els.silA_mapel?.value) || null,
+    fase: norm(els.silA_fase?.value) || null,
+    tahun_ajaran: norm(els.silA_tahun?.value) || null,
+    alokasi_waktu: norm(els.silA_jp?.value) || null,
+    karakter: norm(els.silA_karakter?.value) || null,
+    cp: norm(els.silA_cp?.value) || null,
+    notes: norm(els.sil_notes?.value) || null,
+    updated_at: new Date().toISOString()
+  };
+
+  const { data, error } = await db.from(SILABUS_AKADEMIK_TABLE).upsert(payload, { onConflict: "program_id" }).select("*").single();
+  if(error){ console.error(error); return notify("Gagal simpan silabus akademik.", "error"); }
+
+  silAcadCurrentId = data.id;
+
+  const rows = [..._readSilAsemRows(1), ..._readSilAsemRows(2)];
+  await db.from(SILABUS_AKADEMIK_SEM_TABLE).delete().eq("silabus_id", silAcadCurrentId);
+  if(rows.length){
+    const payloadRows = rows.map(r=> ({ ...r, silabus_id: silAcadCurrentId }));
+    const { error: e2 } = await db.from(SILABUS_AKADEMIK_SEM_TABLE).insert(payloadRows);
+    if(e2){ console.error(e2); notify("Silabus akademik tersimpan, tapi baris semester gagal disimpan.", "warn"); }
+  }
+  if(els.silAStatus) els.silAStatus.textContent = "✅ Silabus akademik tersimpan.";
+  notify("Silabus akademik tersimpan.", "success");
+}
+
+function resetSilabusAkademikStructured(){
+  silAcadCurrentId = null;
+  ["silA_satpen","silA_mapel","silA_fase","silA_tahun","silA_jp","silA_karakter","silA_cp"].forEach(id=>{ if(els[id]) els[id].value=""; });
+  _clearChildren(els.silA_sem1_tbody);
+  _clearChildren(els.silA_sem2_tbody);
+  addSilAsemRow(1);
+  addSilAsemRow(2);
+  if(els.silAStatus) els.silAStatus.textContent = "";
+}
+
+// upload final doc helper
+async function uploadFinalDoc(docType, fileInput, meta){
+  const pid = activeProgramRow?.id;
+  if(!pid) return notify("Pilih baris program dulu.", "warn");
+  const file = fileInput?.files?.[0];
+  if(!file) return notify("Pilih file dulu.", "warn");
+
+  const safeName = file.name.replace(/[^\w.\-() ]+/g, "_");
+  const folder = `program_pontren/${pid}/${docType.toLowerCase()}/`;
+  const filePath = folder + `${Date.now()}_${safeName}`;
+
+  const { error: upErr } = await db.storage.from(STORAGE_BUCKET).upload(filePath, file, { upsert: true });
+  if(upErr){ console.error(upErr); return notify("Upload gagal.", "error"); }
+
+  const payload = {
+    program_id: pid,
+    doc_type: docType,
+    doc_title: meta?.doc_title || null,
+    doc_no: meta?.doc_no || null,
+    doc_revision: meta?.doc_revision || null,
+    doc_effective: meta?.doc_effective || null,
+    notes: meta?.notes || null,
+    file_name: safeName,
+    file_path: filePath
+  };
+
+  const { error: insErr } = await db.from(DOCS_TABLE).insert(payload);
+  if(insErr){ console.error(insErr); return notify("Upload berhasil, tapi pencatatan dokumen gagal.", "warn"); }
+
+  fileInput.value = "";
+  notify("Dokumen terunggah.", "success");
+  // refresh list
+  await loadDocsList(docType, docType.startsWith("SOP") ? els.docsListSOP : (docType.startsWith("IK") ? els.docsListIK : els.docsListDOC));
+}
+
+// Hook listeners (safe)
+function _hookStructuredDocListeners(){
+  els.btnSopAddStep?.addEventListener("click", ()=> addSopStepRow());
+  els.btnSopReset?.addEventListener("click", resetSopStructured);
+  els.btnSopSave?.addEventListener("click", saveSopStructured);
+
+  els.btnIkAddStep?.addEventListener("click", ()=> addIkStepRow());
+  els.btnIkReset?.addEventListener("click", resetIkStructured);
+  els.btnIkSave?.addEventListener("click", saveIkStructured);
+
+  els.btnRecRegReset?.addEventListener("click", resetRecordRegister);
+  els.btnRecRegSave?.addEventListener("click", saveRecordRegister);
+
+  els.btnSilAAddSem1?.addEventListener("click", ()=> addSilAsemRow(1));
+  els.btnSilAAddSem2?.addEventListener("click", ()=> addSilAsemRow(2));
+  els.btnSilAReset?.addEventListener("click", resetSilabusAkademikStructured);
+  els.btnSilASave?.addEventListener("click", saveSilabusAkademikStructured);
+
+  els.btnUploadSOPFinal?.addEventListener("click", ()=> uploadFinalDoc("SOP", els.doc_file, {
+    doc_title: norm(els.sop_judul?.value) || null,
+    doc_no: norm(els.sop_no_dok?.value) || null,
+    doc_revision: norm(els.sop_revisi?.value) || null,
+    doc_effective: els.sop_tgl_berlaku?.value || null,
+    notes: null
+  }));
+  els.btnUploadIKFinal?.addEventListener("click", ()=> uploadFinalDoc("IK", els.ik_file, {
+    doc_title: norm(els.ik_judul?.value) || null,
+    doc_no: norm(els.ik_no_dok?.value) || null,
+    doc_revision: norm(els.ik_revisi?.value) || null,
+    doc_effective: els.ik_tgl_berlaku?.value || null,
+    notes: null
+  }));
+}
+
+(async function init() {
     if (window.innerWidth < 1024) els.filtersPanel.open = false;
+    // Hook tombol form terstruktur (SOP/IK/Silabus Akademik/Record Register)
+    // Agar tombol "Tambah Baris" dan tombol simpan/reset berfungsi.
+    _hookStructuredDocListeners();
     await refreshAllData();
     fetchData();
   })();

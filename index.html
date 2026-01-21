@@ -935,6 +935,52 @@
   width: 100% !important;
   max-width: none !important;
 }
+
+/* ===== Docs Modal: maximize screen ===== */
+.modal-box.docs-modal-box{
+  width: min(98vw, 1600px);
+  height: min(96vh, 980px);
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+}
+.modal-box.docs-modal-box .tabs{ flex: 0 0 auto; }
+.modal-box.docs-modal-box .tab-panel{ flex: 1 1 auto; min-height: 0; }
+.docs-scroll-area{
+  padding: 16px 18px 18px;
+  overflow: auto;
+  max-height: calc(96vh - 140px);
+}
+.docs-grid{
+  display: grid;
+  /* Satu baris = satu kartu (sesuai permintaan), biar fokus dan tidak "nge-grid" ke samping */
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+@media (max-width: 900px){
+  .docs-scroll-area{ max-height: calc(96vh - 160px); }
+}
+.docs-card{
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  box-shadow: var(--shadow-soft);
+}
+.docs-card.soft{ background: rgba(255,255,255,0.85); }
+.docs-card-title{
+  font-weight: 800;
+  margin-bottom: 10px;
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+.doc-meta-2{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+/* Untuk kebutuhan 1–3 input per baris di dalam satu kartu */
+@media (min-width: 1100px){
+  .doc-meta-3{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+}
+
 </style>
 </head>
 <body>
@@ -1125,7 +1171,7 @@
 
   <!-- MODAL: DOKUMEN (SOP/IK) & RECORD BUKTI -->
   <div class="modal-overlay" id="docsModal">
-    <div class="modal-box" style="max-width: 920px;">
+    <div class="modal-box docs-modal-box">
       <div class="modal-head">
         <div>
           <div class="modal-title" id="docsModalTitle">Dokumen & Bukti</div>
@@ -1143,217 +1189,456 @@
 
       <!-- TAB: SOP -->
       <div class="tab-panel active" id="tabPanelSOP">
-        <div class="doc-meta">
+<div class="docs-scroll-area">
+    <div class="docs-grid">
+      <section class="docs-card">
+        <div class="docs-card-title"><i class="ph ph-identification-card"></i> Identitas SOP</div>
+        <div class="doc-meta doc-meta-3">
           <div class="form-group">
             <label>Judul Dokumen</label>
-            <input id="doc_title" type="text" placeholder="Contoh: SOP Pelaksanaan Program" />
+            <input id="sop_judul" type="text" placeholder="Contoh: SOP Pelaksanaan Program" />
           </div>
           <div class="form-group">
             <label>Nomor Dokumen</label>
-            <input id="doc_no" type="text" placeholder="Contoh: SOP/UPMP/001" />
+            <input id="sop_no_dok" type="text" placeholder="Contoh: SOP/UPMP/001" />
           </div>
           <div class="form-group">
             <label>Revisi</label>
-            <input id="doc_revision" type="text" placeholder="Contoh: Rev.02" />
+            <input id="sop_revisi" type="text" placeholder="Contoh: Rev.02" />
           </div>
           <div class="form-group">
             <label>Tanggal Berlaku</label>
-            <input id="doc_effective" type="date" />
+            <input id="sop_tgl_berlaku" type="date" />
+          </div>
+          <div class="form-group">
+            <label>Disusun oleh</label>
+            <input id="sop_disusun" type="text" placeholder="Nama/Unit" />
+          </div>
+          <div class="form-group">
+            <label>Disahkan oleh</label>
+            <input id="sop_disahkan" type="text" placeholder="Nama/Unit" />
           </div>
         </div>
+      </section>
 
+      <section class="docs-card">
+        <div class="docs-card-title"><i class="ph ph-file-text"></i> Isi SOP (sesuai template)</div>
         <div class="form-group">
-          <label>Catatan</label>
-          <textarea id="doc_notes" placeholder="Catatan singkat (opsional)"></textarea>
+          <label>Tujuan</label>
+          <textarea id="sop_tujuan" placeholder="Tujuan SOP..."></textarea>
         </div>
-
-        <!-- file input lama tetap ada (dipakai programmatically), tapi disembunyikan -->
-        <input id="doc_file" type="file" accept=".pdf,.doc,.docx" style="display:none" />
-        <input id="doc_tpl_file" type="file" accept=".xlsx" style="display:none" />
-        <input id="sop_smart_file" type="file" accept=".xlsx,.pdf,.doc,.docx" style="display:none" />
-
-        <div class="action-row">
-          <div class="dd" id="ddSOP">
-            <button class="btn btn-secondary" id="btnTplSOP" type="button" style="height:44px"><i class="ph ph-download-simple"></i> Unduh Template <i class="ph ph-caret-down"></i></button>
-            <div class="dd-menu" id="menuTplSOP">
-              <a class="dd-item" href="./templates/Template_SOP.xlsx" download><i class="ph ph-file-xls"></i> Template SOP (Kosong)</a>
-              <button class="dd-item" id="btnTemplateSOPPrefill" type="button"><i class="ph ph-magic-wand"></i> Template SOP (Isi Otomatis)</button>
-            </div>
-          </div>
-          <button class="btn btn-primary" id="btnUploadSOPSmart" type="button" style="height:44px"><i class="ph ph-upload"></i> Unggah Dokumen</button>
+        <div class="form-group">
+          <label>Ruang Lingkup</label>
+          <textarea id="sop_ruang_lingkup" placeholder="Ruang lingkup penerapan SOP..."></textarea>
         </div>
-        <div class="hint">Unggah <strong>XLSX</strong> untuk <em>parse</em> otomatis (source). Unggah <strong>PDF/DOCX</strong> untuk dokumen final.</div>
-        <div class="parse-preview" id="sopParsePreview" style="display:none"></div>
+        <div class="form-group">
+          <label>Definisi</label>
+          <textarea id="sop_definisi" placeholder="Definisi istilah penting (opsional)..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Referensi</label>
+          <textarea id="sop_referensi" placeholder="Rujukan (ISO/aturan internal/dll)..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Peran & Tanggung Jawab</label>
+          <textarea id="sop_peran" placeholder="Siapa melakukan apa..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Rekaman yang Dihasilkan</label>
+          <textarea id="sop_rekaman" placeholder="Bukti/record yang dihasilkan dari SOP ini..."></textarea>
+        </div>
+      </section>
+    </div>
 
-        <div class="list-stack" id="docsListSOP"></div>
+    <section class="docs-card">
+      <div class="docs-card-title"><i class="ph ph-list-numbers"></i> Langkah/Alur SOP</div>
+      <div class="sil-table-wrap">
+        <table class="sil-table">
+          <thead>
+            <tr>
+              <th style="width:60px">No</th>
+              <th style="width:16%">Tahap</th>
+              <th>Uraian</th>
+              <th style="width:14%">Pelaksana</th>
+              <th style="width:14%">Output</th>
+              <th style="width:14%">Kontrol</th>
+              <th style="width:14%">Bukti</th>
+              <th style="width:52px"></th>
+            </tr>
+          </thead>
+          <tbody id="sopStepsTbody"></tbody>
+        </table>
       </div>
+
+      <div class="action-row" style="justify-content: space-between; margin-top: 12px;">
+        <button class="btn btn-secondary" id="btnSopAddStep" type="button" style="height:44px"><i class="ph ph-plus"></i> Tambah Baris</button>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end">
+          <button class="btn btn-secondary" id="btnSopReset" type="button" style="height:44px"><i class="ph ph-eraser"></i> Reset</button>
+          <button class="btn btn-primary" id="btnSopSave" type="button" style="height:44px"><i class="ph ph-floppy-disk"></i> Simpan SOP</button>
+        </div>
+      </div>
+      <div id="sopStatus" style="margin-top:8px; color: var(--text-dim); font-weight: 600; font-size: 13px;"></div>
+    </section>
+
+    <section class="docs-card">
+      <div class="docs-card-title"><i class="ph ph-paperclip"></i> Lampiran SOP (opsional)</div>
+      <div class="hint">Kalau SOP sudah ditulis langsung di aplikasi, lampiran bisa dikosongkan. Kalau butuh dokumen final (PDF/DOCX) untuk audit/arsip, unggah di sini.</div>
+      <input id="sop_final_file" type="file" accept=".pdf,.doc,.docx" />
+      <div class="action-row" style="margin-top:10px">
+        <button class="btn btn-primary" id="btnUploadSOPFinal" type="button" style="height:44px"><i class="ph ph-upload"></i> Unggah Final</button>
+      </div>
+      <div class="list-stack" id="docsListSOP"></div>
+    </section>
+  </div>
+</div>
 
       <!-- TAB: IK -->
       <div class="tab-panel" id="tabPanelIK">
-        <div class="doc-meta">
+<div class="docs-scroll-area">
+    <div class="docs-grid">
+      <section class="docs-card">
+        <div class="docs-card-title"><i class="ph ph-identification-card"></i> Identitas IK</div>
+        <div class="doc-meta doc-meta-3">
           <div class="form-group">
             <label>Judul Dokumen</label>
-            <input id="ik_title" type="text" placeholder="Contoh: IK Input & Verifikasi" />
+            <input id="ik_judul" type="text" placeholder="Contoh: IK Input & Verifikasi" />
           </div>
           <div class="form-group">
             <label>Nomor Dokumen</label>
-            <input id="ik_no" type="text" placeholder="Contoh: IK/UPMP/001" />
+            <input id="ik_no_dok" type="text" placeholder="Contoh: IK/UPMP/001" />
           </div>
           <div class="form-group">
             <label>Revisi</label>
-            <input id="ik_revision" type="text" placeholder="Contoh: Rev.01" />
+            <input id="ik_revisi" type="text" placeholder="Contoh: Rev.01" />
           </div>
           <div class="form-group">
             <label>Tanggal Berlaku</label>
-            <input id="ik_effective" type="date" />
+            <input id="ik_tgl_berlaku" type="date" />
+          </div>
+          <div class="form-group">
+            <label>Disusun oleh</label>
+            <input id="ik_disusun" type="text" placeholder="Nama/Unit" />
+          </div>
+          <div class="form-group">
+            <label>Disahkan oleh</label>
+            <input id="ik_disahkan" type="text" placeholder="Nama/Unit" />
           </div>
         </div>
+      </section>
+
+      <section class="docs-card">
+        <div class="docs-card-title"><i class="ph ph-list-checks"></i> Isi IK (sesuai template)</div>
 
         <div class="form-group">
-          <label>Catatan</label>
-          <textarea id="ik_notes" placeholder="Catatan singkat (opsional)"></textarea>
+          <label>Kapan Digunakan</label>
+          <textarea id="ik_kapan" placeholder="Kapan IK ini digunakan..."></textarea>
         </div>
-
-        <!-- file input lama tetap ada (dipakai programmatically), tapi disembunyikan -->
-        <input id="ik_file" type="file" accept=".pdf,.doc,.docx" style="display:none" />
-        <input id="ik_tpl_file" type="file" accept=".xlsx" style="display:none" />
-        <input id="ik_smart_file" type="file" accept=".xlsx,.pdf,.doc,.docx" style="display:none" />
-
-        <div class="action-row">
-          <div class="dd" id="ddIK">
-            <button class="btn btn-secondary" id="btnTplIK" type="button" style="height:44px"><i class="ph ph-download-simple"></i> Unduh Template <i class="ph ph-caret-down"></i></button>
-            <div class="dd-menu" id="menuTplIK">
-              <a class="dd-item" href="./templates/Template_IK.xlsx" download><i class="ph ph-file-xls"></i> Template IK (Kosong)</a>
-              <button class="dd-item" id="btnTemplateIKPrefill" type="button"><i class="ph ph-magic-wand"></i> Template IK (Isi Otomatis)</button>
-            </div>
-          </div>
-          <button class="btn btn-primary" id="btnUploadIKSmart" type="button" style="height:44px"><i class="ph ph-upload"></i> Unggah Dokumen</button>
+        <div class="form-group">
+          <label>Peralatan/Aplikasi</label>
+          <textarea id="ik_peralatan" placeholder="Tools/aplikasi/peralatan yang dibutuhkan..."></textarea>
         </div>
-        <div class="hint">Unggah <strong>XLSX</strong> untuk <em>parse</em> otomatis (source). Unggah <strong>PDF/DOCX</strong> untuk dokumen final.</div>
-        <div class="parse-preview" id="ikParsePreview" style="display:none"></div>
+        <div class="form-group">
+          <label>Kriteria Berhasil</label>
+          <textarea id="ik_kriteria" placeholder="Kapan dianggap selesai/benar..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Troubleshooting (opsional)</label>
+          <textarea id="ik_trouble" placeholder="Jika gagal, apa yang dicek..."></textarea>
+        </div>
+      </section>
+    </div>
 
-        <div class="list-stack" id="docsListIK"></div>
+    <section class="docs-card">
+      <div class="docs-card-title"><i class="ph ph-list-numbers"></i> Langkah IK</div>
+      <div class="sil-table-wrap">
+        <table class="sil-table">
+          <thead>
+            <tr>
+              <th style="width:60px">No</th>
+              <th style="width:28%">Langkah</th>
+              <th>Detail</th>
+              <th style="width:22%">Catatan</th>
+              <th style="width:52px"></th>
+            </tr>
+          </thead>
+          <tbody id="ikStepsTbody"></tbody>
+        </table>
       </div>
+
+      <div class="action-row" style="justify-content: space-between; margin-top: 12px;">
+        <button class="btn btn-secondary" id="btnIkAddStep" type="button" style="height:44px"><i class="ph ph-plus"></i> Tambah Baris</button>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end">
+          <button class="btn btn-secondary" id="btnIkReset" type="button" style="height:44px"><i class="ph ph-eraser"></i> Reset</button>
+          <button class="btn btn-primary" id="btnIkSave" type="button" style="height:44px"><i class="ph ph-floppy-disk"></i> Simpan IK</button>
+        </div>
+      </div>
+      <div id="ikStatus" style="margin-top:8px; color: var(--text-dim); font-weight: 600; font-size: 13px;"></div>
+    </section>
+
+    <section class="docs-card">
+      <div class="docs-card-title"><i class="ph ph-paperclip"></i> Lampiran IK (opsional)</div>
+      <div class="hint">Kalau IK ditulis langsung di aplikasi, lampiran bisa dikosongkan. Kalau butuh dokumen final (PDF/DOCX) untuk audit/arsip, unggah di sini.</div>
+      <input id="ik_final_file" type="file" accept=".pdf,.doc,.docx" />
+      <div class="action-row" style="margin-top:10px">
+        <button class="btn btn-primary" id="btnUploadIKFinal" type="button" style="height:44px"><i class="ph ph-upload"></i> Unggah Final</button>
+      </div>
+      <div class="list-stack" id="docsListIK"></div>
+    </section>
+  </div>
+</div>
 
       
 
       <!-- TAB: SILABUS (non-akademik) -->
       <div class="tab-panel" id="tabPanelSIL">
-        <div class="doc-meta">
-          <div class="form-group">
-            <label>Jenis Silabus</label>
-            <select id="sil_subtype">
-              <option value="AKADEMIK">Akademik (Mapel)</option>
-              <option value="BAHASA_ILQO_MUFRODAT">Bahasa • Ilqo Mufrodat</option>
-              <option value="BAHASA_ILQO_KALIMAH">Bahasa • Ilqo Kalimah</option>
-              <option value="BAHASA_MUHADHOROH">Bahasa • Muhadhoroh</option>
-              <option value="BAHASA_HIWAR">Bahasa • Hiwar</option>
-              <option value="LIQO_KAMAR">Liqo Kamar</option>
-              <option value="KAJIAN_KITAB">Kajian Kitab</option>
-              <option value="HALAQOH">Halaqoh</option>
-              <option value="EKSKUL">Ekskul</option>
-            </select>
+<div class="docs-scroll-area">
+    <div class="doc-meta doc-meta-2">
+      <div class="form-group">
+        <label>Jenis Silabus</label>
+        <select id="sil_subtype">
+          <option value="AKADEMIK">Akademik (Mapel)</option>
+          <option value="BAHASA_ILQO_MUFRODAT">Bahasa • Ilqo Mufrodat</option>
+          <option value="BAHASA_ILQO_KALIMAH">Bahasa • Ilqo Kalimah</option>
+          <option value="BAHASA_MUHADHOROH">Bahasa • Muhadhoroh</option>
+          <option value="BAHASA_HIWAR">Bahasa • Hiwar</option>
+          <option value="LIQO_KAMAR">Liqo Kamar</option>
+          <option value="KAJIAN_KITAB">Kajian Kitab</option>
+          <option value="HALAQOH">Halaqoh</option>
+          <option value="EKSKUL">Ekskul</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Keterangan (opsional)</label>
+        <input id="sil_notes" type="text" placeholder="Contoh: Semester Genap 2026" />
+      </div>
+    </div>
+
+    <div class="docs-card" id="silAcademicBox" style="display:none">
+      <div class="docs-card-title"><i class="ph ph-notebook"></i> Silabus Akademik (isi langsung seperti template)</div>
+
+      <div class="docs-grid">
+        <section class="docs-card soft">
+          <div class="docs-card-title"><i class="ph ph-identification-card"></i> Identitas Silabus</div>
+          <div class="doc-meta doc-meta-3">
+            <div class="form-group">
+              <label>Satuan Pendidikan</label>
+              <input id="silA_satpen" type="text" placeholder="Contoh: MTs Husnul Khotimah" />
+            </div>
+            <div class="form-group">
+              <label>Mapel</label>
+              <input id="silA_mapel" type="text" placeholder="Contoh: Fikih" />
+            </div>
+            <div class="form-group">
+              <label>Fase/Kelas</label>
+              <input id="silA_fase" type="text" placeholder="Contoh: D / VII" />
+            </div>
+            <div class="form-group">
+              <label>Tahun Ajaran</label>
+              <input id="silA_tahun" type="text" placeholder="Contoh: 2026/2027" />
+            </div>
+            <div class="form-group">
+              <label>Alokasi Waktu</label>
+              <input id="silA_jp" type="text" placeholder="Contoh: 4 JP/pekan" />
+            </div>
+            <div class="form-group">
+              <label>Karakter</label>
+              <input id="silA_karakter" type="text" placeholder="Contoh: AQIL" />
+            </div>
           </div>
+
           <div class="form-group">
-            <label>Keterangan (opsional)</label>
-            <input id="sil_notes" type="text" placeholder="Contoh: Semester Genap 2026" />
+            <label>Capaian Pembelajaran (CP)</label>
+            <textarea id="silA_cp" placeholder="Tempel CP di sini..."></textarea>
           </div>
-        </div>
+        </section>
 
-        
+        <section class="docs-card soft">
+          <div class="docs-card-title"><i class="ph ph-table"></i> Semester 1</div>
+          <div class="sil-table-wrap">
+            <table class="sil-table">
+              <thead>
+                <tr>
+                  <th style="width:60px">No</th>
+                  <th style="width:22%">Tujuan Pembelajaran</th>
+                  <th style="width:18%">Materi Inti</th>
+                  <th style="width:18%">Pembelajaran Mendalam</th>
+                  <th style="width:14%">Formatif</th>
+                  <th style="width:14%">Sumatif</th>
+                  <th style="width:10%">AQIL</th>
+                  <th style="width:70px">JP</th>
+                  <th style="width:52px"></th>
+                </tr>
+              </thead>
+              <tbody id="silA_sem1_tbody"></tbody>
+            </table>
+          </div>
+          <div class="action-row" style="justify-content: space-between; margin-top: 12px;">
+            <button class="btn btn-secondary" id="btnSilAAddSem1" type="button" style="height:44px"><i class="ph ph-plus"></i> Tambah Baris</button>
+            <span class="hint" style="margin:0">Isi kolom sesuai template akademik antum.</span>
+          </div>
 
-<input id="sil_academic_file" type="file" accept=".pdf,.doc,.docx" style="display:none" />
+          <div class="docs-card-title" style="margin-top:14px"><i class="ph ph-table"></i> Semester 2</div>
+          <div class="sil-table-wrap">
+            <table class="sil-table">
+              <thead>
+                <tr>
+                  <th style="width:60px">No</th>
+                  <th style="width:22%">Tujuan Pembelajaran</th>
+                  <th style="width:18%">Materi Inti</th>
+                  <th style="width:18%">Pembelajaran Mendalam</th>
+                  <th style="width:14%">Formatif</th>
+                  <th style="width:14%">Sumatif</th>
+                  <th style="width:10%">AQIL</th>
+                  <th style="width:70px">JP</th>
+                  <th style="width:52px"></th>
+                </tr>
+              </thead>
+              <tbody id="silA_sem2_tbody"></tbody>
+            </table>
+          </div>
+          <div class="action-row" style="justify-content: space-between; margin-top: 12px;">
+            <button class="btn btn-secondary" id="btnSilAAddSem2" type="button" style="height:44px"><i class="ph ph-plus"></i> Tambah Baris</button>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end">
+              <button class="btn btn-secondary" id="btnSilAReset" type="button" style="height:44px"><i class="ph ph-eraser"></i> Reset</button>
+              <button class="btn btn-primary" id="btnSilASave" type="button" style="height:44px"><i class="ph ph-floppy-disk"></i> Simpan Silabus Akademik</button>
+            </div>
+          </div>
+          <div id="silAStatus" style="margin-top:8px; color: var(--text-dim); font-weight: 600; font-size: 13px;"></div>
+        </section>
+      </div>
 
-<div class="action-row" style="margin-top: 10px;">
-  <div class="dd" id="ddSilTpl">
-    <button class="btn btn-secondary" id="btnTplSIL" type="button" style="height:44px"><i class="ph ph-download-simple"></i> Unduh Template <i class="ph ph-caret-down"></i></button>
-    <div class="dd-menu" id="menuTplSIL">
-      <a class="dd-item" href="./templates/Template_Silabus_Akademik.docx" download><i class="ph ph-file-doc"></i> Silabus Akademik </a>
-      <a class="dd-item" href="./templates/Template_Silabus_NonAkademik.xlsx" download><i class="ph ph-file-xls"></i> Silabus Non-Akademik </a>
+      <div class="docs-card-title" style="margin-top:10px"><i class="ph ph-paperclip"></i> Lampiran Silabus Akademik (opsional)</div>
+      <div class="hint">Kalau butuh file final (DOCX/PDF) untuk arsip, unggah di sini.</div>
+      <input id="silA_final_file" type="file" accept=".pdf,.doc,.docx" />
+      <div class="action-row" style="margin-top:10px">
+        <button class="btn btn-primary" id="btnUploadSilAcademic" type="button" style="height:44px"><i class="ph ph-upload"></i> Unggah Final</button>
+      </div>
+      <div class="list-stack" id="silAcademicList"></div>
+    </div>
+
+    <div class="docs-card" id="silNonAcademicBox">
+      <div class="docs-card-title"><i class="ph ph-notebook"></i> Silabus Non-Akademik (sederhana)</div>
+      <div class="sil-table-wrap">
+        <table class="sil-table">
+          <thead>
+            <tr>
+              <th style="width:34%">Topik / Tema / Materi</th>
+              <th style="width:16%">PIC</th>
+              <th style="width:18%">Waktu</th>
+              <th style="width:16%">Tempat</th>
+              <th style="width:16%">Sasaran</th>
+              <th style="width:52px"></th>
+            </tr>
+          </thead>
+          <tbody id="silTbody"></tbody>
+        </table>
+      </div>
+
+      <div class="action-row" style="justify-content: space-between; margin-top: 12px;">
+        <button class="btn btn-secondary" id="btnSilAddRow" type="button" style="height:44px"><i class="ph ph-plus"></i> Tambah Baris</button>
+        <button class="btn btn-primary" id="btnSilSave" type="button" style="height:44px"><i class="ph ph-floppy-disk"></i> Simpan Silabus</button>
+      </div>
+      <div class="hint">Kolomnya dibuat sama persis dengan template non-akademik: topik, PIC, waktu, tempat, sasaran.</div>
+      <div id="silStatus" style="margin-top:8px; color: var(--text-dim); font-weight: 600; font-size: 13px;"></div>
     </div>
   </div>
-  <button class="btn btn-primary" id="btnUploadSilAcademic" type="button" style="height:44px"><i class="ph ph-upload"></i> Unggah Silabus </button>
-</div>
-
-<div id="silAcademicBox" style="display:none; margin-top: 10px;">
-  <div class="hint">Silabus <strong>akademik</strong> memakai template DOCX yang antum kirim. Isi template, lalu unggah versi final (PDF/DOCX). File akan disimpan di Storage sebagai dokumen silabus.</div>
-  <div class="list-stack" id="silAcademicList"></div>
-</div>
-
-<div id="silNonAcademicBox" style="margin-top: 10px;">
-<div class="sil-table-wrap">
-          <table class="sil-table">
-            <thead>
-              <tr>
-                <th style="width:34%">Topik / Tema / Materi</th>
-                <th style="width:16%">PIC</th>
-                <th style="width:18%">Waktu</th>
-                <th style="width:16%">Tempat</th>
-                <th style="width:16%">Sasaran</th>
-                <th style="width:52px"></th>
-              </tr>
-            </thead>
-            <tbody id="silTbody"></tbody>
-          </table>
-        </div>
-
-        <div class="action-row" style="justify-content: space-between; margin-top: 12px;">
-          <button class="btn btn-secondary" id="btnSilAddRow" type="button" style="height:44px"><i class="ph ph-plus"></i> Tambah Baris</button>
-          <button class="btn btn-primary" id="btnSilSave" type="button" style="height:44px"><i class="ph ph-floppy-disk"></i> Simpan Silabus</button>
-        </div>
-        <div class="hint">Silabus non-akademik cukup 5 kolom: <strong>topik</strong>, <strong>PIC</strong>, <strong>waktu</strong>, <strong>tempat</strong>, <strong>sasaran</strong>. Data tersimpan di database dan bisa dipakai untuk monev.</div>
-        <div id="silStatus" style="margin-top:8px; color: var(--text-dim); font-weight: 600; font-size: 13px;"></div>
-
-      
-        </div>
 </div>
 
       <!-- TAB: RECORD -->
       <div class="tab-panel" id="tabPanelREC">
-        <div class="doc-meta">
-          <div class="form-group">
-            <label>Tanggal</label>
-            <input id="rec_date" type="date" />
-          </div>
-          <div class="form-group">
-            <label>Judul</label>
-            <input id="rec_title" type="text" placeholder="Contoh: Laporan Monev Januari" />
-          </div>
+<div class="docs-scroll-area">
+    <section class="docs-card">
+      <div class="docs-card-title"><i class="ph ph-clipboard-text"></i> Register Record (Identitas Bukti)</div>
+      <div class="hint">Bagian ini mengikuti template Record (register). Diisi sekali per program, lalu dipakai untuk kontrol bukti.</div>
+      <div class="doc-meta doc-meta-3">
+        <div class="form-group">
+          <label>Nama Register</label>
+          <input id="recReg_nama" type="text" placeholder="Contoh: Register Bukti Program ..." />
         </div>
         <div class="form-group">
-          <label>Deskripsi</label>
-          <textarea id="rec_desc" placeholder="Ringkasan bukti/rekaman (opsional)"></textarea>
+          <label>Kode Register</label>
+          <input id="recReg_kode" type="text" placeholder="Contoh: REC/UPMP/001" />
         </div>
         <div class="form-group">
-          <label>Lampiran (opsional)</label>
-          <input id="rec_file" type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+          <label>Revisi</label>
+          <input id="recReg_revisi" type="text" placeholder="Rev.01" />
         </div>
-
-        <!-- file input template record (dipakai programmatically) -->
-        <input id="rec_tpl_file" type="file" accept=".xlsx" style="display:none" />
-        <input id="rec_smart_file" type="file" accept=".xlsx" style="display:none" />
-
-        <div class="action-row">
-          <div class="dd" id="ddREC">
-            <button class="btn btn-secondary" id="btnTplREC" type="button" style="height:44px"><i class="ph ph-download-simple"></i> Unduh Template <i class="ph ph-caret-down"></i></button>
-            <div class="dd-menu" id="menuTplREC">
-              <a class="dd-item" href="./templates/Template_Record.xlsx" download><i class="ph ph-file-xls"></i> Template Bukti (Kosong)</a>
-              <button class="dd-item" id="btnTemplateRECPrefill" type="button"><i class="ph ph-magic-wand"></i> Template Bukti (Isi Otomatis)</button>
-            </div>
-          </div>
-          <div class="dd" id="ddRECAdd">
-            <button class="btn btn-primary" id="btnRecAddMenu" type="button" style="height:44px"><i class="ph ph-plus"></i> Tambah Bukti <i class="ph ph-caret-down"></i></button>
-            <div class="dd-menu" id="menuRecAdd">
-              <button class="dd-item" id="btnAddRecord" type="button"><i class="ph ph-plus"></i> Tambah Manual</button>
-              <button class="dd-item" id="btnImportREC" type="button"><i class="ph ph-file-arrow-up"></i> Impor dari Template (XLSX)</button>
-            </div>
-          </div>
+        <div class="form-group">
+          <label>Pengelola</label>
+          <input id="recReg_pengelola" type="text" placeholder="Unit/PIC" />
         </div>
-        <div class="hint">Klik <strong>Tambah Bukti</strong> untuk pilih: tambah manual atau impor banyak record dari template (XLSX).</div>
-        <div class="parse-preview" id="recParsePreview" style="display:none"></div>
-
-        <div class="list-stack" id="recordsList"></div>
+        <div class="form-group">
+          <label>Verifikator</label>
+          <input id="recReg_verifikator" type="text" placeholder="Unit/PIC" />
+        </div>
+        <div class="form-group">
+          <label>Lokasi Simpan</label>
+          <input id="recReg_lokasi" type="text" placeholder="Drive/lemari/tautan" />
+        </div>
+        <div class="form-group">
+          <label>Retensi</label>
+          <input id="recReg_retensi" type="text" placeholder="Contoh: 2 tahun" />
+        </div>
+        <div class="form-group">
+          <label>Klasifikasi</label>
+          <input id="recReg_klasifikasi" type="text" placeholder="Internal/Publik/dll" />
+        </div>
       </div>
+      <div class="action-row" style="justify-content:flex-end; margin-top: 12px; gap:10px">
+        <button class="btn btn-secondary" id="btnRecRegReset" type="button" style="height:44px"><i class="ph ph-eraser"></i> Reset</button>
+        <button class="btn btn-primary" id="btnRecRegSave" type="button" style="height:44px"><i class="ph ph-floppy-disk"></i> Simpan Register</button>
+      </div>
+      <div id="recRegStatus" style="margin-top:8px; color: var(--text-dim); font-weight: 600; font-size: 13px;"></div>
+    </section>
+
+    <section class="docs-card">
+      <div class="docs-card-title"><i class="ph ph-paperclip"></i> Tambah Bukti (Record Log)</div>
+      <div class="doc-meta doc-meta-3">
+        <div class="form-group">
+          <label>Tanggal</label>
+          <input id="rec_date" type="date" />
+        </div>
+        <div class="form-group">
+          <label>Judul</label>
+          <input id="rec_title" type="text" placeholder="Contoh: Laporan Monev Januari" />
+        </div>
+        <div class="form-group">
+          <label>PIC</label>
+          <input id="rec_pic" type="text" placeholder="PIC bukti" />
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <input id="rec_status" type="text" placeholder="Draft/Final/Verified" />
+        </div>
+        <div class="form-group">
+          <label>Tempat</label>
+          <input id="rec_tempat" type="text" placeholder="Lokasi kegiatan/penyimpanan" />
+        </div>
+        <div class="form-group">
+          <label>Sasaran</label>
+          <input id="rec_sasaran" type="text" placeholder="Sasaran kegiatan" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Deskripsi</label>
+        <textarea id="rec_desc" placeholder="Ringkasan bukti/rekaman (opsional)"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Lampiran (opsional)</label>
+        <input id="rec_file" type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+      </div>
+
+      <div class="action-row" style="justify-content: flex-end;">
+        <button class="btn btn-primary" id="btnAddRecord" type="button" style="height:44px"><i class="ph ph-plus"></i> Simpan Bukti</button>
+      </div>
+      <div class="hint">Bukti/record disimpan sebagai log per kejadian. Lampiran file akan diunggah bila bucket Storage sudah siap.</div>
+
+      <div class="list-stack" id="recordsList"></div>
+    </section>
+  </div>
+</div>
 
     </div>
   </div>
