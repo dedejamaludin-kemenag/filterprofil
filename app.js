@@ -82,6 +82,7 @@ const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
     e_bukti: document.getElementById("e_bukti"),
     e_frekuensi: document.getElementById("e_frekuensi"),
     e_pic: document.getElementById("e_pic"),
+    e_silabus: document.getElementById("e_silabus"),
     e_sop: document.getElementById("e_sop"),
     e_instruksi_kerja: document.getElementById("e_instruksi_kerja"),
 
@@ -107,6 +108,9 @@ const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
     sil_subtype: document.getElementById("sil_subtype"),
     sil_notes: document.getElementById("sil_notes"),
     silTbody: document.getElementById("silTbody"),
+    silNA_select: document.getElementById("silNA_select"),
+    silNA_title: document.getElementById("silNA_title"),
+    btnSilNANew: document.getElementById("btnSilNANew"),
     btnSilAddRow: document.getElementById("btnSilAddRow"),
     btnSilSave: document.getElementById("btnSilSave"),
     silStatus: document.getElementById("silStatus"),
@@ -420,6 +424,11 @@ const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
       els.e_program.value = row.program || "";
       els.e_target_renstra.value = row.target_renstra || "";
       els.e_sasaran.value = row.sasaran || "";
+      // ringkasan silabus diambil dari cache (A / NA(n))
+      if (els.e_silabus) {
+        const c = docsCountsByProgram.get(String(row.id)) || { sil_text: "-" };
+        els.e_silabus.value = c.sil_text || "-";
+      }
       els.e_sop.value = row.sop || "";
       els.e_instruksi_kerja.value = row.instruksi_kerja || "";
       els.e_bukti.value = row.bukti || "";
@@ -442,6 +451,7 @@ const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
       els.e_program.value = "";
       els.e_target_renstra.value = "";
       els.e_sasaran.value = "";
+      if (els.e_silabus) els.e_silabus.value = "";
       els.e_sop.value = "";
       els.e_instruksi_kerja.value = "";
       els.e_bukti.value = "";
@@ -678,6 +688,8 @@ async function uploadSilabusAcademic(file) {
     if (error && isBucketNotFoundError(error)) { showBucketNotFoundHelp(); return; }
     if (error) throw error;
     notify("Silabus akademik terunggah.", "success");
+    // buat meta agar bisa dihitung di tabel hasil filter
+    await ensureSilabusMeta(pid, "AKADEMIK", "Silabus Akademik", null);
     await loadSilabusAcademic(pid, subtype);
   } catch (err) {
     console.error(err);
@@ -723,7 +735,24 @@ async function uploadSilabusAcademic(file) {
   }
 
   function getSelectedSilSubtype() {
-    return els.sil_subtype?.value || "BAHASA_ILQO_MUFRODAT";
+    return els.sil_subtype?.value || "AKADEMIK";
+  }
+
+  async function ensureSilabusMeta(programId, subtype, title, notes = null) {
+    if (!programId) return null;
+    const cleanTitle = norm(title) || (subtype === "AKADEMIK" ? "Silabus Akademik" : "Silabus");
+    try {
+      const { data, error } = await db
+        .from(SILABUS_META_TABLE)
+        .upsert({ program_id: programId, subtype, title: cleanTitle, notes }, { onConflict: "program_id,subtype,title" })
+        .select("id")
+        .single();
+      if (error) throw error;
+      return data;
+    } catch (e) {
+      console.warn("ensureSilabusMeta", e);
+      return null;
+    }
   }
 
   function renderSilabusItems(items) {
@@ -790,24 +819,37 @@ if (els.silAcademicBox && els.silNonAcademicBox && els.btnUploadSilAcademic) {
 if (subtype === "AKADEMIK") {
   setSilStatus("");
   await loadSilabusAcademic(programId, subtype);
+  // structured akademik (tabel)
+  await loadSilabusAkademikStructured(programId);
   return;
 }
 
+    // NON_AKADEMIK: bisa lebih dari 1 silabus (dibedakan judul)
     setSilStatus("Memuat silabus...", "info");
 
-    // ambil meta
-    let meta = null;
+    // ambil daftar meta non-akademik (sekalian tangani legacy subtype non-akademik)
+    let nonList = [];
     try {
-      const { data, error } = await db
-        .from(SILABUS_META_TABLE)
-        .select("*")
-        .eq("program_id", programId)
-        .eq("subtype", subtype)
-        .maybeSingle();
-      if (error) throw error;
-      meta = data;
+      const all = await safeSelect(SILABUS_META_TABLE, (t) =>
+        t.select("*")
+          .eq("program_id", programId)
+          .order("updated_at", { ascending: false })
+          .order("created_at", { ascending: false })
+      );
+      nonList = (all || []).filter(x => String(x.subtype || "").toUpperCase() !== "AKADEMIK");
+
+      // auto-normalize legacy subtype ke NON_AKADEMIK (biar rapi), tanpa mengubah id
+      const legacy = nonList.filter(x => String(x.subtype || "").toUpperCase() !== "NON_AKADEMIK");
+      if (legacy.length) {
+        // best effort: jangan bikin crash bila policy melarang
+        try {
+          await Promise.all(legacy.map(x => db.from(SILABUS_META_TABLE).update({ subtype: "NON_AKADEMIK" }).eq("id", x.id)));
+          nonList = nonList.map(x => ({ ...x, subtype: "NON_AKADEMIK" }));
+        } catch(e) {
+          console.warn("legacy subtype normalize skipped", e);
+        }
+      }
     } catch (err) {
-      // tabel belum ada / policy
       if (!warnedMissingDocsTables) {
         warnedMissingDocsTables = true;
         notify("Tabel silabus belum ada / belum bisa diakses. Jalankan SQL migration dulu.", "error");
@@ -816,11 +858,33 @@ if (subtype === "AKADEMIK") {
       return;
     }
 
-    activeSilabusId = meta?.id || null;
-    activeSilabusSubtype = subtype;
+    // render dropdown
+    if (els.silNA_select) {
+      els.silNA_select.innerHTML = "";
+      const optEmpty = document.createElement("option");
+      optEmpty.value = "";
+      optEmpty.textContent = nonList.length ? "-- pilih --" : "(belum ada)";
+      els.silNA_select.appendChild(optEmpty);
+      nonList.forEach(x => {
+        const o = document.createElement("option");
+        o.value = String(x.id);
+        o.textContent = x.title || `Silabus #${x.id}`;
+        els.silNA_select.appendChild(o);
+      });
+    }
+
+    // tentukan pilihan aktif
+    const stillExists = nonList.some(x => String(x.id) === String(activeSilabusId));
+    if (!stillExists) activeSilabusId = nonList[0]?.id || null;
+
+    if (els.silNA_select) els.silNA_select.value = activeSilabusId ? String(activeSilabusId) : "";
+
+    const meta = nonList.find(x => String(x.id) === String(activeSilabusId)) || null;
+    activeSilabusSubtype = "NON_AKADEMIK";
+    if (els.silNA_title) els.silNA_title.value = meta?.title || "";
     if (els.sil_notes) els.sil_notes.value = meta?.notes || "";
 
-    // ambil items
+    // load items untuk meta terpilih
     let items = [];
     if (activeSilabusId) {
       items = await safeSelect(SILABUS_ITEMS_TABLE, (t) =>
@@ -842,7 +906,56 @@ if (subtype === "AKADEMIK") {
     }));
 
     renderSilabusItems(uiItems);
-    setSilStatus(meta ? "Silabus ditemukan." : "Belum ada silabus untuk jenis ini.", "info");
+    if (meta) setSilStatus(`Silabus aktif: ${meta.title || "(tanpa judul)"}`, "info");
+    else setSilStatus("Belum ada silabus non-akademik. Klik 'Buat Baru'.", "info");
+  }
+
+  async function createNewNonAcademicSilabus() {
+    if (!activeProgramRow?.id) return;
+    const programId = activeProgramRow.id;
+    // paksa mode NON_AKADEMIK
+    if (els.sil_subtype && els.sil_subtype.value !== "NON_AKADEMIK") {
+      els.sil_subtype.value = "NON_AKADEMIK";
+    }
+
+    let baseTitle = norm(els.silNA_title?.value);
+    if (!baseTitle) {
+      notify("Isi dulu judul silabus (misal: Semester 1 / Pekanan / Program Khusus).", "error");
+      return;
+    }
+    const notes = norm(els.sil_notes?.value);
+
+    setSilStatus("Membuat silabus baru...", "info");
+
+    // hindari konflik judul (unique: program_id+subtype+title)
+    let title = baseTitle;
+    let created = null;
+    for (let i = 0; i < 5; i++) {
+      try {
+        const { data, error } = await db
+          .from(SILABUS_META_TABLE)
+          .insert({ program_id: programId, subtype: "NON_AKADEMIK", title, notes })
+          .select("id")
+          .single();
+        if (error) throw error;
+        created = data;
+        break;
+      } catch (e) {
+        // coba judul lain
+        title = `${baseTitle} (${i + 2})`;
+      }
+    }
+
+    if (!created?.id) {
+      setSilStatus("Gagal membuat (cek policy / judul duplikat)", "error");
+      notify("Gagal membuat silabus baru. Coba ubah judul.", "error");
+      return;
+    }
+
+    activeSilabusId = created.id;
+    activeSilabusSubtype = "NON_AKADEMIK";
+    await loadSilabusForSelectedSubtype();
+    setSilStatus("Silabus baru dibuat ✓", "success");
   }
 
   async function saveSilabus() {
@@ -850,6 +963,11 @@ if (subtype === "AKADEMIK") {
     const programId = activeProgramRow.id;
     const subtype = getSelectedSilSubtype();
     const notes = norm(els.sil_notes?.value);
+
+    if (subtype === "AKADEMIK") {
+      notify("Silabus akademik tidak disimpan lewat tombol ini. Gunakan form akademik atau unggah file.", "warn");
+      return;
+    }
 
     // ambil dari DOM + bersihkan baris kosong
     const raw = readSilabusItemsFromDom();
@@ -876,28 +994,28 @@ if (subtype === "AKADEMIK") {
 
     setSilStatus("Menyimpan...", "info");
 
-    // 1) pastikan meta ada
+    // 1) pastikan meta ada (NON_AKADEMIK bisa lebih dari 1, dibedakan judul)
     let metaId = null;
-    try {
-      const { data: existing, error: selErr } = await db
-        .from(SILABUS_META_TABLE)
-        .select("id")
-        .eq("program_id", programId)
-        .eq("subtype", subtype)
-        .maybeSingle();
-      if (selErr) throw selErr;
+    const title = norm(els.silNA_title?.value);
+    if (!title) {
+      notify("Judul silabus wajib diisi (untuk membedakan silabus non-akademik).", "error");
+      return;
+    }
 
-      if (existing?.id) {
-        metaId = existing.id;
+    try {
+      const selectedIdRaw = els.silNA_select?.value || "";
+      metaId = selectedIdRaw ? Number(selectedIdRaw) : (activeSilabusId ? Number(activeSilabusId) : null);
+
+      if (metaId) {
         const { error: upErr } = await db
           .from(SILABUS_META_TABLE)
-          .update({ notes })
+          .update({ title, notes, subtype: "NON_AKADEMIK" })
           .eq("id", metaId);
         if (upErr) throw upErr;
       } else {
         const { data: ins, error: insErr } = await db
           .from(SILABUS_META_TABLE)
-          .insert({ program_id: programId, subtype, notes })
+          .insert({ program_id: programId, subtype: "NON_AKADEMIK", title, notes })
           .select("id")
           .single();
         if (insErr) throw insErr;
@@ -928,7 +1046,10 @@ if (subtype === "AKADEMIK") {
       }
 
       activeSilabusId = metaId;
-      activeSilabusSubtype = subtype;
+      activeSilabusSubtype = "NON_AKADEMIK";
+
+      // refresh dropdown agar judul & daftar update
+      await loadSilabusForSelectedSubtype();
 
       setSilStatus("Tersimpan ✓", "success");
       notify("Silabus tersimpan.", "success");
@@ -1387,7 +1508,14 @@ if (subtype === "AKADEMIK") {
     const sop = countDocGroups(docs, "SOP");
     const ik = countDocGroups(docs, "IK");
     const rec = (recs || []).length;
-    docsCountsByProgram.set(String(pid), { sop, ik, rec });
+    const prev = docsCountsByProgram.get(String(pid)) || {
+      sop: 0,
+      ik: 0,
+      rec: 0,
+      sil_text: "-",
+      sil_total: 0,
+    };
+    docsCountsByProgram.set(String(pid), { ...prev, sop, ik, rec });
   }
 
   async function refreshCountsForViewRows() {
@@ -1403,9 +1531,12 @@ if (subtype === "AKADEMIK") {
     const recs = await safeSelect(RECORDS_TABLE, (t) =>
       t.select("program_id").in("program_id", ids)
     );
+    const sils = await safeSelect(SILABUS_META_TABLE, (t) =>
+      t.select("program_id,subtype,title").in("program_id", ids)
+    );
 
     const map = new Map();
-    ids.forEach(id => map.set(String(id), { sop: 0, ik: 0, rec: 0 }));
+    ids.forEach(id => map.set(String(id), { sop: 0, ik: 0, rec: 0, sil_text: "-", sil_total: 0 }));
     // hitung unik per kelompok dokumen (agar SOURCE+FINAL tidak jadi dobel)
     const groupMap = new Map();
     ids.forEach(id => groupMap.set(String(id), { sop: new Set(), ik: new Set() }));
@@ -1419,14 +1550,33 @@ if (subtype === "AKADEMIK") {
     });
 
     groupMap.forEach((sets, pid) => {
-      if (!map.has(pid)) map.set(pid, { sop: 0, ik: 0, rec: 0 });
+      if (!map.has(pid)) map.set(pid, { sop: 0, ik: 0, rec: 0, sil_text: "-", sil_total: 0 });
       map.get(pid).sop = sets.sop.size;
       map.get(pid).ik = sets.ik.size;
     });
     (recs || []).forEach(r => {
       const key = String(r.program_id);
-      if (!map.has(key)) map.set(key, { sop: 0, ik: 0, rec: 0 });
+      if (!map.has(key)) map.set(key, { sop: 0, ik: 0, rec: 0, sil_text: "-", sil_total: 0 });
       map.get(key).rec += 1;
+    });
+
+    // Silabus summary (akademik: 1 jika ada meta subtype AKADEMIK, non: jumlah meta NON_AKADEMIK)
+    const silAgg = new Map();
+    ids.forEach(id => silAgg.set(String(id), { acad: false, nonCount: 0 }));
+    (sils || []).forEach(s => {
+      const pid = String(s.program_id);
+      if (!silAgg.has(pid)) silAgg.set(pid, { acad: false, nonCount: 0 });
+      const st = String(s.subtype || "").toUpperCase();
+      if (st === "AKADEMIK") silAgg.get(pid).acad = true;
+      else silAgg.get(pid).nonCount += 1;
+    });
+    silAgg.forEach((v, pid) => {
+      if (!map.has(pid)) map.set(pid, { sop: 0, ik: 0, rec: 0, sil_text: "-", sil_total: 0 });
+      const parts = [];
+      if (v.acad) parts.push("A");
+      if (v.nonCount > 0) parts.push(`NA(${v.nonCount})`);
+      map.get(pid).sil_text = parts.length ? parts.join(" + ") : "-";
+      map.get(pid).sil_total = (v.acad ? 1 : 0) + (v.nonCount || 0);
     });
 
     docsCountsByProgram = map;
@@ -1438,10 +1588,31 @@ if (subtype === "AKADEMIK") {
     document.querySelectorAll("[data-chip-count]").forEach((el) => {
       const pid = el.getAttribute("data-program-id");
       const kind = el.getAttribute("data-kind"); // sop|ik|rec
-      const c = docsCountsByProgram.get(String(pid)) || { sop: 0, ik: 0, rec: 0 };
+      const c = docsCountsByProgram.get(String(pid)) || { sop: 0, ik: 0, rec: 0, sil_text: "-", sil_total: 0 };
+      if (kind === "sil") {
+        // count di chip = angka total, sedangkan ringkasan A/NA(n) tampil di excerpt
+        el.textContent = String(typeof c.sil_total === "number" ? c.sil_total : 0);
+        return;
+      }
       const v = kind === "ik" ? c.ik : kind === "rec" ? c.rec : c.sop;
       el.textContent = String(v);
     });
+
+    // update ringkasan silabus (A / NA(n)) di kolom Silabus
+    document.querySelectorAll("[data-sil-excerpt]").forEach((el) => {
+      const pid = el.getAttribute("data-program-id");
+      const c = docsCountsByProgram.get(String(pid)) || { sil_text: "-" };
+      el.textContent = String(c.sil_text || "-");
+    });
+
+    // jika modal edit sedang terbuka, sinkronkan ringkasan silabus juga
+    try {
+      if (els.modal && els.modal.classList.contains("open") && activeProgramRow && els.e_silabus) {
+        const pid = String(activeProgramRow.id || "");
+        const c = docsCountsByProgram.get(pid) || { sil_text: "-" };
+        els.e_silabus.value = c.sil_text || "-";
+      }
+    } catch (_) {}
   }
 
   function renderDocsList(docs, docType, container) {
@@ -1960,7 +2131,7 @@ const description = (metaParts.length ? metaParts.join(" | ") + (descMain ? " | 
     const empty = `<div style="padding:40px;text-align:center;color:var(--text-muted)">Data tidak ditemukan.</div>`;
 
     if (!viewRowsData.length) {
-      els.tbody.innerHTML = `<tr><td colspan="11">${empty}</td></tr>`;
+      els.tbody.innerHTML = `<tr><td colspan="12">${empty}</td></tr>`;
       els.cards.innerHTML = empty;
       return;
     }
@@ -1977,6 +2148,14 @@ const description = (metaParts.length ? metaParts.join(" | ") + (descMain ? " | 
     <td>${safeText(r.sasaran || "-")}</td>
     <td><div class="badge-wrap">${renderPicBadges(r.pic)}</div></td>
     <td>${safeText(r.frekuensi || "-")}</td>
+    <td>
+      <div class="cell-excerpt"><span data-sil-excerpt data-program-id="${pid}">-</span></div>
+      <div class="mini-chips">
+        <button class="chip-btn" type="button" data-open-docs="SIL" data-index="${i}">
+          <span class="chip-dot sil"></span> Silabus: <span class="chip-count" data-chip-count data-kind="sil" data-program-id="${pid}">0</span>
+        </button>
+      </div>
+    </td>
     <td>
       <div class="cell-excerpt">${safeText(excerptText(r.sop || "-"))}</div>
       <div class="mini-chips">
@@ -2017,6 +2196,14 @@ const description = (metaParts.length ? metaParts.join(" | ") + (descMain ? " | 
     <div class="m-row"><div class="m-label">Sasaran</div><div>${safeText(r.sasaran || "-")}</div></div>
     <div class="m-row"><div class="m-label">PIC</div><div><div class="badge-wrap">${renderPicBadges(r.pic)}</div></div></div>
     <div class="m-row"><div class="m-label">Frekuensi</div><div>${safeText(r.frekuensi || "-")}</div></div>
+    <div class="m-row"><div class="m-label">Silabus</div><div>
+      <div class="cell-excerpt"><span data-sil-excerpt data-program-id="${r.id}">-</span></div>
+      <div class="mini-chips">
+        <button class="chip-btn" type="button" data-open-docs="SIL" data-index="${i}">
+          <span class="chip-dot sil"></span> Silabus: <span class="chip-count" data-chip-count data-kind="sil" data-program-id="${r.id}">0</span>
+        </button>
+      </div>
+    </div></div>
     <div class="m-row"><div class="m-label">SOP</div><div>
       <div class="cell-excerpt">${safeText(excerptText(r.sop || "-", 200))}</div>
       <div class="mini-chips">
@@ -2345,6 +2532,12 @@ els.fileExcel.addEventListener("change", async (e) => {
 
   // Silabus (non-akademik)
   els.sil_subtype?.addEventListener("change", () => loadSilabusForSelectedSubtype());
+  els.silNA_select?.addEventListener("change", () => {
+    const v = els.silNA_select?.value || "";
+    activeSilabusId = v ? Number(v) : null;
+    loadSilabusForSelectedSubtype();
+  });
+  els.btnSilNANew?.addEventListener("click", () => createNewNonAcademicSilabus());
   els.btnSilAddRow?.addEventListener("click", addSilabusRow);
   els.btnSilSave?.addEventListener("click", saveSilabus);
 
@@ -2973,6 +3166,8 @@ async function saveSilabusAkademikStructured(){
     const { error: e2 } = await db.from(SILABUS_AKADEMIK_SEM_TABLE).insert(payloadRows);
     if(e2){ console.error(e2); notify("Silabus akademik tersimpan, tapi baris semester gagal disimpan.", "warn"); }
   }
+  // buat meta agar terhitung pada kolom Silabus di tabel hasil filter
+  await ensureSilabusMeta(programId, "AKADEMIK", "Silabus Akademik", null);
   if(els.silAStatus) els.silAStatus.textContent = "✅ Silabus akademik tersimpan.";
   notify("Silabus akademik tersimpan.", "success");
 }

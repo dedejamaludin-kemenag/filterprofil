@@ -491,6 +491,7 @@
         var(--col-sasaran)
         var(--col-pic)
         var(--col-frekuensi)
+        var(--col-silabus)
         var(--col-sop)
         var(--col-ik)
         var(--col-bukti);
@@ -530,10 +531,11 @@
       /* PIC dibuat lebih lebar agar badge tidak mudah terpotong */
       --col-pic: 300px;
       --col-frekuensi: 160px;
+      --col-silabus: 180px;
       --col-sop: 240px;
       --col-ik: 260px;
       --col-bukti: 200px;
-      --table-minwidth: 2540px;
+      --table-minwidth: 2720px;
     }
 
     /* thead lama disembunyikan (dipakai box header di atas) */
@@ -577,6 +579,7 @@
     .chip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-blue); }
     .chip-dot.sop { background: var(--accent-blue); }
     .chip-dot.ik { background: var(--primary); }
+    .chip-dot.sil { background: var(--accent); }
     .chip-dot.rec { background: var(--warning); }
     .chip-count { color: var(--text-main); }
 
@@ -1155,10 +1158,11 @@
           <div class="hcell">PROFIL &amp; DEFINISI</div>
           <div class="hcell">INDIKATOR</div>
           <div class="hcell">PROGRAM</div>
-          <div class=\"hcell\">TARGET RENSTRA</div>
+          <div class="hcell">TARGET RENSTRA</div>
           <div class="hcell">SASARAN</div>
           <div class="hcell">PIC</div>
           <div class="hcell">FREKUENSI</div>
+          <div class="hcell">SILABUS</div>
           <div class="hcell">SOP</div>
           <div class="hcell">INSTRUKSI KERJA</div>
           <div class="hcell">BUKTI</div>
@@ -1170,10 +1174,11 @@
             <col style="width: var(--col-profil)">
             <col style="width: var(--col-indikator)">
             <col style="width: var(--col-program)">
-            <col style=\"width: var(--col-target-renstra)\">
+            <col style="width: var(--col-target-renstra)">
             <col style="width: var(--col-sasaran)">
             <col style="width: var(--col-pic)">
             <col style="width: var(--col-frekuensi)">
+            <col style="width: var(--col-silabus)">
             <col style="width: var(--col-sop)">
             <col style="width: var(--col-ik)">
             <col style="width: var(--col-bukti)">
@@ -1188,6 +1193,7 @@
               <th>SASARAN</th>
               <th>PIC</th>
               <th>FREKUENSI</th>
+              <th>SILABUS</th>
               <th>SOP</th>
               <th>INSTRUKSI KERJA</th>
               <th>BUKTI</th>
@@ -1235,7 +1241,7 @@
     <input type="text" id="e_target_renstra" placeholder="Target renstra (ringkas) yang terkait program ini">
   </div>
 
-<div class=\"form-group\">
+  <div class="form-group">
     <label>Sasaran</label>
     <input type="text" id="e_sasaran" placeholder="Contoh: Santri kelas X, Tim Bahasa, dll">
   </div>
@@ -1248,6 +1254,11 @@
   <div class="form-group">
     <label>Frekuensi</label>
     <input type="text" id="e_frekuensi" placeholder="Harian / Pekanan / Bulanan / dsb">
+  </div>
+
+  <div class="form-group">
+    <label>Silabus</label>
+    <input type="text" id="e_silabus" disabled placeholder="Ringkasan otomatis. Kelola di Kelola Dokumen → Silabus">
   </div>
 
   <div class="form-group">
@@ -1551,15 +1562,8 @@
       <div class="form-group">
         <label>Jenis Silabus</label>
         <select id="sil_subtype">
-          <option value="AKADEMIK">Akademik (Mapel)</option>
-          <option value="BAHASA_ILQO_MUFRODAT">Bahasa • Ilqo Mufrodat</option>
-          <option value="BAHASA_ILQO_KALIMAH">Bahasa • Ilqo Kalimah</option>
-          <option value="BAHASA_MUHADHOROH">Bahasa • Muhadhoroh</option>
-          <option value="BAHASA_HIWAR">Bahasa • Hiwar</option>
-          <option value="LIQO_KAMAR">Liqo Kamar</option>
-          <option value="KAJIAN_KITAB">Kajian Kitab</option>
-          <option value="HALAQOH">Halaqoh</option>
-          <option value="EKSKUL">Ekskul</option>
+          <option value="NON_AKADEMIK" selected>Silabus Non-Akademik</option>
+          <option value="AKADEMIK">Silabus Akademik</option>
         </select>
       </div>
       <div class="form-group">
@@ -1673,6 +1677,22 @@
 
     <div class="docs-card" id="silNonAcademicBox">
       <div class="docs-card-title"><i class="ph ph-notebook"></i> Silabus Non-Akademik (sederhana)</div>
+
+      <div class="action-row" style="justify-content: space-between; gap: 12px; align-items: flex-end; margin: 10px 0 12px; flex-wrap: wrap;">
+        <div class="form-group" style="flex: 1 1 320px; margin: 0;">
+          <label>Pilih Silabus</label>
+          <div class="input-wrapper">
+            <select id="silNA_select"></select>
+            <i class="ph ph-caret-down select-arrow"></i>
+          </div>
+        </div>
+        <div class="form-group" style="flex: 0 0 320px; margin: 0;">
+          <label>Judul Silabus</label>
+          <input id="silNA_title" type="text" placeholder="Misal: Semester 1 / Pekanan / Program Khusus" autocomplete="off">
+        </div>
+        <button class="btn btn-secondary" id="btnSilNANew" type="button" style="height:44px"><i class="ph ph-plus"></i> Buat Baru</button>
+      </div>
+
       <div class="sil-table-wrap">
         <table class="sil-table">
           <thead>
@@ -1696,7 +1716,7 @@
         <button class="btn btn-secondary" id="btnSilAddRow" type="button" style="height:44px"><i class="ph ph-plus"></i> Tambah Baris</button>
         <button class="btn btn-primary" id="btnSilSave" type="button" style="height:44px"><i class="ph ph-floppy-disk"></i> Simpan Silabus</button>
       </div>
-      <div class="hint">Kolomnya dibuat sama persis dengan template non-akademik: topik, PIC, waktu, tempat, sasaran.</div>
+      <div class="hint">Kolom disamakan dengan template non-akademik: Materi, Tahapan (target per jenjang), Penilaian, Referensi, PIC, Waktu (harian/pekanan), Tempat, Sasaran.</div>
       <div id="silStatus" style="margin-top:8px; color: var(--text-dim); font-weight: 600; font-size: 13px;"></div>
     </div>
   </div>
