@@ -487,6 +487,7 @@
         var(--col-profil)
         var(--col-indikator)
         var(--col-program)
+        var(--col-target-renstra)
         var(--col-sasaran)
         var(--col-pic)
         var(--col-frekuensi)
@@ -524,6 +525,7 @@
       --col-profil: 360px;
       --col-indikator: 320px;
       --col-program: 240px;
+      --col-target-renstra: 220px;
       --col-sasaran: 220px;
       /* PIC dibuat lebih lebar agar badge tidak mudah terpotong */
       --col-pic: 300px;
@@ -531,7 +533,7 @@
       --col-sop: 240px;
       --col-ik: 260px;
       --col-bukti: 200px;
-      --table-minwidth: 2320px;
+      --table-minwidth: 2540px;
     }
 
     /* thead lama disembunyikan (dipakai box header di atas) */
@@ -976,6 +978,9 @@
   gap: 10px;
 }
 .doc-meta-2{ grid-template-columns: repeat(2, minmax(0,1fr)); }
+.doc-meta-auto{ grid-template-columns: 1fr; }
+@media (min-width: 768px){ .doc-meta-auto{ grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (min-width: 1100px){ .doc-meta-auto{ grid-template-columns: repeat(3, minmax(0,1fr)); } }
 /* Untuk kebutuhan 1–3 input per baris di dalam satu kartu */
 @media (min-width: 1100px){
   .doc-meta-3{ grid-template-columns: repeat(3, minmax(0,1fr)); }
@@ -1069,6 +1074,19 @@
   #docsModal .template-details.dock .template-menu{ min-width: min(86vw, 320px); }
 }
 
+
+/* Template groups (Lite vs Lengkap) */
+.template-menu .template-group{ padding: 8px 10px; border-top: 1px dashed rgba(255,255,255,0.12); }
+.template-menu .template-group:first-child{ border-top: none; }
+.template-group-title{ font-size: 12px; font-weight: 800; color: rgba(255,255,255,0.85); margin: 2px 0 6px; }
+
+
+/* Collapsible ISO-ready identity fields (kept, but not in your face) */
+.iso-details{ margin-top: 10px; border: 1px dashed rgba(255,255,255,0.18); border-radius: 14px; padding: 10px 10px 6px; background: rgba(255,255,255,0.03); }
+.iso-details > summary{ cursor: pointer; font-weight: 800; font-size: 12px; color: rgba(255,255,255,0.88); list-style: none; display:flex; align-items:center; gap:8px; }
+.iso-details > summary::-webkit-details-marker{ display:none; }
+.iso-details[open] > summary{ margin-bottom: 8px; }
+
 </style>
 </head>
 <body>
@@ -1137,6 +1155,7 @@
           <div class="hcell">PROFIL &amp; DEFINISI</div>
           <div class="hcell">INDIKATOR</div>
           <div class="hcell">PROGRAM</div>
+          <div class=\"hcell\">TARGET RENSTRA</div>
           <div class="hcell">SASARAN</div>
           <div class="hcell">PIC</div>
           <div class="hcell">FREKUENSI</div>
@@ -1151,6 +1170,7 @@
             <col style="width: var(--col-profil)">
             <col style="width: var(--col-indikator)">
             <col style="width: var(--col-program)">
+            <col style=\"width: var(--col-target-renstra)\">
             <col style="width: var(--col-sasaran)">
             <col style="width: var(--col-pic)">
             <col style="width: var(--col-frekuensi)">
@@ -1164,6 +1184,7 @@
               <th>PROFIL &amp; DEFINISI</th>
               <th>INDIKATOR</th>
               <th>PROGRAM</th>
+              <th>TARGET RENSTRA</th>
               <th>SASARAN</th>
               <th>PIC</th>
               <th>FREKUENSI</th>
@@ -1208,7 +1229,13 @@
     <input type="text" id="e_program" placeholder="Nama program / kegiatan">
   </div>
 
+  
   <div class="form-group">
+    <label>Target Renstra</label>
+    <input type="text" id="e_target_renstra" placeholder="Target renstra (ringkas) yang terkait program ini">
+  </div>
+
+<div class=\"form-group\">
     <label>Sasaran</label>
     <input type="text" id="e_sasaran" placeholder="Contoh: Santri kelas X, Tim Bahasa, dll">
   </div>
@@ -1225,17 +1252,17 @@
 
   <div class="form-group">
     <label>SOP</label>
-    <textarea id="e_sop" placeholder="Tulis SOP / ringkas SOP di sini..."></textarea>
+    <textarea id="e_sop" disabled placeholder="Diisi otomatis dari Kelola Dokumen (ringkasan)."></textarea>
   </div>
 
   <div class="form-group">
     <label>Instruksi Kerja</label>
-    <textarea id="e_instruksi_kerja" placeholder="Tulis instruksi kerja / langkah kerja di sini..."></textarea>
+    <textarea id="e_instruksi_kerja" disabled placeholder="Diisi otomatis dari Kelola Dokumen (ringkasan)."></textarea>
   </div>
 
   <div class="form-group">
     <label>Bukti</label>
-    <input type="text" id="e_bukti" placeholder="Dokumentasi / eviden / laporan / dsb">
+    <input type="text" id="e_bukti" disabled placeholder="Diisi otomatis dari Kelola Dokumen (ringkasan)">
   </div>
 
   <div class="inline-actions">
@@ -1269,24 +1296,28 @@
       </div>
 
       <div class="tabs" role="tablist">
-        <button class="tab-btn active" id="tabBtnSOP" data-tab="SOP" type="button"><i class="ph ph-file-text"></i> SOP</button>
+        <button class="tab-btn active" id="tabBtnSIL" data-tab="SIL" type="button"><i class="ph ph-notebook"></i> Silabus</button>
+        <button class="tab-btn" id="tabBtnSOP" data-tab="SOP" type="button"><i class="ph ph-file-text"></i> SOP</button>
         <button class="tab-btn" id="tabBtnIK" data-tab="IK" type="button"><i class="ph ph-list-checks"></i> Instruksi Kerja</button>
-                <button class="tab-btn" id="tabBtnSIL" data-tab="SIL" type="button"><i class="ph ph-notebook"></i> Silabus</button>
         <button class="tab-btn" id="tabBtnREC" data-tab="REC" type="button"><i class="ph ph-paperclip"></i> Bukti (Record)</button>
       </div>
 
       <!-- TAB: SOP -->
-      <div class="tab-panel active" id="tabPanelSOP">
+      <div class="tab-panel" id="tabPanelSOP">
 <div class="docs-scroll-area">
     <div class="docs-grid">
       <section class="docs-card">
         <div class="docs-card-title"><i class="ph ph-identification-card"></i> Identitas SOP</div>
-        <div class="doc-meta doc-meta-3">
-          <div class="form-group">
+        <div class="doc-meta doc-meta-auto">
+<div class="form-group">
             <label>Judul Dokumen</label>
             <input id="sop_judul" type="text" placeholder="Contoh: SOP Pelaksanaan Program" />
           </div>
-          <div class="form-group">
+                  </div>
+        <details class="iso-details">
+          <summary>Detail Identitas (opsional, siap ISO)</summary>
+          <div class="doc-meta doc-meta-auto">
+<div class="form-group">
             <label>Nomor Dokumen</label>
             <input id="sop_no_dok" type="text" placeholder="Contoh: SOP/UPMP/001" />
           </div>
@@ -1305,8 +1336,8 @@
           <div class="form-group">
             <label>Disahkan oleh</label>
             <input id="sop_disahkan" type="text" placeholder="Nama/Unit" />
-          </div>
-        </div>
+          </div>          </div>
+        </details>
       </section>
 
       <section class="docs-card">
@@ -1383,7 +1414,14 @@
         <details class="template-details dock">
           <summary><i class="ph ph-download-simple"></i> Unduh format resmi</summary>
           <div class="template-menu">
-            <a class="template-link" href="templates/Template_SOP.xlsx" download><i class="ph ph-file-xls"></i> Template SOP (XLSX)</a>
+            <div class="template-group">
+              <div class="template-group-title">Versi Sederhana (Lite)</div>
+              <a class="template-link" href="templates/Template_SOP_Lite.xlsx" download><i class="ph ph-file-xls"></i> Template SOP Lite (XLSX)</a>
+            </div>
+            <div class="template-group">
+              <div class="template-group-title">Versi Lengkap</div>
+              <a class="template-link" href="templates/Template_SOP.xlsx" download><i class="ph ph-file-xls"></i> Template SOP Lengkap (XLSX)</a>
+            </div>
           </div>
         </details>
       </div>
@@ -1395,12 +1433,16 @@
     <div class="docs-grid">
       <section class="docs-card">
         <div class="docs-card-title"><i class="ph ph-identification-card"></i> Identitas IK</div>
-        <div class="doc-meta doc-meta-3">
-          <div class="form-group">
+        <div class="doc-meta doc-meta-auto">
+<div class="form-group">
             <label>Judul Dokumen</label>
             <input id="ik_judul" type="text" placeholder="Contoh: IK Input & Verifikasi" />
           </div>
-          <div class="form-group">
+                  </div>
+        <details class="iso-details">
+          <summary>Detail Identitas (opsional, siap ISO)</summary>
+          <div class="doc-meta doc-meta-auto">
+<div class="form-group">
             <label>Nomor Dokumen</label>
             <input id="ik_no_dok" type="text" placeholder="Contoh: IK/UPMP/001" />
           </div>
@@ -1419,8 +1461,8 @@
           <div class="form-group">
             <label>Disahkan oleh</label>
             <input id="ik_disahkan" type="text" placeholder="Nama/Unit" />
-          </div>
-        </div>
+          </div>          </div>
+        </details>
       </section>
 
       <section class="docs-card">
@@ -1488,7 +1530,14 @@
         <details class="template-details dock">
           <summary><i class="ph ph-download-simple"></i> Unduh format resmi</summary>
           <div class="template-menu">
-            <a class="template-link" href="templates/Template_IK.xlsx" download><i class="ph ph-file-xls"></i> Template IK (XLSX)</a>
+            <div class="template-group">
+              <div class="template-group-title">Versi Sederhana (Lite)</div>
+              <a class="template-link" href="templates/Template_IK_Lite.xlsx" download><i class="ph ph-file-xls"></i> Template IK Lite (XLSX)</a>
+            </div>
+            <div class="template-group">
+              <div class="template-group-title">Versi Lengkap</div>
+              <a class="template-link" href="templates/Template_IK.xlsx" download><i class="ph ph-file-xls"></i> Template IK Lengkap (XLSX)</a>
+            </div>
           </div>
         </details>
       </div>
@@ -1496,7 +1545,7 @@
 
 
       <!-- TAB: SILABUS (non-akademik) -->
-      <div class="tab-panel" id="tabPanelSIL">
+      <div class="tab-panel active" id="tabPanelSIL">
 <div class="docs-scroll-area">
     <div class="doc-meta doc-meta-2">
       <div class="form-group">
@@ -1525,7 +1574,7 @@
       <div class="docs-grid">
         <section class="docs-card soft">
           <div class="docs-card-title"><i class="ph ph-identification-card"></i> Identitas Silabus</div>
-          <div class="doc-meta doc-meta-3">
+          <div class="doc-meta doc-meta-auto">
             <div class="form-group">
               <label>Satuan Pendidikan</label>
               <input id="silA_satpen" type="text" placeholder="Contoh: MTs Husnul Khotimah" />
@@ -1628,11 +1677,14 @@
         <table class="sil-table">
           <thead>
             <tr>
-              <th style="width:34%">Topik / Tema / Materi</th>
-              <th style="width:16%">PIC</th>
-              <th style="width:18%">Waktu</th>
-              <th style="width:16%">Tempat</th>
-              <th style="width:16%">Sasaran</th>
+              <th style="width:18%">Materi</th>
+              <th style="width:14%">Tahapan (target per jenjang)</th>
+              <th style="width:14%">Penilaian</th>
+              <th style="width:14%">Referensi</th>
+              <th style="width:14%">PIC</th>
+              <th style="width:10%">Waktu</th>
+              <th style="width:8%">Tempat</th>
+              <th style="width:8%">Sasaran</th>
               <th style="width:52px"></th>
             </tr>
           </thead>
@@ -1652,8 +1704,18 @@
         <details class="template-details dock">
           <summary><i class="ph ph-download-simple"></i> Unduh format resmi</summary>
           <div class="template-menu">
-            <a class="template-link" href="templates/Template_Silabus_Akademik.docx" download><i class="ph ph-file-doc"></i> Silabus Akademik (DOCX)</a>
-            <a class="template-link" href="templates/Template_Silabus_NonAkademik.xlsx" download><i class="ph ph-file-xls"></i> Silabus Non-Akademik (XLSX)</a>
+            <div class="template-group">
+              <div class="template-group-title">Akademik</div>
+              <a class="template-link" href="templates/Template_Silabus_Akademik.docx" download><i class="ph ph-file-doc"></i> Silabus Akademik (DOCX)</a>
+            </div>
+            <div class="template-group">
+              <div class="template-group-title">Non-Akademik – Versi Sederhana (Lite)</div>
+              <a class="template-link" href="templates/Template_Silabus_NonAkademik_Lite.xlsx" download><i class="ph ph-file-xls"></i> Silabus Non-Akademik Lite (XLSX)</a>
+            </div>
+            <div class="template-group">
+              <div class="template-group-title">Non-Akademik – Versi Lengkap</div>
+              <a class="template-link" href="templates/Template_Silabus_NonAkademik.xlsx" download><i class="ph ph-file-xls"></i> Silabus Non-Akademik Lengkap (XLSX)</a>
+            </div>
           </div>
         </details>
       </div>
@@ -1666,7 +1728,7 @@
     <section class="docs-card">
       <div class="docs-card-title"><i class="ph ph-clipboard-text"></i> Register Record (Identitas Bukti)</div>
       <div class="hint">Bagian ini mengikuti template Record (register). Diisi sekali per program, lalu dipakai untuk kontrol bukti.</div>
-      <div class="doc-meta doc-meta-3">
+      <div class="doc-meta doc-meta-auto">
         <div class="form-group">
           <label>Nama Register</label>
           <input id="recReg_nama" type="text" placeholder="Contoh: Register Bukti Program ..." />
@@ -1709,7 +1771,7 @@
 
     <section class="docs-card">
       <div class="docs-card-title"><i class="ph ph-paperclip"></i> Tambah Bukti (Record Log)</div>
-      <div class="doc-meta doc-meta-3">
+      <div class="doc-meta doc-meta-auto">
         <div class="form-group">
           <label>Tanggal</label>
           <input id="rec_date" type="date" />
@@ -1761,7 +1823,14 @@
         <details class="template-details dock">
           <summary><i class="ph ph-download-simple"></i> Unduh format resmi</summary>
           <div class="template-menu">
-            <a class="template-link" href="templates/Template_Record.xlsx" download><i class="ph ph-file-xls"></i> Template Record (XLSX)</a>
+            <div class="template-group">
+              <div class="template-group-title">Versi Sederhana (Lite)</div>
+              <a class="template-link" href="templates/Template_Record_Lite.xlsx" download><i class="ph ph-file-xls"></i> Template Record Lite (XLSX)</a>
+            </div>
+            <div class="template-group">
+              <div class="template-group-title">Versi Lengkap</div>
+              <a class="template-link" href="templates/Template_Record.xlsx" download><i class="ph ph-file-xls"></i> Template Record Lengkap (XLSX)</a>
+            </div>
           </div>
         </details>
       </div>

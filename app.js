@@ -77,6 +77,7 @@ const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
     e_definisi: document.getElementById("e_definisi"),
     e_indikator: document.getElementById("e_indikator"),
     e_program: document.getElementById("e_program"),
+    e_target_renstra: document.getElementById("e_target_renstra"),
     e_sasaran: document.getElementById("e_sasaran"),
     e_bukti: document.getElementById("e_bukti"),
     e_frekuensi: document.getElementById("e_frekuensi"),
@@ -260,7 +261,7 @@ const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
   let activeProgramRow = null;
   let docsCountsByProgram = new Map(); // program_id -> { sop: n, ik: n, rec: n }
   let warnedMissingDocsTables = false;
-  let lastDocsTab = "SOP";
+  let lastDocsTab = "SIL";
 
   // state silabus (non-akademik)
   let activeSilabusId = null;
@@ -417,6 +418,7 @@ const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
       els.e_definisi.value = row.definisi || "";
       els.e_indikator.value = row.indikator || "";
       els.e_program.value = row.program || "";
+      els.e_target_renstra.value = row.target_renstra || "";
       els.e_sasaran.value = row.sasaran || "";
       els.e_sop.value = row.sop || "";
       els.e_instruksi_kerja.value = row.instruksi_kerja || "";
@@ -438,6 +440,7 @@ const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
       els.e_definisi.value = "";
       els.e_indikator.value = "";
       els.e_program.value = "";
+      els.e_target_renstra.value = "";
       els.e_sasaran.value = "";
       els.e_sop.value = "";
       els.e_instruksi_kerja.value = "";
@@ -501,7 +504,7 @@ function buildStoragePathSilabus(programId, subtype, fileName) {
   }
 
   function setDocsTab(tab) {
-    lastDocsTab = tab || "SOP";
+    lastDocsTab = tab || "SIL";
     const allBtns = [els.tabBtnSOP, els.tabBtnIK, els.tabBtnSIL, els.tabBtnREC];
     const allPanels = [els.tabPanelSOP, els.tabPanelIK, els.tabPanelSIL, els.tabPanelREC];
     allBtns.forEach(b => b && b.classList.remove("active"));
@@ -526,7 +529,7 @@ function buildStoragePathSilabus(programId, subtype, fileName) {
     }
   }
 
-  function openDocsModal(row, initialTab = "SOP") {
+  function openDocsModal(row, initialTab = "SIL") {
     if (!row || !row.id) {
       notify("Data belum punya ID. Simpan dulu datanya, baru bisa lampirkan dokumen/bukti.", "error");
       return;
@@ -689,7 +692,7 @@ async function uploadSilabusAcademic(file) {
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
-      .replace(/\"/g, "&quot;")
+      .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
   }
 
@@ -728,14 +731,17 @@ async function uploadSilabusAcademic(file) {
     els.silTbody.innerHTML = "";
 
     const rows = Array.isArray(items) ? items : [];
-    if (rows.length === 0) rows.push({ topik: "", pic: "", waktu: "", tempat: "", sasaran: "" });
+    if (rows.length === 0) rows.push({ materi: "", tahapan: "", penilaian: "", referensi: "", pic: "", waktu: "", tempat: "", sasaran: "" });
 
     rows.forEach((r) => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td><input class="sil_topik" type="text" placeholder="Materi/topik" value="${escapeHtmlLite(r.topik || "")}"></td>
+        <td><input class="sil_materi" type="text" placeholder="Materi" value="${escapeHtmlLite(r.materi || "")}"></td>
+        <td><input class="sil_tahapan" type="text" placeholder="Target per jenjang" value="${escapeHtmlLite(r.tahapan || "")}"></td>
+        <td><input class="sil_penilaian" type="text" placeholder="Penilaian" value="${escapeHtmlLite(r.penilaian || "")}"></td>
+        <td><input class="sil_referensi" type="text" placeholder="Referensi" value="${escapeHtmlLite(r.referensi || "")}"></td>
         <td><input class="sil_pic" type="text" placeholder="PIC" value="${escapeHtmlLite(r.pic || "")}"></td>
-        <td><input class="sil_waktu" type="datetime-local" value="${escapeHtmlLite(r.waktu || "")}"></td>
+        <td><input class="sil_waktu" type="text" placeholder="Harian / Pekanan / dst" value="${escapeHtmlLite(r.waktu || "")}"></td>
         <td><input class="sil_tempat" type="text" placeholder="Tempat" value="${escapeHtmlLite(r.tempat || "")}"></td>
         <td><input class="sil_sasaran" type="text" placeholder="Sasaran" value="${escapeHtmlLite(r.sasaran || "")}"></td>
         <td style="text-align:right"><button class="btn-row-del" type="button" data-sil-del="1" title="Hapus baris"><i class="ph ph-trash"></i></button></td>
@@ -748,28 +754,23 @@ async function uploadSilabusAcademic(file) {
     const out = [];
     if (!els.silTbody) return out;
     els.silTbody.querySelectorAll("tr").forEach((tr) => {
-      const topik = tr.querySelector(".sil_topik")?.value || "";
+      const materi = tr.querySelector(".sil_materi")?.value || "";
+      const tahapan = tr.querySelector(".sil_tahapan")?.value || "";
+      const penilaian = tr.querySelector(".sil_penilaian")?.value || "";
+      const referensi = tr.querySelector(".sil_referensi")?.value || "";
       const pic = tr.querySelector(".sil_pic")?.value || "";
-      const waktuLocal = tr.querySelector(".sil_waktu")?.value || "";
+      const waktu = tr.querySelector(".sil_waktu")?.value || "";
       const tempat = tr.querySelector(".sil_tempat")?.value || "";
       const sasaran = tr.querySelector(".sil_sasaran")?.value || "";
-      out.push({ topik, pic, waktuLocal, tempat, sasaran });
+      out.push({ materi, tahapan, penilaian, referensi, pic, waktu, tempat, sasaran });
     });
     return out;
   }
 
   function addSilabusRow() {
     const current = readSilabusItemsFromDom();
-    current.push({ topik: "", pic: "", waktuLocal: "", tempat: "", sasaran: "" });
-    // normalisasi key waktu
-    const normalized = current.map((r) => ({
-      topik: r.topik || "",
-      pic: r.pic || "",
-      waktu: r.waktu || r.waktuLocal || "",
-      tempat: r.tempat || "",
-      sasaran: r.sasaran || "",
-    }));
-    renderSilabusItems(normalized);
+    current.push({ materi: "", tahapan: "", penilaian: "", referensi: "", pic: "", waktu: "", tempat: "", sasaran: "" });
+    renderSilabusItems(current);
   }
 
   async function loadSilabusForSelectedSubtype() {
@@ -830,9 +831,12 @@ if (subtype === "AKADEMIK") {
     }
 
     const uiItems = (items || []).map((it) => ({
-      topik: it.topik || "",
+      materi: it.materi || it.topik || "",
+      tahapan: it.tahapan || "",
+      penilaian: it.penilaian || "",
+      referensi: it.referensi || "",
       pic: it.pic || "",
-      waktu: toDatetimeLocalValue(it.waktu),
+      waktu: it.waktu || "",
       tempat: it.tempat || "",
       sasaran: it.sasaran || "",
     }));
@@ -851,18 +855,21 @@ if (subtype === "AKADEMIK") {
     const raw = readSilabusItemsFromDom();
     const rows = raw
       .map((r) => ({
-        topik: norm(r.topik),
+        materi: norm(r.materi),
+        tahapan: norm(r.tahapan),
+        penilaian: norm(r.penilaian),
+        referensi: norm(r.referensi),
         pic: norm(r.pic),
-        waktuLocal: r.waktuLocal || "",
+        waktu: norm(r.waktu),
         tempat: norm(r.tempat),
         sasaran: norm(r.sasaran),
       }))
-      .filter((r) => r.topik || r.pic || r.waktuLocal || r.tempat || r.sasaran);
+      .filter((r) => r.materi || r.tahapan || r.penilaian || r.referensi || r.pic || r.waktu || r.tempat || r.sasaran);
 
-    // validasi topik minimal jika baris ada
+    // validasi materi minimal jika baris ada
     for (const r of rows) {
-      if (!r.topik) {
-        notify("Kolom 'Topik/Tema/Materi' wajib diisi untuk setiap baris yang disimpan.", "error");
+      if (!r.materi) {
+        notify("Kolom 'Materi' wajib diisi untuk setiap baris yang disimpan.", "error");
         return;
       }
     }
@@ -907,9 +914,12 @@ if (subtype === "AKADEMIK") {
       if (rows.length) {
         const payload = rows.map((r) => ({
           silabus_id: metaId,
-          topik: r.topik,
+          materi: r.materi,
+          tahapan: r.tahapan || null,
+          penilaian: r.penilaian || null,
+          referensi: r.referensi || null,
           pic: r.pic || null,
-          waktu: fromDatetimeLocalToIso(r.waktuLocal),
+          waktu: r.waktu || null,
           tempat: r.tempat || null,
           sasaran: r.sasaran || null,
         }));
@@ -1315,7 +1325,7 @@ if (subtype === "AKADEMIK") {
       if (!norm(els.rec_desc.value) && identPIC) els.rec_desc.value = `PIC (dari template): ${identPIC}`;
 
       const previewRows = parsed.slice(0, 4).map(p => `<div>• <strong>${safeText(p.record_date)}</strong> — ${safeText(p.title)}</div>`).join("");
-      showParsePreview(els.recParsePreview, { title: identTitle, doc_no: "", revision: "", effective_date: "", pic: identPIC }, `<div style="margin-top:8px">Ditemukan <strong>${count}</strong> record.</div><div style="margin-top:6px">${previewRows}${count > 4 ? `<div style=\"margin-top:6px\">…dan ${count - 4} record lainnya</div>` : ""}</div>`);
+      showParsePreview(els.recParsePreview, { title: identTitle, doc_no: "", revision: "", effective_date: "", pic: identPIC }, `<div style="margin-top:8px">Ditemukan <strong>${count}</strong> record.</div><div style="margin-top:6px">${previewRows}${count > 4 ? `<div style="margin-top:6px">…dan ${count - 4} record lainnya</div>` : ""}</div>`);
 
       const ok = await askConfirm(`Tambah ${count} record dari template ini?`);
       if (!ok) {
@@ -1811,10 +1821,8 @@ const description = (metaParts.length ? metaParts.join(" | ") + (descMain ? " | 
       definisi: els.e_definisi.value.trim(),
       indikator: els.e_indikator.value.trim(),
       program: els.e_program.value.trim(),
+      target_renstra: els.e_target_renstra.value.trim(),
       sasaran: els.e_sasaran.value.trim(),
-      sop: els.e_sop.value.trim(),
-      instruksi_kerja: els.e_instruksi_kerja.value.trim(),
-      bukti: norm(els.e_bukti.value),
       frekuensi: norm(els.e_frekuensi.value),
       pic: els.e_pic.value.trim(),
     };
@@ -1921,6 +1929,7 @@ const description = (metaParts.length ? metaParts.join(" | ") + (descMain ? " | 
       r.definisi,
       r.indikator,
       r.program,
+      r.target_renstra,
       r.sasaran,
       r.pic,
       r.frekuensi,
@@ -1951,7 +1960,7 @@ const description = (metaParts.length ? metaParts.join(" | ") + (descMain ? " | 
     const empty = `<div style="padding:40px;text-align:center;color:var(--text-muted)">Data tidak ditemukan.</div>`;
 
     if (!viewRowsData.length) {
-      els.tbody.innerHTML = `<tr><td colspan="10">${empty}</td></tr>`;
+      els.tbody.innerHTML = `<tr><td colspan="11">${empty}</td></tr>`;
       els.cards.innerHTML = empty;
       return;
     }
@@ -1964,6 +1973,7 @@ const description = (metaParts.length ? metaParts.join(" | ") + (descMain ? " | 
     <td><span class="cell-profil">${safeText(r.profil || r.profil_utama || "-")}</span><span class="cell-def">${safeText(r.definisi || "-")}</span></td>
     <td>${safeText(r.indikator || "-")}</td>
     <td>${safeText(r.program || "-")}</td>
+    <td>${safeText(r.target_renstra || "-")}</td>
     <td>${safeText(r.sasaran || "-")}</td>
     <td><div class="badge-wrap">${renderPicBadges(r.pic)}</div></td>
     <td>${safeText(r.frekuensi || "-")}</td>
@@ -2003,6 +2013,7 @@ const description = (metaParts.length ? metaParts.join(" | ") + (descMain ? " | 
     </div>
     <div class="m-row"><div class="m-label">Indikator</div><div>${safeText(r.indikator || "-")}</div></div>
     <div class="m-row"><div class="m-label">Program</div><div>${safeText(r.program || "-")}</div></div>
+    <div class="m-row"><div class="m-label">Target Renstra</div><div>${safeText(r.target_renstra || "-")}</div></div>
     <div class="m-row"><div class="m-label">Sasaran</div><div>${safeText(r.sasaran || "-")}</div></div>
     <div class="m-row"><div class="m-label">PIC</div><div><div class="badge-wrap">${renderPicBadges(r.pic)}</div></div></div>
     <div class="m-row"><div class="m-label">Frekuensi</div><div>${safeText(r.frekuensi || "-")}</div></div>
@@ -2097,6 +2108,11 @@ const HEADER_TO_DB = {
   sasaran_program: "sasaran",
   sasaran_kegiatan: "sasaran",
 
+
+  // Target Renstra
+  target_renstra: "target_renstra",
+  targetrenstra: "target_renstra",
+  renstra: "target_renstra",
   sop: "sop",
   instruksi_kerja: "instruksi_kerja",
   instruksi: "instruksi_kerja",
@@ -2313,8 +2329,8 @@ els.fileExcel.addEventListener("change", async (e) => {
   // Quick link: kelola dokumen/record dari modal edit
   els.btnManageDocs?.addEventListener("click", () => {
     closeModal();
-    // buka tab terakhir yang dipakai (kalau ada), default SOP
-    openDocsModal(activeProgramRow, lastDocsTab || "SOP");
+    // buka tab terakhir yang dipakai (kalau ada), default Silabus
+    openDocsModal(activeProgramRow, lastDocsTab || "SIL");
   });
 
   // Docs modal interactions
