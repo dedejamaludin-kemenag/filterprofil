@@ -264,14 +264,13 @@
     .cell-excerpt { font-size: 13px; color: var(--text-muted); line-height: 1.4; white-space: pre-wrap; word-break: break-word; }
 
     /* === TOMBOL FILE (MINI CHIPS) === */
-    /* REVISI: Mengembalikan ke RATA KIRI (flex-start) */
     .mini-chips { 
       display: flex; 
       gap: 6px; 
       margin-top: 0; 
       flex-wrap: wrap; 
       align-items: center; 
-      justify-content: flex-start; /* KEMBALI KE KIRI */
+      /* justify-content: flex-end; -> DIHAPUS (Kembali Kiri) */
     }
     .chip-btn {
       display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px;
@@ -385,10 +384,15 @@
       grid-template-columns: 1fr 1fr 1fr;
       gap: 6px;
     }
+    
+    /* REVISI: UPDATE TOMBOL TEMPLATE/UPLOAD/DOWNLOAD */
     .btn-fw {
       display: inline-flex; align-items: center; justify-content: center; gap: 4px;
       padding: 6px;
-      font-size: 12px; font-weight: 600;
+      /* Font Size Tetap 12px, tapi BOLD & UPPERCASE sesuai Judul Kolom */
+      font-size: 12px; 
+      font-weight: 700; 
+      text-transform: uppercase;
       border-radius: 6px; border: 1px solid var(--border); background: #fff;
       color: var(--text-muted); cursor: pointer; transition: all 0.2s;
     }
@@ -403,12 +407,10 @@
     }
     .file-list-container.has-items { display: block; border-top: 2px solid var(--bg-input); }
     
-    /* REVISI: Rata Kanan untuk List File */
     .file-item { 
       display: flex; 
-      justify-content: flex-end; /* RATA KANAN */
+      justify-content: space-between; /* Kembali ke layout awal (kiri-kanan) */
       align-items: center; 
-      gap: 10px;
       padding: 8px 10px; 
       border-bottom: 1px solid var(--border-light); 
       font-size: 12px; 
@@ -420,8 +422,8 @@
       flex-direction: column; 
       gap: 2px; 
       overflow: hidden; 
-      text-align: right; /* Text Rata Kanan */
-      margin-right: 0; 
+      flex: 1; margin-right: 8px; /* Kembali Normal */
+      text-align: right;
     }
     
     .file-item-name { font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -698,7 +700,7 @@
           <div class="file-list-container" id="list_REC"></div>
         </div>
 
-        </div>
+      </div>
 
       <div class="modal-actions">
         <button class="btn btn-danger" id="btnDeleteData" style="height:44px">
