@@ -6,7 +6,20 @@
   const SUPABASE_ANON_KEY =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuaGFjbWtoamF3aG9pemRjdGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MjczOTMsImV4cCI6MjA4MTQwMzM5M30.oKIm1s9gwotCeZVvS28vOCLddhIN9lopjG-YeaULMtk";
 
-  const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // REVISI: Cek apakah instance sudah ada di window (Singleton Pattern)
+  // Ini mencegah warning "Multiple GoTrueClient" saat refresh/hot-reload
+  let db;
+  if (window.pontrenDbInstance) {
+    db = window.pontrenDbInstance;
+  } else {
+    db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        persistSession: true, // Simpan sesi
+        detectSessionInUrl: false // Matikan deteksi URL agar lebih bersih
+      }
+    });
+    window.pontrenDbInstance = db;
+  }
 
   const STORAGE_BUCKET = "pontren_docs"; 
   const DOCS_TABLE = "program_pontren_docs";
