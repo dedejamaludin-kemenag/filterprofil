@@ -1,66 +1,37 @@
 (function () {
   const { createClient } = supabase;
 
-  // KONFIGURASI SUPABASE
+  // --- 1. KONFIGURASI SUPABASE ---
   const SUPABASE_URL = "https://unhacmkhjawhoizdctdk.supabase.co";
   const SUPABASE_ANON_KEY =
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVuaGFjbWtoamF3aG9pemRjdGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4MjczOTMsImV4cCI6MjA4MTQwMzM5M30.oKIm1s9gwotCeZVvS28vOCLddhIN9lopjG-YeaULMtk";
 
   const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // Storage & tabel pendamping (SOP/IK + Record Bukti)
-  // Catatan: pastikan tabel & bucket sudah dibuat (lihat file sql/migrations_program_docs_records.sql)
-  const STORAGE_BUCKET = "pontren_docs"; // bisa diganti sesuai bucket antum
+  const STORAGE_BUCKET = "pontren_docs"; 
   const DOCS_TABLE = "program_pontren_docs";
   const RECORDS_TABLE = "program_pontren_records";
-const REC_REGISTER_TABLE = "program_pontren_record_register";
-const SOP_TABLE = "program_pontren_sop";
-const SOP_STEPS_TABLE = "program_pontren_sop_steps";
-const IK_TABLE = "program_pontren_ik";
-const IK_STEPS_TABLE = "program_pontren_ik_steps";
-const SILABUS_AKADEMIK_TABLE = "program_pontren_silabus_akademik";
-const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
 
-  // Silabus non-akademik (meta + items)
-  const SILABUS_META_TABLE = "program_pontren_silabus";
-  const SILABUS_ITEMS_TABLE = "program_pontren_silabus_items";
-
-  // Template XLSX dibundel sebagai Base64 agar bisa dipakai meski file dibuka via file:// (tanpa fetch/CORS)
-  const TEMPLATES_B64 = {
-    SOP: "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",
-    IK: "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",
-    REC: "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",
-  };
-
-  function b64ToArrayBuffer(b64) {
-    const binary = atob(b64);
-    const len = binary.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) bytes[i] = binary.charCodeAt(i);
-    return bytes.buffer;
-  }
-
-  // Cache Element DOM
+  // --- 2. CACHE ELEMENT DOM ---
   const els = {
+    // Filter Inputs
     profil: document.getElementById("f_profil"),
-    indikator: document.getElementById("f_indikator"),
-    program: document.getElementById("f_program"),
-    bukti: document.getElementById("f_bukti"),
-    frekuensi: document.getElementById("f_frekuensi"),
-    sop: document.getElementById("f_sop"),
-    instruksi_kerja: document.getElementById("f_instruksi_kerja"),
-    
+    sasaran: document.getElementById("f_sasaran"), 
+    frekuensi: document.getElementById("f_frekuensi"), 
     pic: document.getElementById("f_pic"),
     q: document.getElementById("q"),
+    
+    // Buttons
     btnApply: document.getElementById("btn_apply"),
     btnReset: document.getElementById("btn_reset"),
     btnAddData: document.getElementById("btnAddData"),
+    
+    // Areas
     tbody: document.getElementById("tbody"),
     cards: document.getElementById("cards"),
     count: document.getElementById("count"),
     status: document.getElementById("status"),
     statusDot: document.getElementById("statusDot"),
-    filtersPanel: document.getElementById("filtersPanel"),
     fileExcel: document.getElementById("fileExcel"),
     
     // Modal Edit
@@ -71,188 +42,17 @@ const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
     btnSaveEdit: document.getElementById("btnSaveEdit"),
     btnDeleteData: document.getElementById("btnDeleteData"),
     
-    // Form Inputs
+    // Inputs Form
     e_id: document.getElementById("e_id"),
     e_profil: document.getElementById("e_profil"),
     e_definisi: document.getElementById("e_definisi"),
     e_indikator: document.getElementById("e_indikator"),
     e_program: document.getElementById("e_program"),
-    e_target_renstra: document.getElementById("e_target_renstra"),
     e_sasaran: document.getElementById("e_sasaran"),
-    e_bukti: document.getElementById("e_bukti"),
     e_frekuensi: document.getElementById("e_frekuensi"),
     e_pic: document.getElementById("e_pic"),
-    e_silabus: document.getElementById("e_silabus"),
-    e_sop: document.getElementById("e_sop"),
-    e_instruksi_kerja: document.getElementById("e_instruksi_kerja"),
-
-    // Quick link: kelola dokumen (SOP/IK/Record)
-    btnManageDocs: document.getElementById("btnManageDocs"),
-
-    // Modal Dokumen & Record
-    docsModal: document.getElementById("docsModal"),
-    docsModalTitle: document.getElementById("docsModalTitle"),
-    docsModalSubtitle: document.getElementById("docsModalSubtitle"),
-    btnCloseDocsModal: document.getElementById("btnCloseDocsModal"),
-
-    tabBtnSOP: document.getElementById("tabBtnSOP"),
-    tabBtnIK: document.getElementById("tabBtnIK"),
-    tabBtnSIL: document.getElementById("tabBtnSIL"),
-    tabBtnREC: document.getElementById("tabBtnREC"),
-    tabPanelSOP: document.getElementById("tabPanelSOP"),
-    tabPanelIK: document.getElementById("tabPanelIK"),
-    tabPanelSIL: document.getElementById("tabPanelSIL"),
-    tabPanelREC: document.getElementById("tabPanelREC"),
-
-    // Silabus
-    sil_subtype: document.getElementById("sil_subtype"),
-    sil_notes: document.getElementById("sil_notes"),
-    silTbody: document.getElementById("silTbody"),
-    silNA_select: document.getElementById("silNA_select"),
-    silNA_title: document.getElementById("silNA_title"),
-    silNA_titles: document.getElementById("silNA_titles"),
-    btnSilNANew: document.getElementById("btnSilNANew"),
-    btnSilAddRow: document.getElementById("btnSilAddRow"),
-    btnSilNADefault: document.getElementById("btnSilNADefault"),
-    btnSilSave: document.getElementById("btnSilSave"),
-    silStatus: document.getElementById("silStatus"),
-
-    // Silabus templates & academic upload
-    btnTplSIL: document.getElementById("btnTplSIL"),
-    menuTplSIL: document.getElementById("menuTplSIL"),
-    btnUploadSilAcademic: document.getElementById("btnUploadSilAcademic"),
-    sil_academic_file: document.getElementById("silA_final_file"),
-    silAcademicBox: document.getElementById("silAcademicBox"),
-    silNonAcademicBox: document.getElementById("silNonAcademicBox"),
-    silAcademicList: document.getElementById("silAcademicList"),
-
-    // Input SOP
-    doc_title: document.getElementById("sop_judul"),
-    doc_no: document.getElementById("sop_no_dok"),
-    doc_revision: document.getElementById("sop_revisi"),
-    doc_effective: document.getElementById("sop_tgl_berlaku"),
-    doc_notes: document.getElementById("doc_notes"),
-    doc_file: document.getElementById("sop_final_file"),
-    doc_tpl_file: document.getElementById("doc_tpl_file"),
-    sopParsePreview: document.getElementById("sopParsePreview"),
-    // Actions SOP (merged)
-    btnTplSOP: document.getElementById("btnTplSOP"),
-    menuTplSOP: document.getElementById("menuTplSOP"),
-    btnTemplateSOPPrefill: document.getElementById("btnTemplateSOPPrefill"),
-    sop_smart_file: document.getElementById("sop_smart_file"),
-    btnUploadSOPSmart: document.getElementById("btnUploadSOPSmart"),
-    docsListSOP: document.getElementById("docsListSOP"),
-    // SOP structured (new)
-    sop_judul: document.getElementById("sop_judul"),
-    sop_no_dok: document.getElementById("sop_no_dok"),
-    sop_revisi: document.getElementById("sop_revisi"),
-    sop_tgl_berlaku: document.getElementById("sop_tgl_berlaku"),
-    sop_disusun: document.getElementById("sop_disusun"),
-    sop_disahkan: document.getElementById("sop_disahkan"),
-    sop_tujuan: document.getElementById("sop_tujuan"),
-    sop_ruang_lingkup: document.getElementById("sop_ruang_lingkup"),
-    sop_definisi: document.getElementById("sop_definisi"),
-    sop_referensi: document.getElementById("sop_referensi"),
-    sop_peran: document.getElementById("sop_peran"),
-    sop_rekaman: document.getElementById("sop_rekaman"),
-    sopStepsTbody: document.getElementById("sopStepsTbody"),
-    btnSopAddStep: document.getElementById("btnSopAddStep"),
-    btnSopSave: document.getElementById("btnSopSave"),
-    btnSopReset: document.getElementById("btnSopReset"),
-    sopStatus: document.getElementById("sopStatus"),
-    btnUploadSOPFinal: document.getElementById("btnUploadSOPFinal"),
-
-    // IK structured (new)
-    ik_judul: document.getElementById("ik_judul"),
-    ik_no_dok: document.getElementById("ik_no_dok"),
-    ik_revisi: document.getElementById("ik_revisi"),
-    ik_tgl_berlaku: document.getElementById("ik_tgl_berlaku"),
-    ik_disusun: document.getElementById("ik_disusun"),
-    ik_disahkan: document.getElementById("ik_disahkan"),
-    ik_kapan: document.getElementById("ik_kapan"),
-    ik_peralatan: document.getElementById("ik_peralatan"),
-    ik_kriteria: document.getElementById("ik_kriteria"),
-    ik_trouble: document.getElementById("ik_trouble"),
-    ikStepsTbody: document.getElementById("ikStepsTbody"),
-    btnIkAddStep: document.getElementById("btnIkAddStep"),
-    btnIkSave: document.getElementById("btnIkSave"),
-    btnIkReset: document.getElementById("btnIkReset"),
-    ikStatus: document.getElementById("ikStatus"),
-    btnUploadIKFinal: document.getElementById("btnUploadIKFinal"),
-
-    // Silabus akademik (new)
-    silAcademicBox: document.getElementById("silAcademicBox"),
-    silNonAcademicBox: document.getElementById("silNonAcademicBox"),
-    silA_satpen: document.getElementById("silA_satpen"),
-    silA_mapel: document.getElementById("silA_mapel"),
-    silA_fase: document.getElementById("silA_fase"),
-    silA_tahun: document.getElementById("silA_tahun"),
-    silA_jp: document.getElementById("silA_jp"),
-    silA_karakter: document.getElementById("silA_karakter"),
-    silA_cp: document.getElementById("silA_cp"),
-    silA_sem1_tbody: document.getElementById("silA_sem1_tbody"),
-    silA_sem2_tbody: document.getElementById("silA_sem2_tbody"),
-    btnSilAAddSem1: document.getElementById("btnSilAAddSem1"),
-    btnSilAAddSem2: document.getElementById("btnSilAAddSem2"),
-    btnSilASave: document.getElementById("btnSilASave"),
-    btnSilAReset: document.getElementById("btnSilAReset"),
-    silAStatus: document.getElementById("silAStatus"),
-
-    // Record register (new)
-    recReg_nama: document.getElementById("recReg_nama"),
-    recReg_kode: document.getElementById("recReg_kode"),
-    recReg_revisi: document.getElementById("recReg_revisi"),
-    recReg_pengelola: document.getElementById("recReg_pengelola"),
-    recReg_verifikator: document.getElementById("recReg_verifikator"),
-    recReg_lokasi: document.getElementById("recReg_lokasi"),
-    recReg_retensi: document.getElementById("recReg_retensi"),
-    recReg_klasifikasi: document.getElementById("recReg_klasifikasi"),
-    btnRecRegSave: document.getElementById("btnRecRegSave"),
-    btnRecRegReset: document.getElementById("btnRecRegReset"),
-    recRegStatus: document.getElementById("recRegStatus"),
-    rec_pic: document.getElementById("rec_pic"),
-    rec_status: document.getElementById("rec_status"),
-    rec_tempat: document.getElementById("rec_tempat"),
-    rec_sasaran: document.getElementById("rec_sasaran"),
-    btnRecDefault: document.getElementById("btnRecDefault"),
-
-
-    // Input IK
-    ik_title: document.getElementById("ik_judul"),
-    ik_no: document.getElementById("ik_no_dok"),
-    ik_revision: document.getElementById("ik_revisi"),
-    ik_effective: document.getElementById("ik_tgl_berlaku"),
-    ik_notes: document.getElementById("ik_notes"),
-    ik_file: document.getElementById("ik_final_file"),
-    ik_tpl_file: document.getElementById("ik_tpl_file"),
-    ikParsePreview: document.getElementById("ikParsePreview"),
-    // Actions IK (merged)
-    btnTplIK: document.getElementById("btnTplIK"),
-    menuTplIK: document.getElementById("menuTplIK"),
-    btnTemplateIKPrefill: document.getElementById("btnTemplateIKPrefill"),
-    ik_smart_file: document.getElementById("ik_smart_file"),
-    btnUploadIKSmart: document.getElementById("btnUploadIKSmart"),
-    docsListIK: document.getElementById("docsListIK"),
-
-    // Record bukti
-    rec_date: document.getElementById("rec_date"),
-    rec_title: document.getElementById("rec_title"),
-    rec_desc: document.getElementById("rec_desc"),
-    rec_file: document.getElementById("rec_file"),
-    rec_tpl_file: document.getElementById("rec_tpl_file"),
-    recParsePreview: document.getElementById("recParsePreview"),
-    // Actions REC (merged-ish)
-    btnTplREC: document.getElementById("btnTplREC"),
-    menuTplREC: document.getElementById("menuTplREC"),
-    btnTemplateRECPrefill: document.getElementById("btnTemplateRECPrefill"),
-    btnRecAddMenu: document.getElementById("btnRecAddMenu"),
-    menuRecAdd: document.getElementById("menuRecAdd"),
-    rec_smart_file: document.getElementById("rec_smart_file"),
-    btnImportREC: document.getElementById("btnImportREC"),
-    btnAddRecord: document.getElementById("btnAddRecord"),
-    recordsList: document.getElementById("recordsList"),
-
-    // Toast & Confirm
+    
+    // Utils
     toastContainer: document.getElementById("toastContainer"),
     confirmModal: document.getElementById("confirmModal"),
     confirmText: document.getElementById("confirmText"),
@@ -260,3124 +60,518 @@ const SILABUS_AKADEMIK_SEM_TABLE = "program_pontren_silabus_akademik_semester";
     btnConfirmNo: document.getElementById("btnConfirmNo"),
   };
 
-  // master data (dari DB), dan data yang sedang ditampilkan
+  // --- 3. STATE ---
   let allRowsData = [];
   let viewRowsData = [];
-
-  // state modal dokumen
   let activeProgramRow = null;
-  let docsCountsByProgram = new Map(); // program_id -> { sop: n, ik: n, rec: n }
-  let warnedMissingDocsTables = false;
-  let lastDocsTab = "SIL";
+  let latestFiles = { SILABUS: null, SOP: null, IK: null, REC: null };
 
-  // state silabus (non-akademik)
-  let activeSilabusId = null;
-  let activeSilabusSubtype = null;
+  // --- 4. GLOBAL HELPERS ---
+  window.handleQuickTemplate = (type) => downloadTemplatePrefilled(type); 
+  window.handleQuickUploadClick = (type) => document.getElementById(`file_${type}`).click();
+  window.handleQuickUploadFile = (type, input) => quickUploadFile(type, input);
+  window.handleQuickDownload = (type) => quickDownloadLatest(type);
+  window.deleteSingleFile = (type, id, path) => deleteSingleFile(type, id, path);
+  
+  window.openFileInNewTab = async (path) => {
+    const url = await getFileUrl(path);
+    if(url) window.open(url, '_blank');
+    else notify("Gagal mendapatkan URL file", "error");
+  };
 
-  // cache judul -> id untuk silabus non-akademik (buat input datalist)
-  let silNATitleToId = new Map();
+  // --- 5. UTILITY FUNCTIONS ---
+  function norm(x) { return (x ?? "").toString().trim(); }
+  function normLower(x) { return norm(x).toLowerCase(); }
+  function safeText(x) { return (x ?? "").toString().replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function sanitizeFileName(name) { return String(name || "file").replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0, 100); }
 
-  // default cepat (auto-fill) untuk item Silabus NA & Record Log
-  let silItemDefaults = { pic: "", sasaran: "", tempat: "" };
-
-
-  // Normalisasi string
-  function norm(x) {
-    return (x ?? "").toString().trim();
+  function buildStoragePath(programId, kind, fileName) {
+    const d = new Date();
+    const ts = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}_${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;
+    return `program_pontren/${programId}/${kind}/${ts}_${sanitizeFileName(fileName)}`;
   }
 
-  function normLower(x) {
-    return norm(x).toLowerCase();
-  }
-
-  function getProgramDefaults() {
-    const pid = activeProgramRow?.id;
-    const pic = norm(activeProgramRow?.pic);
-    const sasaran = norm(activeProgramRow?.sasaran);
-    let tempat = "";
+  async function getFileUrl(path) {
     try {
-      if (pid) tempat = norm(localStorage.getItem(`pontren_last_lokasi_${pid}`));
+      const { data, error } = await db.storage.from(STORAGE_BUCKET).createSignedUrl(path, 60 * 60); 
+      if (!error && data?.signedUrl) return data.signedUrl;
     } catch (_) {}
-    return { pic, sasaran, tempat };
+    const { data } = db.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+    return data?.publicUrl || "";
   }
 
-  function applyDefaultsToSilabusRows(d) {
-    if (!els.silTbody) return;
-    const pic = norm(d?.pic);
-    const sasaran = norm(d?.sasaran);
-    const tempat = norm(d?.tempat);
-    els.silTbody.querySelectorAll("tr").forEach((tr) => {
-      const ipic = tr.querySelector(".sil_pic");
-      const isas = tr.querySelector(".sil_sasaran");
-      const itmp = tr.querySelector(".sil_tempat");
-      if (ipic && !norm(ipic.value) && pic) ipic.value = pic;
-      if (isas && !norm(isas.value) && sasaran) isas.value = sasaran;
-      if (itmp && !norm(itmp.value) && tempat) itmp.value = tempat;
-    });
-  }
-
-  function applyDefaultsToRecordLog(d) {
-    const pic = norm(d?.pic);
-    const sasaran = norm(d?.sasaran);
-    const tempat = norm(d?.tempat);
-    if (els.rec_pic && !norm(els.rec_pic.value) && pic) els.rec_pic.value = pic;
-    if (els.rec_sasaran && !norm(els.rec_sasaran.value) && sasaran) els.rec_sasaran.value = sasaran;
-    if (els.rec_tempat && !norm(els.rec_tempat.value) && tempat) els.rec_tempat.value = tempat;
-  }
-
-  // --- NOTIFICATION SYSTEM (TOAST) ---
   function notify(msg, type = "info") {
     const toast = document.createElement("div");
     toast.className = `toast ${type}`;
-    
-    let icon = "info";
-    if (type === "success") icon = "check-circle";
-    if (type === "error") icon = "warning-circle";
-
+    let icon = type==="success"?"check-circle": type==="error"?"warning-circle":"info";
     toast.innerHTML = `<i class="ph ph-${icon}"></i> <span>${msg}</span>`;
-    
     els.toastContainer.appendChild(toast);
-
-    // Auto remove after 4s
-    setTimeout(() => {
-      toast.style.opacity = "0";
-      setTimeout(() => toast.remove(), 300);
-    }, 4000);
-  }
-
-
-
-  // --- CUSTOM CONFIRM MODAL ---
-
-  function isBucketNotFoundError(err) {
-    const msg = (err?.message || String(err || "")).toLowerCase();
-    return msg.includes("bucket not found") || msg.includes("bucket_not_found");
-  }
-
-  function showBucketNotFoundHelp() {
-    notify(
-      `Bucket Storage "${STORAGE_BUCKET}" belum ada. Buat bucket itu di Supabase Storage (nama harus persis), atau ubah konstanta STORAGE_BUCKET di app.js.`,
-      "error"
-    );
+    setTimeout(() => { toast.style.opacity="0"; setTimeout(() => toast.remove(), 300); }, 3000);
   }
 
   function askConfirm(message) {
     return new Promise((resolve) => {
       els.confirmText.textContent = message;
       els.confirmModal.classList.add("open");
-
-      // Handler untuk tombol
-      const handleYes = () => {
-        cleanup();
-        resolve(true);
-      };
-      
-      const handleNo = () => {
-        cleanup();
-        resolve(false);
-      };
-
-      // Cleanup event listeners agar tidak menumpuk
-      function cleanup() {
-        els.btnConfirmYes.removeEventListener("click", handleYes);
-        els.btnConfirmNo.removeEventListener("click", handleNo);
+      const cleanup = () => {
+        els.btnConfirmYes.onclick = null; els.btnConfirmNo.onclick = null;
         els.confirmModal.classList.remove("open");
-      }
-
-      els.btnConfirmYes.addEventListener("click", handleYes);
-      els.btnConfirmNo.addEventListener("click", handleNo);
+      };
+      els.btnConfirmYes.onclick = () => { cleanup(); resolve(true); };
+      els.btnConfirmNo.onclick = () => { cleanup(); resolve(false); };
     });
-  }
-
-  // Utils
-  function safeText(x) {
-    return (x ?? "").toString().replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  }
-
-  // --- BADGE HELPERS (kolom PIC) ---
-  function renderPicBadges(value) {
-    const s = norm(value);
-    const empty = s ? "" : " is-empty";
-    if (!s) return `<span class="pill-badge pic${empty}" title="—">—</span>`;
-
-    // Pecah multi-PIC: koma / titik-koma / baris baru
-    const parts = s
-      .split(/[\n;,]+/)
-      .map(x => x.trim())
-      .filter(Boolean);
-
-    if (!parts.length) return `<span class="pill-badge pic is-empty" title="—">—</span>`;
-
-    return parts
-      .slice(0, 6) // batasi agar tabel tetap rapih
-      .map(p => `<span class="pill-badge pic" title="${safeText(p)}">${safeText(p)}</span>`)
-      .join("");
-  }
-
-  function excerptText(x, maxLen = 140) {
-    const s = norm(x);
-    if (!s) return "-";
-    if (s.length <= maxLen) return s;
-    return s.slice(0, Math.max(0, maxLen - 1)) + "…";
   }
 
   function setStatus(msg, state = "ok") {
     els.status.textContent = msg;
     els.statusDot.className = "dot " + state;
-    const loading = state === "load";
-    [els.btnApply, els.btnReset].forEach(b => b.disabled = loading);
-    els.btnApply.style.opacity = loading ? "0.7" : "1";
-    document.body.style.cursor = loading ? "wait" : "default";
+    document.body.style.cursor = state === "load" ? "wait" : "default";
   }
 
   function setOptions(selectEl, items) {
     if (!selectEl) return;
     const current = selectEl.value;
     selectEl.innerHTML = '<option value="">Semua</option>';
-    const arr = (items || []).filter(v => v != null && String(v).trim() !== "");
-    arr.forEach(v => {
-      const opt = document.createElement("option");
-      opt.value = String(v);
-      opt.textContent = String(v);
-      selectEl.appendChild(opt);
+    (items || []).forEach(v => {
+      if(v) {
+        const opt = document.createElement("option");
+        opt.value = v; opt.textContent = v;
+        selectEl.appendChild(opt);
+      }
     });
-    if (arr.some(v => String(v) === current)) selectEl.value = current;
+    if (items.includes(current)) selectEl.value = current;
   }
 
-  function readFilters() {
-  return {
-    profil: norm(els.profil.value),
-    indikator: norm(els.indikator.value),
-    program: els.program.value.trim(),
-    pic: els.pic.value.trim(),
-    q: els.q.value.trim(),
-  };
-}
+  function renderPicBadges(value) {
+    const s = norm(value);
+    if (!s) return `<span class="pill-badge pic is-empty">—</span>`;
+    return s.split(/[\n;,]+/).filter(Boolean).slice(0, 4).map(p => 
+      `<span class="pill-badge pic">${safeText(p.trim())}</span>`
+    ).join("");
+  }
 
-  // --- MODAL & DATA LOGIC ---
-  function openModal(row) {
-    // simpan row aktif untuk tombol kelola dokumen/bukti
+  // --- 6. GENERATOR TEMPLATE EXCEL (ISO Standard) ---
+  function generateWorksheet(kind, row) {
+    const today = new Date().toISOString().slice(0, 10);
+    const programRaw = row.program || "PROGRAM";
+    const program = programRaw.toUpperCase();
+    const programTitle = program.length > 60 ? program.substring(0, 60) + "..." : program; 
+    const profil = row.profil || "-";
+    const pic = row.pic || "Admin";
+    const progCode = sanitizeFileName(program).substring(0, 6).toUpperCase().replace(/_/g, "");
+    const docNo = `${kind}/${progCode}/001`;
+
+    const borderAll = { top: {style:'thin'}, bottom: {style:'thin'}, left: {style:'thin'}, right: {style:'thin'} };
+    const fontBase = { name: "Arial", sz: 10 };
+    const fontBold = { name: "Arial", sz: 10, bold: true };
+    const fontTitleMain = { name: "Arial", sz: 12, bold: true }; 
+    const fontTitleDoc = { name: "Arial", sz: 14, bold: true };  
+
+    const styleIsoBrand = { font: fontTitleMain, alignment: { horizontal: "center", vertical: "center", wrapText: true }, border: borderAll };
+    const styleIsoTitle = { font: fontTitleDoc, alignment: { horizontal: "center", vertical: "center", wrapText: true }, border: borderAll };
+    const styleIsoLabel = { font: { ...fontBold, sz: 9 }, fill: { fgColor: { rgb: "F2F2F2" } }, alignment: { horizontal: "left", vertical: "center", indent: 1 }, border: borderAll };
+    const styleIsoValue = { font: { ...fontBase, sz: 9 }, alignment: { horizontal: "left", vertical: "center", indent: 1 }, border: borderAll };
+    const styleTableHead = { font: { ...fontBold, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "4472C4" } }, alignment: { horizontal: "center", vertical: "center", wrapText: false }, border: borderAll };
+    const styleCellLeft = { font: fontBase, alignment: { horizontal: "left", vertical: "center", indent: 1, wrapText: false }, border: borderAll };
+    const styleCellCenter = { font: fontBase, alignment: { horizontal: "center", vertical: "center", wrapText: false }, border: borderAll };
+    const styleFooter = { font: fontBase, alignment: { horizontal: "center", vertical: "center" } };
+
+    let titleDoc = "";
+    let wsData = [];
+    let filename = "";
+    let colsWidth = [];
+
+    if (kind === 'SILABUS') {
+      titleDoc = "SILABUS PEMBELAJARAN"; filename = `SILABUS_${sanitizeFileName(programRaw)}.xlsx`;
+      wsData = [
+        ["NO", "MATERI POKOK", "TUJUAN PEMBELAJARAN", "TARGET", "AQIL", "KELAS", "REFERENSI", "PENILAIAN", "JP"],
+        [1, `Pengantar ${programTitle}`, "Peserta memahami konsep dasar", "Paham 100%", profil, "Semua", "Modul", "Tulis", "2"],
+        [2, `Praktek ${programTitle}`, "Peserta mampu mempraktikkan", "Bisa", profil, "Semua", "SOP", "Praktek", "4"]
+      ];
+      colsWidth = [{wpx: 40}, {wpx: 250}, {wpx: 250}, {wpx: 150}, {wpx: 80}, {wpx: 80}, {wpx: 150}, {wpx: 120}, {wpx: 50}];
+    } else if (kind === 'SOP') {
+      titleDoc = "STANDAR OPERASIONAL PROSEDUR"; filename = `SOP_${sanitizeFileName(programRaw)}.xlsx`;
+      wsData = [
+        ["NO", "TAHAPAN PROSES", "URAIAN AKTIVITAS", "PELAKSANA", "OUTPUT / HASIL", "KONTROL / INDIKATOR", "BUKTI FISIK"],
+        [1, "Persiapan", `Menyiapkan alat untuk ${programTitle}`, pic, "Alat Siap", "Ceklist", "Foto"],
+        [2, "Pelaksanaan", `Melakukan ${programTitle} sesuai juknis`, "Tim", "Berjalan", "Absensi", "Dokumen"]
+      ];
+      colsWidth = [{wpx: 40}, {wpx: 150}, {wpx: 300}, {wpx: 120}, {wpx: 150}, {wpx: 150}, {wpx: 150}];
+    } else if (kind === 'IK') {
+      titleDoc = "INSTRUKSI KERJA (IK)"; filename = `IK_${sanitizeFileName(programRaw)}.xlsx`;
+      wsData = [
+        ["NO", "LANGKAH KERJA", "DETAIL / CARA MELAKUKAN", "CATATAN / SAFETY / ALAT"],
+        [1, "Persiapan", `Siapkan alat bantu ${programTitle}`, "Cek kondisi alat"],
+        [2, "Eksekusi", "Lakukan sesuai urutan", "Hati-hati"]
+      ];
+      colsWidth = [{wpx: 40}, {wpx: 200}, {wpx: 400}, {wpx: 250}];
+    } else { 
+      titleDoc = "FORMULIR REKAMAN KEGIATAN"; filename = `BUKTI_${sanitizeFileName(programRaw)}.xlsx`;
+      wsData = [
+        ["NO", "HARI / TANGGAL", "URAIAN KEGIATAN", "LOKASI", "BUKTI FISIK", "STATUS", "PARAF"],
+        [1, today, `Pelaksanaan ${programTitle}`, "Area Pontren", "Foto", "OK", ""]
+      ];
+      colsWidth = [{wpx: 40}, {wpx: 120}, {wpx: 350}, {wpx: 120}, {wpx: 150}, {wpx: 80}, {wpx: 80}];
+    }
+
+    const wb = XLSX.utils.book_new();
+    const ws = {};
+    const setCell = (r, c, v, s) => { ws[XLSX.utils.encode_cell({r,c})] = { v, t: 's', s }; };
+    const maxCol = colsWidth.length - 1;
+
+    // Header ISO
+    const merges = [ {s:{r:0,c:0},e:{r:4,c:1}}, {s:{r:0,c:2},e:{r:1,c:maxCol-2}}, {s:{r:2,c:2},e:{r:4,c:maxCol-2}} ];
+    setCell(0,0,"PONTREN\nDATA EXPLORER", styleIsoBrand);
+    setCell(0,2,titleDoc, styleIsoTitle);
+    setCell(2,2,program, { ...styleIsoTitle, font: {name:"Arial", sz:11} });
+    
+    ["No. Dok", "Revisi", "Tanggal", "Halaman", "PIC"].forEach((l,i) => setCell(i, maxCol-1, l, styleIsoLabel));
+    [docNo, "00", today, "1 dari 1", pic].forEach((v,i) => setCell(i, maxCol, v, styleIsoValue));
+    
+    for(let r=0;r<=4;r++) for(let c=0;c<=maxCol;c++) if(!ws[XLSX.utils.encode_cell({r,c})]) setCell(r,c,"",styleIsoBrand);
+
+    const startRow = 6;
+    wsData.forEach((row, idx) => {
+      const r = startRow + idx;
+      row.forEach((v, c) => {
+        let s = styleCellLeft;
+        if (idx === 0) s = styleTableHead;
+        else if (c === 0 || String(v).length <= 4) s = styleCellCenter;
+        setCell(r, c, v, s);
+      });
+    });
+
+    const fRow = startRow + wsData.length + 2;
+    setCell(fRow, 1, "Dibuat Oleh,", styleFooter);
+    setCell(fRow, maxCol-1, "Disetujui Oleh,", styleFooter);
+    setCell(fRow+4, 1, `( ${pic} )`, styleFooter);
+    setCell(fRow+4, maxCol-1, "( Pimpinan )", styleFooter);
+    
+    merges.push({s:{r:fRow,c:1},e:{r:fRow,c:2}}, {s:{r:fRow+4,c:1},e:{r:fRow+4,c:2}}, 
+                {s:{r:fRow,c:maxCol-1},e:{r:fRow,c:maxCol}}, {s:{r:fRow+4,c:maxCol-1},e:{r:fRow+4,c:maxCol}});
+
+    const rowHeights = [];
+    for(let i=0; i<=4; i++) rowHeights[i] = { hpt: 25 }; 
+    rowHeights[5] = { hpt: 10 };
+    rowHeights[6] = { hpt: 30 };
+    
+    ws['!rows'] = rowHeights;
+    ws['!ref'] = XLSX.utils.encode_range({s:{r:0,c:0},e:{r:fRow+5,c:maxCol}});
+    ws['!cols'] = colsWidth;
+    ws['!merges'] = merges;
+
+    XLSX.utils.book_append_sheet(wb, ws, kind);
+    return { wb, filename };
+  }
+
+  async function downloadTemplatePrefilled(kind) {
+    if (!activeProgramRow?.id) return notify("Simpan data program dulu.", "error");
+    try {
+      const { wb, filename } = generateWorksheet(kind, activeProgramRow);
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([wbout], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click(); setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 0);
+      notify("Template berhasil dibuat", "success");
+    } catch (e) { notify("Error template: "+e.message, "error"); }
+  }
+
+  // --- 7. LOGIKA WIDGET FILE ---
+
+  async function refreshQuickWidgetStatus(programId) {
+    ['SILABUS', 'SOP', 'IK', 'REC'].forEach(t => {
+      document.getElementById(`status_txt_${t}`).innerHTML = '<i class="ph ph-spinner ph-spin"></i>';
+      document.getElementById(`list_${t}`).innerHTML = '';
+      document.getElementById(`list_${t}`).classList.remove('has-items');
+      document.getElementById(`btn_down_${t}`).disabled = true;
+      latestFiles[t] = null;
+    });
+
+    try {
+      const { data: docs } = await db.from(DOCS_TABLE).select('*').eq('program_id', programId).eq('is_active', true).order('created_at', {ascending: false});
+      const { data: recs } = await db.from(RECORDS_TABLE).select('*').eq('program_id', programId).order('created_at', {ascending: false});
+
+      const renderList = (type, files) => {
+        const container = document.getElementById(`list_${type}`);
+        const statusTxt = document.getElementById(`status_txt_${type}`);
+        const btnDown = document.getElementById(`btn_down_${type}`);
+
+        if (files && files.length > 0) {
+          latestFiles[type] = files[0];
+          btnDown.disabled = false;
+          statusTxt.textContent = `${files.length} File`;
+          statusTxt.classList.add('has-file');
+          container.classList.add('has-items');
+
+          container.innerHTML = files.map(f => {
+            const name = f.title || (f.file_path ? f.file_path.split('/').pop() : "File");
+            const date = new Date(f.created_at || f.record_date).toLocaleDateString('id-ID');
+            return `
+              <div class="file-item">
+                <div class="file-item-info">
+                  <div class="file-item-name" title="${safeText(name)}">${safeText(name)}</div>
+                  <div class="file-item-meta">${date}</div>
+                </div>
+                <div class="file-item-actions">
+                  <button class="btn-icon-sm" onclick="openFileInNewTab('${f.file_path}')" title="Buka"><i class="ph ph-arrow-square-out"></i></button>
+                  <button class="btn-icon-sm del" onclick="deleteSingleFile('${type}', ${f.id}, '${f.file_path}')" title="Hapus"><i class="ph ph-trash"></i></button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          statusTxt.textContent = "0 File";
+          statusTxt.classList.remove('has-file');
+        }
+      };
+
+      const filterDocs = (type) => (docs || []).filter(d => d.doc_type === type);
+      
+      renderList('SILABUS', filterDocs('SILABUS'));
+      renderList('SOP', filterDocs('SOP'));
+      renderList('IK', filterDocs('IK'));
+      renderList('REC', recs || []);
+
+    } catch (e) { console.error(e); }
+  }
+
+  async function quickDownloadLatest(type) {
+    const f = latestFiles[type];
+    if (!f) return notify("Tidak ada file.", "error");
+    setStatus("Membuka...", "load");
+    const url = await getFileUrl(f.file_path);
+    if(url) window.open(url, '_blank');
+    else notify("Gagal mendapatkan URL.", "error");
+    setStatus("Ready");
+  }
+
+  // --- DELETE & UPLOAD ---
+  async function deleteSingleFile(type, id, path) {
+    if (!await askConfirm("Hapus file ini permanen?")) return;
+    setStatus("Menghapus...", "load");
+    
+    if (path) await db.storage.from(STORAGE_BUCKET).remove([path]);
+
+    const table = (type === 'REC') ? RECORDS_TABLE : DOCS_TABLE;
+    const { error } = await db.from(table).delete().eq('id', id);
+    
+    if (error) notify("Gagal hapus DB: " + error.message, "error");
+    else {
+      notify("File dihapus", "success");
+      await refreshQuickWidgetStatus(activeProgramRow.id);
+      await refreshCountsForViewRows();
+    }
+    setStatus("Ready");
+  }
+
+  async function quickUploadFile(type, input) {
+    const file = input.files[0];
+    if (!file || !activeProgramRow?.id) return;
+    const pid = activeProgramRow.id;
+    const path = buildStoragePath(pid, type, file.name);
+    
+    setStatus("Mengupload...", "load");
+    try {
+      const { error: upErr } = await db.storage.from(STORAGE_BUCKET).upload(path, file, { upsert: false });
+      if (upErr) throw upErr;
+
+      let payload = {};
+      if (type === 'REC') {
+        payload = { program_id: pid, record_date: new Date().toISOString(), title: file.name, file_path: path };
+        await db.from(RECORDS_TABLE).insert(payload);
+      } else {
+        payload = { program_id: pid, doc_type: type, title: file.name, file_path: path, is_active: true };
+        await db.from(DOCS_TABLE).insert(payload);
+      }
+      
+      notify("Berhasil upload", "success");
+      input.value = "";
+      await refreshQuickWidgetStatus(pid);
+      await refreshCountsForViewRows();
+    } catch (e) { notify("Gagal upload: " + e.message, "error"); }
+    setStatus("Ready");
+  }
+
+  // --- 8. CORE CRUD ---
+  
+  async function openModal(row) {
     activeProgramRow = row || null;
-
     if (row) {
       els.modalTitle.textContent = "Edit Data";
-      els.e_id.value = row.id;
-      els.e_profil.value = row.profil || row.profil_utama || "";
-      els.e_definisi.value = row.definisi || "";
-      els.e_indikator.value = row.indikator || "";
-      els.e_program.value = row.program || "";
-      els.e_target_renstra.value = row.target_renstra || "";
-      els.e_sasaran.value = row.sasaran || "";
-      // Ringkasan Silabus/SOP/IK/Bukti ditampilkan konsisten (berbasis hitungan dari Kelola Dokumen)
-      const cDocs = docsCountsByProgram.get(String(row.id)) || { sop: 0, ik: 0, rec: 0, sil_text: "-", sil_total: 0 };
-      if (els.e_silabus) {
-        const sil = (cDocs.sil_total || 0) === 0 ? "0" : String(cDocs.sil_text || "-");
-        els.e_silabus.value = `Silabus: ${sil}`;
-      }
-      els.e_sop.value = `SOP: ${Number(cDocs.sop || 0)}`;
-      els.e_instruksi_kerja.value = `IK: ${Number(cDocs.ik || 0)}`;
-      els.e_bukti.value = `Record: ${Number(cDocs.rec || 0)}`;
-      els.e_frekuensi.value = row.frekuensi || "";
-      els.e_pic.value = row.pic || "";
       els.btnDeleteData.classList.remove("hidden");
-
-      // tombol kelola dokumen aktif
-      [els.btnManageDocs].forEach(b => {
-        if (!b) return;
-        b.disabled = false;
-        b.style.opacity = "1";
+      ["id","profil","definisi","indikator","program","sasaran","frekuensi","pic"].forEach(k => {
+        if(els[`e_${k}`]) els[`e_${k}`].value = row[k] || (k==='profil'?row.profil_utama:'') || "";
       });
+      await refreshQuickWidgetStatus(row.id);
     } else {
-      els.modalTitle.textContent = "Tambah Data Baru";
-      els.e_id.value = "";
-      els.e_profil.value = "";
-      els.e_definisi.value = "";
-      els.e_indikator.value = "";
-      els.e_program.value = "";
-      els.e_target_renstra.value = "";
-      els.e_sasaran.value = "";
-	      if (els.e_silabus) els.e_silabus.value = "Silabus: 0";
-	      els.e_sop.value = "SOP: 0";
-	      els.e_instruksi_kerja.value = "IK: 0";
-	      els.e_bukti.value = "Record: 0";
-      els.e_frekuensi.value = "";
-      els.e_pic.value = "";
+      els.modalTitle.textContent = "Tambah Data";
       els.btnDeleteData.classList.add("hidden");
-
-      // tombol kelola dokumen nonaktif sampai data dibuat
-      [els.btnManageDocs].forEach(b => {
-        if (!b) return;
-        b.disabled = true;
-        b.style.opacity = "0.6";
+      // RESET SEMUA 7 FIELD (+ID)
+      ["id","profil","definisi","indikator","program","sasaran","frekuensi","pic"].forEach(k => { if(els[`e_${k}`]) els[`e_${k}`].value = ""; });
+      
+      // Reset widgets
+      ['SILABUS','SOP','IK','REC'].forEach(t => {
+        document.getElementById(`status_txt_${t}`).textContent = "0 File";
+        document.getElementById(`list_${t}`).innerHTML = "";
+        document.getElementById(`list_${t}`).classList.remove('has-items');
+        document.getElementById(`btn_down_${t}`).disabled = true;
       });
     }
     els.modal.classList.add("open");
   }
 
-  function closeModal() {
-    els.modal.classList.remove("open");
-  }
-
-  // --- DOKUMEN (SOP/IK) & RECORD BUKTI ---
-  function sanitizeFileName(name) {
-    return String(name || "file")
-      .replace(/[^a-zA-Z0-9._-]+/g, "_")
-      .replace(/^_+|_+$/g, "")
-      .slice(0, 160);
-  }
-
-  function nowKey() {
-    const d = new Date();
-    const pad = (n) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
-  }
-
-  function buildStoragePath(programId, kind, fileName) {
-    // kind: SOP | IK | REC
-    const safe = sanitizeFileName(fileName);
-    return `program_pontren/${programId}/${kind}/${nowKey()}_${safe}`;
-  }
-
-
-function buildStoragePathSilabus(programId, subtype, fileName) {
-  const safe = sanitizeFileName(fileName);
-  const st = sanitizeFileName(subtype || "AKADEMIK");
-  return `program_pontren/${programId}/SILABUS/${st}/${nowKey()}_${safe}`;
-}
-
-  async function getFileUrl(path) {
-    // 1) coba signed url (kalau bucket privat)
-    try {
-      const { data, error } = await db.storage.from(STORAGE_BUCKET).createSignedUrl(path, 60 * 60);
-      if (error && isBucketNotFoundError(error)) { showBucketNotFoundHelp(); return ""; }
-      if (!error && data?.signedUrl) return data.signedUrl;
-    } catch (_) {}
-
-    // 2) fallback public url (kalau bucket publik)
-    const { data } = db.storage.from(STORAGE_BUCKET).getPublicUrl(path);
-    return data?.publicUrl || "";
-  }
-
-  function setDocsTab(tab) {
-    lastDocsTab = tab || "SIL";
-    const allBtns = [els.tabBtnSOP, els.tabBtnIK, els.tabBtnSIL, els.tabBtnREC];
-    const allPanels = [els.tabPanelSOP, els.tabPanelIK, els.tabPanelSIL, els.tabPanelREC];
-    allBtns.forEach(b => b && b.classList.remove("active"));
-    allPanels.forEach(p => p && p.classList.remove("active"));
-
-    if (tab === "SOP") {
-      els.tabBtnSOP?.classList.add("active");
-      els.tabPanelSOP?.classList.add("active");
-    } else if (tab === "IK") {
-      els.tabBtnIK?.classList.add("active");
-      els.tabPanelIK?.classList.add("active");
-    } else if (tab === "SIL") {
-      els.tabBtnSIL?.classList.add("active");
-      els.tabPanelSIL?.classList.add("active");
-      // lazy load silabus
-      queueMicrotask(() => {
-        loadSilabusForSelectedSubtype().catch((e) => console.error(e));
-      });
-    } else {
-      els.tabBtnREC?.classList.add("active");
-      els.tabPanelREC?.classList.add("active");
-    }
-  }
-
-  function openDocsModal(row, initialTab = "SIL") {
-    if (!row || !row.id) {
-      notify("Data belum punya ID. Simpan dulu datanya, baru bisa lampirkan dokumen/bukti.", "error");
-      return;
-    }
-    activeProgramRow = row;
-    silItemDefaults = getProgramDefaults();
-    els.docsModalTitle.textContent = "Dokumen & Bukti";
-    const profil = row.profil || row.profil_utama || "-";
-    const program = row.program || "-";
-    els.docsModalSubtitle.textContent = `${profil} • ${program}`;
-    setDocsTab(initialTab);
-    els.docsModal.classList.add("open");
-    loadDocsAndRecords();
-  }
-
-  function closeDocsModal() {
-    els.docsModal.classList.remove("open");
-  }
-
-  async function safeSelect(table, queryFn) {
-    try {
-      const q = queryFn(db.from(table));
-      const res = await q;
-      if (res?.error) throw res.error;
-      return res?.data || [];
-    } catch (err) {
-      // Table belum dibuat? Jangan bikin app crash.
-      if (!warnedMissingDocsTables) {
-        warnedMissingDocsTables = true;
-        notify("Tabel dokumen/record belum ada. Jalankan SQL migration dulu (lihat folder sql).", "error");
-      }
-      return [];
-    }
-  }
-
-  async function loadDocsAndRecords() {
-    if (!activeProgramRow?.id) return;
-
-    const pid = activeProgramRow.id;
-
-    // load docs
-    const docs = await safeSelect(DOCS_TABLE, (t) =>
-      t.select("*").eq("program_id", pid).order("created_at", { ascending: false })
-    );
-
-    // load records
-    const recs = await safeSelect(RECORDS_TABLE, (t) =>
-      t.select("*").eq("program_id", pid).order("record_date", { ascending: false })
-    );
-
-    renderDocsList(docs, "SOP", els.docsListSOP);
-    renderDocsList(docs, "IK", els.docsListIK);
-    renderRecordsList(recs, els.recordsList);
-
-    // update counts cache & chips
-    updateCountsCacheFromLists(pid, docs, recs);
-    updateChipCountsInDom();
-
-    // load structured forms
-    await loadSopStructured(pid);
-    await loadIkStructured(pid);
-    await loadRecordRegister(pid);
-}
-
-
-  // ----------------------------
-  // SILABUS (non-akademik)
-
-// SILABUS (akademik) disimpan sebagai file di Storage (DOCX/PDF)
-async function listSilabusAcademicFiles(programId, subtype) {
-  const folder = `program_pontren/${programId}/SILABUS/${sanitizeFileName(subtype || "AKADEMIK")}`;
-  try {
-    const { data, error } = await db.storage.from(STORAGE_BUCKET).list(folder, {
-      limit: 100,
-      sortBy: { column: "name", order: "desc" },
-    });
-    if (error && isBucketNotFoundError(error)) { showBucketNotFoundHelp(); return []; }
-    if (error) throw error;
-    return (data || []).filter(x => x && x.name && x.name !== ".emptyFolderPlaceholder");
-  } catch (err) {
-    console.error(err);
-    notify("Gagal memuat daftar silabus akademik (cek bucket/policy).", "error");
-    return [];
-  }
-}
-
-function renderSilabusAcademicList(programId, subtype, files) {
-  if (!els.silAcademicList) return;
-  els.silAcademicList.innerHTML = "";
-  const folder = `program_pontren/${programId}/SILABUS/${sanitizeFileName(subtype || "AKADEMIK")}`;
-  const rows = Array.isArray(files) ? files : [];
-  if (rows.length === 0) {
-    const empty = document.createElement("div");
-    empty.className = "hint";
-    empty.innerHTML = "Belum ada file silabus akademik. Unduh template, isi, lalu unggah.";
-    els.silAcademicList.appendChild(empty);
-    return;
-  }
-
-  rows.forEach((f) => {
-    const fullPath = `${folder}/${f.name}`;
-    const card = document.createElement("div");
-    card.className = "doc-card";
-    card.innerHTML = `
-      <div class="doc-main">
-        <div class="doc-title">${escapeHtmlLite(f.name)}</div>
-        <div class="doc-sub">${escapeHtmlLite(subtype)} • ${escapeHtmlLite(f.updated_at || f.created_at || "")}</div>
-      </div>
-      <div class="doc-actions">
-        <button class="btn btn-secondary btn-sm" type="button" data-open-sil="${escapeHtmlLite(fullPath)}"><i class="ph ph-eye"></i> Buka</button>
-      </div>
-    `;
-    els.silAcademicList.appendChild(card);
-  });
-
-  els.silAcademicList.querySelectorAll("[data-open-sil]").forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const path = btn.getAttribute("data-open-sil");
-      if (!path) return;
-      const url = await getFileUrl(path);
-      if (!url) return;
-      window.open(url, "_blank");
-    });
-  });
-}
-
-async function loadSilabusAcademic(programId, subtype) {
-  const files = await listSilabusAcademicFiles(programId, subtype);
-  renderSilabusAcademicList(programId, subtype, files);
-}
-
-async function uploadSilabusAcademic(file) {
-  if (!activeProgramRow?.id) return;
-  const pid = activeProgramRow.id;
-  const subtype = getSelectedSilSubtype();
-  if (subtype !== "AKADEMIK") {
-    notify("Unggah ini khusus untuk Silabus Akademik.", "error");
-    return;
-  }
-  if (!file) return;
-  const path = buildStoragePathSilabus(pid, subtype, file.name || "Silabus.docx");
-  try {
-    const { error } = await db.storage.from(STORAGE_BUCKET).upload(path, file, {
-      upsert: false,
-      contentType: file.type || undefined,
-    });
-    if (error && isBucketNotFoundError(error)) { showBucketNotFoundHelp(); return; }
-    if (error) throw error;
-    notify("Silabus akademik terunggah.", "success");
-    // buat meta agar bisa dihitung di tabel hasil filter
-    await ensureSilabusMeta(pid, "AKADEMIK", "Silabus Akademik", null);
-    await loadSilabusAcademic(pid, subtype);
-  } catch (err) {
-    console.error(err);
-    notify("Gagal unggah silabus akademik: " + (err?.message || String(err)), "error");
-  }
-}
-
-
-  // ----------------------------
-  function escapeHtmlLite(s) {
-    return String(s ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  function pad2(n) {
-    return String(n).padStart(2, "0");
-  }
-
-  function toDatetimeLocalValue(iso) {
-    if (!iso) return "";
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return "";
-    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
-  }
-
-  function fromDatetimeLocalToIso(val) {
-    if (!val) return null;
-    const d = new Date(val);
-    if (isNaN(d.getTime())) return null;
-    return d.toISOString();
-  }
-
-  function setSilStatus(msg, kind = "info") {
-    if (!els.silStatus) return;
-    els.silStatus.textContent = msg || "";
-    if (kind === "success") els.silStatus.style.color = "var(--success)";
-    else if (kind === "error") els.silStatus.style.color = "var(--danger)";
-    else els.silStatus.style.color = "var(--text-dim)";
-  }
-
-  function getSelectedSilSubtype() {
-    return els.sil_subtype?.value || "AKADEMIK";
-  }
-
-  async function ensureSilabusMeta(programId, subtype, title, notes = null) {
-    if (!programId) return null;
-    const cleanTitle = norm(title) || (subtype === "AKADEMIK" ? "Silabus Akademik" : "Silabus");
-    try {
-      const { data, error } = await db
-        .from(SILABUS_META_TABLE)
-        .upsert({ program_id: programId, subtype, title: cleanTitle, notes }, { onConflict: "program_id,subtype,title" })
-        .select("id")
-        .single();
-      if (error) throw error;
-      return data;
-    } catch (e) {
-      console.warn("ensureSilabusMeta", e);
-      return null;
-    }
-  }
-
-  function renderSilabusItems(items) {
-    if (!els.silTbody) return;
-    els.silTbody.innerHTML = "";
-
-    const rows = Array.isArray(items) ? items : [];
-    if (rows.length === 0) rows.push({ materi: "", tahapan: "", penilaian: "", referensi: "", pic: "", waktu: "", tempat: "", sasaran: "" });
-
-    rows.forEach((r) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td><input class="sil_materi" type="text" placeholder="Materi" value="${escapeHtmlLite(r.materi || "")}"></td>
-        <td><input class="sil_tahapan" type="text" placeholder="Target per jenjang" value="${escapeHtmlLite(r.tahapan || "")}"></td>
-        <td><input class="sil_penilaian" type="text" placeholder="Penilaian" value="${escapeHtmlLite(r.penilaian || "")}"></td>
-        <td><input class="sil_referensi" type="text" placeholder="Referensi" value="${escapeHtmlLite(r.referensi || "")}"></td>
-        <td><input class="sil_pic" type="text" placeholder="PIC" value="${escapeHtmlLite(r.pic || "")}"></td>
-        <td><input class="sil_waktu" type="text" placeholder="Harian / Pekanan / dst" value="${escapeHtmlLite(r.waktu || "")}"></td>
-        <td><input class="sil_tempat" type="text" placeholder="Lokasi kegiatan" value="${escapeHtmlLite(r.tempat || "")}"></td>
-        <td><input class="sil_sasaran" type="text" placeholder="Sasaran" value="${escapeHtmlLite(r.sasaran || "")}"></td>
-        <td style="text-align:right"><button class="btn-row-del" type="button" data-sil-del="1" title="Hapus baris"><i class="ph ph-trash"></i></button></td>
-      `;
-      els.silTbody.appendChild(tr);
-    });
-  }
-
-  function readSilabusItemsFromDom() {
-    const out = [];
-    if (!els.silTbody) return out;
-    els.silTbody.querySelectorAll("tr").forEach((tr) => {
-      const materi = tr.querySelector(".sil_materi")?.value || "";
-      const tahapan = tr.querySelector(".sil_tahapan")?.value || "";
-      const penilaian = tr.querySelector(".sil_penilaian")?.value || "";
-      const referensi = tr.querySelector(".sil_referensi")?.value || "";
-      const pic = tr.querySelector(".sil_pic")?.value || "";
-      const waktu = tr.querySelector(".sil_waktu")?.value || "";
-      const tempat = tr.querySelector(".sil_tempat")?.value || "";
-      const sasaran = tr.querySelector(".sil_sasaran")?.value || "";
-      out.push({ materi, tahapan, penilaian, referensi, pic, waktu, tempat, sasaran });
-    });
-    return out;
-  }
-
-  function addSilabusRow() {
-    const current = readSilabusItemsFromDom();
-    const d = silItemDefaults || { pic: "", sasaran: "", tempat: "" };
-    current.push({ materi: "", tahapan: "", penilaian: "", referensi: "", pic: d.pic || "", waktu: "", tempat: d.tempat || "", sasaran: d.sasaran || "" });
-    renderSilabusItems(current);
-  }
-
-  async function loadSilabusForSelectedSubtype() {
-    if (!activeProgramRow?.id) return;
-    const programId = activeProgramRow.id;
-    const subtype = getSelectedSilSubtype();
-
-
-// Toggle UI: AKADEMIK pakai file (Storage), non-akademik pakai tabel (DB)
-if (els.silAcademicBox && els.silNonAcademicBox && els.btnUploadSilAcademic) {
-  const isAcad = subtype === "AKADEMIK";
-  els.silAcademicBox.style.display = isAcad ? "block" : "none";
-  els.silNonAcademicBox.style.display = isAcad ? "none" : "block";
-  els.btnUploadSilAcademic.style.display = isAcad ? "inline-flex" : "none";
-}
-
-if (subtype === "AKADEMIK") {
-  setSilStatus("");
-  await loadSilabusAcademic(programId, subtype);
-  // structured akademik (tabel)
-  await loadSilabusAkademikStructured(programId);
-  return;
-}
-
-    // NON_AKADEMIK: bisa lebih dari 1 silabus (dibedakan judul)
-    setSilStatus("Memuat silabus...", "info");
-
-    // ambil daftar meta non-akademik (sekalian tangani legacy subtype non-akademik)
-    let nonList = [];
-    try {
-      const all = await safeSelect(SILABUS_META_TABLE, (t) =>
-        t.select("*")
-          .eq("program_id", programId)
-          .order("updated_at", { ascending: false })
-          .order("created_at", { ascending: false })
-      );
-      nonList = (all || []).filter(x => String(x.subtype || "").toUpperCase() !== "AKADEMIK");
-
-      // auto-normalize legacy subtype ke NON_AKADEMIK (biar rapi), tanpa mengubah id
-      const legacy = nonList.filter(x => String(x.subtype || "").toUpperCase() !== "NON_AKADEMIK");
-      if (legacy.length) {
-        // best effort: jangan bikin crash bila policy melarang
-        try {
-          await Promise.all(legacy.map(x => db.from(SILABUS_META_TABLE).update({ subtype: "NON_AKADEMIK" }).eq("id", x.id)));
-          nonList = nonList.map(x => ({ ...x, subtype: "NON_AKADEMIK" }));
-        } catch(e) {
-          console.warn("legacy subtype normalize skipped", e);
-        }
-      }
-    } catch (err) {
-      if (!warnedMissingDocsTables) {
-        warnedMissingDocsTables = true;
-        notify("Tabel silabus belum ada / belum bisa diakses. Jalankan SQL migration dulu.", "error");
-      }
-      setSilStatus("Gagal memuat (cek migration/policy)", "error");
-      return;
-    }
-
-    // cache judul -> id + render daftar judul (datalist) untuk input "Judul Silabus"
-    silNATitleToId = new Map();
-    if (els.silNA_titles) els.silNA_titles.innerHTML = "";
-
-    // select lama disimpan tersembunyi sebagai fallback (kompatibilitas), tetap diisi
-    if (els.silNA_select) {
-      els.silNA_select.innerHTML = "";
-      const optEmpty = document.createElement("option");
-      optEmpty.value = "";
-      optEmpty.textContent = nonList.length ? "-- pilih --" : "(belum ada)";
-      els.silNA_select.appendChild(optEmpty);
-    }
-
-    nonList.forEach((x) => {
-      const title = norm(x.title) || `Silabus #${x.id}`;
-      silNATitleToId.set(normLower(title), x.id);
-
-      if (els.silNA_titles) {
-        const opt = document.createElement("option");
-        opt.value = title;
-        els.silNA_titles.appendChild(opt);
-      }
-
-      if (els.silNA_select) {
-        const o = document.createElement("option");
-        o.value = String(x.id);
-        o.textContent = title;
-        els.silNA_select.appendChild(o);
-      }
-    });
-
-    // tentukan pilihan aktif
-    const stillExists = nonList.some(x => String(x.id) === String(activeSilabusId));
-    if (!stillExists) activeSilabusId = nonList[0]?.id || null;
-
-    if (els.silNA_select) els.silNA_select.value = activeSilabusId ? String(activeSilabusId) : "";
-
-    const meta = nonList.find(x => String(x.id) === String(activeSilabusId)) || null;
-    activeSilabusSubtype = "NON_AKADEMIK";
-    if (els.silNA_title) els.silNA_title.value = meta?.title || "";
-    if (els.sil_notes) els.sil_notes.value = meta?.notes || "";
-
-    // load items untuk meta terpilih
-    let items = [];
-    if (activeSilabusId) {
-      items = await safeSelect(SILABUS_ITEMS_TABLE, (t) =>
-        t.select("*")
-          .eq("silabus_id", activeSilabusId)
-          .order("created_at", { ascending: true })
-      );
-    }
-
-    const uiItems = (items || []).map((it) => ({
-      materi: it.materi || it.topik || "",
-      tahapan: it.tahapan || "",
-      penilaian: it.penilaian || "",
-      referensi: it.referensi || "",
-      pic: it.pic || "",
-      waktu: it.waktu || "",
-      tempat: it.tempat || "",
-      sasaran: it.sasaran || "",
-    }));
-
-    renderSilabusItems(uiItems);
-    if (meta) setSilStatus(`Silabus aktif: ${meta.title || "(tanpa judul)"}`, "info");
-    else setSilStatus("Belum ada silabus non-akademik. Klik 'Buat Baru'.", "info");
-  }
-
-  async function createNewNonAcademicSilabus() {
-    if (!activeProgramRow?.id) return;
-    const programId = activeProgramRow.id;
-    // paksa mode NON_AKADEMIK
-    if (els.sil_subtype && els.sil_subtype.value !== "NON_AKADEMIK") {
-      els.sil_subtype.value = "NON_AKADEMIK";
-    }
-
-    let baseTitle = norm(els.silNA_title?.value);
-    if (!baseTitle) {
-      notify("Isi dulu judul silabus (misal: Semester 1 / Pekanan / Program Khusus).", "error");
-      return;
-    }
-
-    // jika judul sudah ada, cukup buka silabus itu (tidak bikin duplikat)
-    const existingId = silNATitleToId.get(normLower(baseTitle)) || null;
-    if (existingId) {
-      activeSilabusId = Number(existingId);
-      if (els.silNA_select) els.silNA_select.value = String(existingId);
-      await loadSilabusForSelectedSubtype();
-      setSilStatus("Judul sudah ada. Membuka silabus yang sudah tersimpan.", "info");
-      return;
-    }
-    const notes = norm(els.sil_notes?.value);
-
-    setSilStatus("Membuat silabus baru...", "info");
-
-    // hindari konflik judul (unique: program_id+subtype+title)
-    let title = baseTitle;
-    let created = null;
-    for (let i = 0; i < 5; i++) {
-      try {
-        const { data, error } = await db
-          .from(SILABUS_META_TABLE)
-          .insert({ program_id: programId, subtype: "NON_AKADEMIK", title, notes })
-          .select("id")
-          .single();
-        if (error) throw error;
-        created = data;
-        break;
-      } catch (e) {
-        // coba judul lain
-        title = `${baseTitle} (${i + 2})`;
-      }
-    }
-
-    if (!created?.id) {
-      setSilStatus("Gagal membuat (cek policy / judul duplikat)", "error");
-      notify("Gagal membuat silabus baru. Coba ubah judul.", "error");
-      return;
-    }
-
-    activeSilabusId = created.id;
-    activeSilabusSubtype = "NON_AKADEMIK";
-    await loadSilabusForSelectedSubtype();
-    setSilStatus("Silabus baru dibuat ✓", "success");
-  }
-
-  async function saveSilabus() {
-    if (!activeProgramRow?.id) return;
-    const programId = activeProgramRow.id;
-    const subtype = getSelectedSilSubtype();
-    const notes = norm(els.sil_notes?.value);
-
-    if (subtype === "AKADEMIK") {
-      notify("Silabus akademik tidak disimpan lewat tombol ini. Gunakan form akademik atau unggah file.", "warn");
-      return;
-    }
-
-    // ambil dari DOM + bersihkan baris kosong
-    const raw = readSilabusItemsFromDom();
-    const rows = raw
-      .map((r) => ({
-        materi: norm(r.materi),
-        tahapan: norm(r.tahapan),
-        penilaian: norm(r.penilaian),
-        referensi: norm(r.referensi),
-        pic: norm(r.pic),
-        waktu: norm(r.waktu),
-        tempat: norm(r.tempat),
-        sasaran: norm(r.sasaran),
-      }))
-      .filter((r) => r.materi || r.tahapan || r.penilaian || r.referensi || r.pic || r.waktu || r.tempat || r.sasaran);
-
-    // validasi materi minimal jika baris ada
-    for (const r of rows) {
-      if (!r.materi) {
-        notify("Kolom 'Materi' wajib diisi untuk setiap baris yang disimpan.", "error");
-        return;
-      }
-    }
-
-    // simpan lokasi kegiatan terakhir untuk auto-default (per program)
-    try {
-      const firstLok = (rows.find(r => r.tempat)?.tempat || "");
-      if (firstLok) localStorage.setItem(`pontren_last_lokasi_${programId}`, firstLok);
-    } catch (_) {}
-
-    setSilStatus("Menyimpan...", "info");
-
-    // 1) pastikan meta ada (NON_AKADEMIK bisa lebih dari 1, dibedakan judul)
-    let metaId = null;
-    const title = norm(els.silNA_title?.value);
-    if (!title) {
-      notify("Judul silabus wajib diisi (untuk membedakan silabus non-akademik).", "error");
-      return;
-    }
-
-    try {
-      const selectedIdRaw = els.silNA_select?.value || "";
-      metaId = selectedIdRaw ? Number(selectedIdRaw) : (activeSilabusId ? Number(activeSilabusId) : null);
-
-      if (metaId) {
-        const { error: upErr } = await db
-          .from(SILABUS_META_TABLE)
-          .update({ title, notes, subtype: "NON_AKADEMIK" })
-          .eq("id", metaId);
-        if (upErr) throw upErr;
-      } else {
-        const { data: ins, error: insErr } = await db
-          .from(SILABUS_META_TABLE)
-          .insert({ program_id: programId, subtype: "NON_AKADEMIK", title, notes })
-          .select("id")
-          .single();
-        if (insErr) throw insErr;
-        metaId = ins.id;
-      }
-
-      // 2) replace items
-      const { error: delErr } = await db
-        .from(SILABUS_ITEMS_TABLE)
-        .delete()
-        .eq("silabus_id", metaId);
-      if (delErr) throw delErr;
-
-      if (rows.length) {
-        const payload = rows.map((r) => ({
-          silabus_id: metaId,
-          materi: r.materi,
-          tahapan: r.tahapan || null,
-          penilaian: r.penilaian || null,
-          referensi: r.referensi || null,
-          pic: r.pic || null,
-          waktu: r.waktu || null,
-          tempat: r.tempat || null,
-          sasaran: r.sasaran || null,
-        }));
-        const { error: ins2Err } = await db.from(SILABUS_ITEMS_TABLE).insert(payload);
-        if (ins2Err) throw ins2Err;
-      }
-
-      activeSilabusId = metaId;
-      activeSilabusSubtype = "NON_AKADEMIK";
-
-      // refresh dropdown agar judul & daftar update
-      await loadSilabusForSelectedSubtype();
-
-      setSilStatus("Tersimpan ✓", "success");
-      notify("Silabus tersimpan.", "success");
-    } catch (err) {
-      console.error(err);
-      setSilStatus("Gagal menyimpan (cek policy/RLS)", "error");
-      notify("Gagal menyimpan silabus: " + (err?.message || String(err)), "error");
-    }
-  }
-
-  // ----------------------------
-  // TEMPLATE XLSX (ISI OTOMATIS)
-  // ----------------------------
-  function safeFilePart(s) {
-    return norm(s)
-      .replace(/\s+/g, "_")
-      .replace(/[^a-zA-Z0-9_\-\.]/g, "_")
-      .slice(0, 80) || "dokumen";
-  }
-
-  function setCellPreserveStyle(ws, addr, value) {
-    const v = value == null ? "" : String(value);
-    const cell = ws[addr] || {};
-    // pertahankan style (jika ada)
-    const style = cell.s;
-    ws[addr] = { ...cell, v, t: "s", s: style };
-  }
-
-  async function downloadTemplatePrefilled(kind) {
-    if (!activeProgramRow?.id) {
-      notify("Buka dulu data programnya, baru bisa download template isi otomatis.", "error");
-      return;
-    }
-
-    const row = activeProgramRow;
-    const profil = row.profil || row.profil_utama || "";
-    const program = row.program || "";
-    const sasaran = row.sasaran || "";
-    const pic = row.pic || "";
-    const frekuensi = row.frekuensi || "";
-
-    let templateUrl = "";
-    let filename = "";
-
-    // ambil metadata dari input box (kalau kosong, auto-isi)
-    const today = new Date().toISOString().slice(0, 10);
-
-    if (kind === "SOP") {
-      templateUrl = "./templates/Template_SOP.xlsx";
-      const title = norm(els.doc_title?.value) || (program ? `SOP ${program}` : "SOP");
-      const no = norm(els.doc_no?.value);
-      const rev = norm(els.doc_revision?.value);
-      const eff = norm(els.doc_effective?.value) || today;
-
-      filename = `TEMPLATE_SOP_${safeFilePart(program || profil)}_${eff}.xlsx`;
-
-      const buf = b64ToArrayBuffer(TEMPLATES_B64.SOP);
-      const wb = XLSX.read(buf, { type: "array" });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-
-      // Identitas (kolom B)
-      setCellPreserveStyle(ws, "B5", no);
-      setCellPreserveStyle(ws, "B6", title);
-      setCellPreserveStyle(ws, "B7", rev);
-      setCellPreserveStyle(ws, "B8", eff);
-      setCellPreserveStyle(ws, "B9", pic);
-
-      // Isi ringkas agar nyambung dengan data program
-      setCellPreserveStyle(
-        ws,
-        "B15",
-        program && sasaran ? `Melaksanakan program: ${program} untuk mencapai sasaran: ${sasaran}.` : (program ? `Melaksanakan program: ${program}.` : "")
-      );
-      setCellPreserveStyle(
-        ws,
-        "B16",
-        profil ? `Profil/Area: ${profil}${frekuensi ? ` (Frekuensi: ${frekuensi})` : ""}` : (frekuensi ? `Frekuensi: ${frekuensi}` : "")
-      );
-      setCellPreserveStyle(ws, "B18", "ISO 21001:2025 dan ketentuan internal lembaga");
-      setCellPreserveStyle(ws, "B19", pic ? `PIC pelaksana: ${pic}` : "");
-
-      const out = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      triggerDownload(out, filename);
-      return;
-    }
-
-    if (kind === "IK") {
-      templateUrl = "./templates/Template_IK.xlsx";
-      const title = norm(els.ik_title?.value) || (program ? `IK ${program}` : "IK");
-      const no = norm(els.ik_no?.value);
-      const rev = norm(els.ik_revision?.value);
-      const eff = norm(els.ik_effective?.value) || today;
-
-      filename = `TEMPLATE_IK_${safeFilePart(program || profil)}_${eff}.xlsx`;
-
-      const buf = b64ToArrayBuffer(TEMPLATES_B64.IK);
-      const wb = XLSX.read(buf, { type: "array" });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-
-      setCellPreserveStyle(ws, "B5", no);
-      setCellPreserveStyle(ws, "B6", title);
-      setCellPreserveStyle(ws, "B7", rev);
-      setCellPreserveStyle(ws, "B8", eff);
-      setCellPreserveStyle(ws, "B9", pic);
-
-      setCellPreserveStyle(ws, "B14", program ? `Digunakan saat menjalankan program: ${program}.` : "");
-      setCellPreserveStyle(ws, "B15", "Perangkat kerja sesuai kebutuhan (aplikasi / form / dokumen pendukung)");
-      setCellPreserveStyle(ws, "B16", "Sesuai role yang ditetapkan (Admin/UPMP/Unit terkait)");
-
-      const out = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-      triggerDownload(out, filename);
-      return;
-    }
-
-    // RECORD
-    templateUrl = "./templates/Template_Record.xlsx";
-    const rdate = norm(els.rec_date?.value) || today;
-    const rtitle = norm(els.rec_title?.value) || (program ? `Record ${program}` : "Record");
-    const rdesc = norm(els.rec_desc?.value);
-    filename = `TEMPLATE_RECORD_${safeFilePart(program || profil)}_${rdate}.xlsx`;
-
-    const buf = b64ToArrayBuffer(TEMPLATES_B64.REC);
-    const wb = XLSX.read(buf, { type: "array" });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-
-    // Identitas form
-    setCellPreserveStyle(ws, "B5", rtitle);
-    setCellPreserveStyle(ws, "B6", "");
-    setCellPreserveStyle(ws, "B7", "Rev.01");
-    setCellPreserveStyle(ws, "B8", pic);
-    setCellPreserveStyle(ws, "B10", "Arsip Digital (Drive/Storage) / Arsip Fisik (jika ada)");
-    setCellPreserveStyle(ws, "B11", "Sesuai ketentuan retensi lembaga");
-    setCellPreserveStyle(ws, "B12", "Internal");
-
-    // Isi 1 baris log awal (row 16)
-    setCellPreserveStyle(ws, "A16", rdate);
-    setCellPreserveStyle(ws, "B16", program);
-    setCellPreserveStyle(ws, "C16", rtitle);
-    setCellPreserveStyle(ws, "D16", rdesc);
-    setCellPreserveStyle(ws, "F16", pic);
-    setCellPreserveStyle(ws, "H16", "Draft");
-
-    const out = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-    triggerDownload(out, filename);
-  }
-
-  function triggerDownload(arrayBuffer, filename) {
-    const blob = new Blob([arrayBuffer], {
-      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }
-
-  // ----------------------------
-  // PARSE TEMPLATE XLSX (UPLOAD + PREFILL INPUT)
-  // ----------------------------
-  function getFileExt(nameOrPath) {
-    const s = norm(nameOrPath).toLowerCase();
-    const m = s.match(/\.([a-z0-9]+)(?:\?|#|$)/i);
-    return m ? m[1] : "";
-  }
-
-  function isTemplateXlsx(nameOrPath) {
-    const ext = getFileExt(nameOrPath);
-    return ext === "xlsx" || ext === "xls" || ext === "xlsm";
-  }
-
-  function excelDateToISO(v) {
-    if (!v && v !== 0) return "";
-    // Sudah ISO
-    if (typeof v === "string") {
-      const s = v.trim();
-      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-      // Kadang dd/mm/yyyy
-      const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-      if (m) {
-        const dd = String(m[1]).padStart(2, "0");
-        const mm = String(m[2]).padStart(2, "0");
-        return `${m[3]}-${mm}-${dd}`;
-      }
-      return s;
-    }
-    if (typeof v === "number") {
-      const d = XLSX.SSF.parse_date_code(v);
-      if (!d || !d.y) return "";
-      const mm = String(d.m).padStart(2, "0");
-      const dd = String(d.d).padStart(2, "0");
-      return `${d.y}-${mm}-${dd}`;
-    }
-    return "";
-  }
-
-  function getCell(ws, addr) {
-    const c = ws?.[addr];
-    return c ? c.v : "";
-  }
-
-  async function parseSopIkTemplate(file, kind) {
-    const buf = await file.arrayBuffer();
-    const wb = XLSX.read(buf, { type: "array" });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-
-    const doc_no = norm(getCell(ws, "B5"));
-    const title = norm(getCell(ws, "B6"));
-    const revision = norm(getCell(ws, "B7"));
-    const effective_date = excelDateToISO(getCell(ws, "B8"));
-    const pic = norm(getCell(ws, "B9"));
-
-    // ringkasan isi (opsional): ambil beberapa sel yang memang kita isi saat prefill
-    const ringkas1 = norm(getCell(ws, kind === "SOP" ? "B15" : "B14"));
-    const ringkas2 = norm(getCell(ws, kind === "SOP" ? "B16" : "B15"));
-    const ringkas3 = norm(getCell(ws, kind === "SOP" ? "B19" : "B16"));
-    const notes_from_file = [ringkas1, ringkas2, ringkas3].filter(Boolean).join("\n");
-
-    return { title, doc_no, revision, effective_date, pic, notes_from_file };
-  }
-
-  function showParsePreview(previewEl, meta, extraHtml = "") {
-    if (!previewEl) return;
-    previewEl.style.display = "block";
-    previewEl.innerHTML = `
-      <div><strong>Hasil Parse</strong></div>
-      <div style="margin-top:6px">
-        ${meta.doc_no ? `<div>No Dok: <strong>${safeText(meta.doc_no)}</strong></div>` : ""}
-        ${meta.title ? `<div>Judul: <strong>${safeText(meta.title)}</strong></div>` : ""}
-        ${meta.revision ? `<div>Revisi: <strong>${safeText(meta.revision)}</strong></div>` : ""}
-        ${meta.effective_date ? `<div>Berlaku: <strong>${safeText(meta.effective_date)}</strong></div>` : ""}
-        ${meta.pic ? `<div>PIC (dari template): <strong>${safeText(meta.pic)}</strong></div>` : ""}
-      </div>
-      ${extraHtml}
-    `;
-  }
-
-  function hideParsePreview(previewEl) {
-    if (!previewEl) return;
-    previewEl.style.display = "none";
-    previewEl.innerHTML = "";
-  }
-
-  async function uploadTemplateParsed(docType, fileOverride = null) {
-    if (!activeProgramRow?.id) return;
-    const pid = activeProgramRow.id;
-    const isSOP = docType === "SOP";
-    const fileEl = isSOP ? els.doc_tpl_file : els.ik_tpl_file;
-    const previewEl = isSOP ? els.sopParsePreview : els.ikParsePreview;
-    const file = fileOverride || fileEl?.files?.[0];
-    if (!file) {
-      notify("Pilih file template XLSX dulu.", "error");
-      return;
-    }
-
-    setStatus("Parsing template...", "load");
-    try {
-      const meta = await parseSopIkTemplate(file, docType);
-
-      // isi input box (boleh diedit sebelum simpan)
-      if (isSOP) {
-        if (meta.title) els.doc_title.value = meta.title;
-        if (meta.doc_no) els.doc_no.value = meta.doc_no;
-        if (meta.revision) els.doc_revision.value = meta.revision;
-        if (meta.effective_date) els.doc_effective.value = meta.effective_date;
-        if (!norm(els.doc_notes.value) && meta.notes_from_file) els.doc_notes.value = meta.notes_from_file;
-      } else {
-        if (meta.title) els.ik_title.value = meta.title;
-        if (meta.doc_no) els.ik_no.value = meta.doc_no;
-        if (meta.revision) els.ik_revision.value = meta.revision;
-        if (meta.effective_date) els.ik_effective.value = meta.effective_date;
-        if (!norm(els.ik_notes.value) && meta.notes_from_file) els.ik_notes.value = meta.notes_from_file;
-      }
-
-      showParsePreview(previewEl, meta);
-
-      const ok = await askConfirm(`Upload template ${docType} ini dan simpan sebagai sumber (XLSX)?`);
-      if (!ok) {
-        setStatus("Ready", "ok");
-        return;
-      }
-
-      setStatus("Uploading...", "load");
-      const path = buildStoragePath(pid, docType, file.name);
-      const { error: upErr } = await db.storage.from(STORAGE_BUCKET).upload(path, file, { upsert: false });
-      if (upErr) throw upErr;
-
-      // payload seperti dokumen biasa, tapi kita tandai sebagai sumber template
-      const title = norm(isSOP ? els.doc_title.value : els.ik_title.value);
-      const doc_no = norm(isSOP ? els.doc_no.value : els.ik_no.value);
-      const revision = norm(isSOP ? els.doc_revision.value : els.ik_revision.value);
-      const effective_date = (isSOP ? els.doc_effective.value : els.ik_effective.value) || null;
-      const notesRaw = norm(isSOP ? els.doc_notes.value : els.ik_notes.value);
-      const notes = (notesRaw ? notesRaw + "\n" : "") + "[SOURCE_XLSX]";
-
-      const payload = {
-        program_id: pid,
-        doc_type: docType,
-        title: title || null,
-        doc_no: doc_no || null,
-        revision: revision || null,
-        effective_date,
-        notes,
-        file_path: path,
-        is_active: true,
-      };
-      const { error: insErr } = await db.from(DOCS_TABLE).insert(payload);
-      if (insErr) throw insErr;
-
-      // reset
-      if (!fileOverride && fileEl) fileEl.value = "";
-      notify(`Template ${docType} berhasil diupload & diparse.`, "success");
-      await loadDocsAndRecords();
-      await refreshCountsForViewRows();
-    } catch (err) {
-      console.error(err);
-      if (isBucketNotFoundError(err)) { showBucketNotFoundHelp(); return; }
-      notify("Gagal parse/upload template: " + (err?.message || String(err)), "error");
-    } finally {
-      setStatus("Ready", "ok");
-    }
-  }
-
-  async function parseRecordTemplate(file) {
-    const buf = await file.arrayBuffer();
-    const wb = XLSX.read(buf, { type: "array" });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true });
-
-    // Cari header tabel log (kolom A = Tanggal)
-    let headerIdx = -1;
-    for (let i = 0; i < Math.min(rows.length, 60); i++) {
-      const a = norm(rows[i]?.[0]);
-      if (/tanggal/i.test(a)) {
-        headerIdx = i;
-        break;
-      }
-    }
-    const start = headerIdx >= 0 ? headerIdx + 1 : 15; // fallback
-
-    const parsed = [];
-    for (let i = start; i < rows.length; i++) {
-      const r = rows[i] || [];
-      const dateISO = excelDateToISO(r[0]);
-      const program = norm(r[1]);
-      const title = norm(r[2]);
-      const desc = norm(r[3]);
-      const pic = norm(r[5]);
-      if (!dateISO && !title && !desc && !program) {
-        // stop kalau sudah kosong beruntun
-        continue;
-      }
-      if (!dateISO) continue; // tanggal wajib
-
-      parsed.push({
-        record_date: dateISO,
-        title: title || (program ? `Record ${program}` : "Record"),
-        description: desc || (program ? `Program: ${program}${pic ? ` • PIC: ${pic}` : ""}` : (pic ? `PIC: ${pic}` : "")),
-      });
-    }
-
-    // identitas ringkas dari sel B5 (judul), B8 (PIC)
-    const identTitle = norm(getCell(ws, "B5"));
-    const identPIC = norm(getCell(ws, "B8"));
-
-    return { identTitle, identPIC, parsed };
-  }
-
-  async function uploadRecordTemplateParsed(fileOverride = null) {
-    if (!activeProgramRow?.id) return;
-    const pid = activeProgramRow.id;
-    const file = fileOverride || els.rec_tpl_file?.files?.[0];
-    if (!file) {
-      notify("Pilih file Template Record XLSX dulu.", "error");
-      return;
-    }
-
-    setStatus("Parsing template record...", "load");
-    try {
-      const { identTitle, identPIC, parsed } = await parseRecordTemplate(file);
-      const count = parsed.length;
-      if (!count) {
-        hideParsePreview(els.recParsePreview);
-        notify("Tidak menemukan baris record yang valid. Pastikan kolom Tanggal terisi.", "error");
-        setStatus("Ready", "ok");
-        return;
-      }
-
-      // prefill input ringkas kalau masih kosong
-      if (!norm(els.rec_title.value) && identTitle) els.rec_title.value = identTitle;
-      if (!norm(els.rec_desc.value) && identPIC) els.rec_desc.value = `PIC (dari template): ${identPIC}`;
-
-      const previewRows = parsed.slice(0, 4).map(p => `<div>• <strong>${safeText(p.record_date)}</strong> — ${safeText(p.title)}</div>`).join("");
-      showParsePreview(els.recParsePreview, { title: identTitle, doc_no: "", revision: "", effective_date: "", pic: identPIC }, `<div style="margin-top:8px">Ditemukan <strong>${count}</strong> record.</div><div style="margin-top:6px">${previewRows}${count > 4 ? `<div style="margin-top:6px">…dan ${count - 4} record lainnya</div>` : ""}</div>`);
-
-      const ok = await askConfirm(`Tambah ${count} record dari template ini?`);
-      if (!ok) {
-        setStatus("Ready", "ok");
-        return;
-      }
-
-      setStatus("Uploading template & saving records...", "load");
-      // Upload file template sebagai bukti sumber (opsional) dan attach ke semua record
-      const path = buildStoragePath(pid, "REC", file.name);
-      const { error: upErr } = await db.storage.from(STORAGE_BUCKET).upload(path, file, { upsert: false });
-      if (upErr) throw upErr;
-
-      // Insert records (batch)
-      const payloads = parsed.map(p => ({
-        program_id: pid,
-        record_date: p.record_date,
-        title: p.title,
-        description: p.description,
-        file_path: path, // bukti sumber template
-      }));
-
-      const { error: insErr } = await db.from(RECORDS_TABLE).insert(payloads);
-      if (insErr) throw insErr;
-
-      // reset
-      if (!fileOverride) els.rec_tpl_file.value = "";
-      notify("Record dari template berhasil ditambahkan.", "success");
-      await loadDocsAndRecords();
-      await refreshCountsForViewRows();
-    } catch (err) {
-      console.error(err);
-      notify("Gagal parse/upload record: " + (err?.message || String(err)), "error");
-    } finally {
-      setStatus("Ready", "ok");
-    }
-  }
-
-  function docGroupKey(d) {
-    const k = [
-      norm(d.doc_no),
-      norm(d.revision),
-      norm(d.effective_date),
-      norm(d.title),
-    ].join("|");
-    // fallback agar tidak kosong total
-    return k !== "|||" ? k : norm(d.file_path) || String(d.id);
-  }
-
-  function countDocGroups(docs, docType) {
-    const set = new Set();
-    (docs || [])
-      .filter(d => d.doc_type === docType)
-      .forEach(d => set.add(docGroupKey(d)));
-    return set.size;
-  }
-
-  function updateCountsCacheFromLists(pid, docs, recs) {
-    const sop = countDocGroups(docs, "SOP");
-    const ik = countDocGroups(docs, "IK");
-    const rec = (recs || []).length;
-    const prev = docsCountsByProgram.get(String(pid)) || {
-      sop: 0,
-      ik: 0,
-      rec: 0,
-      sil_text: "-",
-      sil_total: 0,
-    };
-    docsCountsByProgram.set(String(pid), { ...prev, sop, ik, rec });
-  }
-
-  async function refreshCountsForViewRows() {
-    const ids = (viewRowsData || []).map(r => r.id).filter(Boolean);
-    if (!ids.length) {
-      updateChipCountsInDom();
-      return;
-    }
-
-    const docs = await safeSelect(DOCS_TABLE, (t) =>
-      t.select("program_id,doc_type,doc_no,revision,effective_date,title,file_path").in("program_id", ids)
-    );
-    const recs = await safeSelect(RECORDS_TABLE, (t) =>
-      t.select("program_id").in("program_id", ids)
-    );
-    const sils = await safeSelect(SILABUS_META_TABLE, (t) =>
-      t.select("program_id,subtype,title").in("program_id", ids)
-    );
-
-    const map = new Map();
-    ids.forEach(id => map.set(String(id), { sop: 0, ik: 0, rec: 0, sil_text: "-", sil_total: 0 }));
-    // hitung unik per kelompok dokumen (agar SOURCE+FINAL tidak jadi dobel)
-    const groupMap = new Map();
-    ids.forEach(id => groupMap.set(String(id), { sop: new Set(), ik: new Set() }));
-
-    (docs || []).forEach(d => {
-      const pid = String(d.program_id);
-      if (!groupMap.has(pid)) groupMap.set(pid, { sop: new Set(), ik: new Set() });
-      const key = docGroupKey(d);
-      if (d.doc_type === "SOP") groupMap.get(pid).sop.add(key);
-      if (d.doc_type === "IK") groupMap.get(pid).ik.add(key);
-    });
-
-    groupMap.forEach((sets, pid) => {
-      if (!map.has(pid)) map.set(pid, { sop: 0, ik: 0, rec: 0, sil_text: "-", sil_total: 0 });
-      map.get(pid).sop = sets.sop.size;
-      map.get(pid).ik = sets.ik.size;
-    });
-    (recs || []).forEach(r => {
-      const key = String(r.program_id);
-      if (!map.has(key)) map.set(key, { sop: 0, ik: 0, rec: 0, sil_text: "-", sil_total: 0 });
-      map.get(key).rec += 1;
-    });
-
-    // Silabus summary (akademik: 1 jika ada meta subtype AKADEMIK, non: jumlah meta NON_AKADEMIK)
-    const silAgg = new Map();
-    ids.forEach(id => silAgg.set(String(id), { acad: false, nonCount: 0 }));
-    (sils || []).forEach(s => {
-      const pid = String(s.program_id);
-      if (!silAgg.has(pid)) silAgg.set(pid, { acad: false, nonCount: 0 });
-      const st = String(s.subtype || "").toUpperCase();
-      if (st === "AKADEMIK") silAgg.get(pid).acad = true;
-      else silAgg.get(pid).nonCount += 1;
-    });
-    silAgg.forEach((v, pid) => {
-      if (!map.has(pid)) map.set(pid, { sop: 0, ik: 0, rec: 0, sil_text: "-", sil_total: 0 });
-      const parts = [];
-      if (v.acad) parts.push("A");
-      if (v.nonCount > 0) parts.push(`NA(${v.nonCount})`);
-      map.get(pid).sil_text = parts.length ? parts.join(" + ") : "-";
-      map.get(pid).sil_total = (v.acad ? 1 : 0) + (v.nonCount || 0);
-    });
-
-    docsCountsByProgram = map;
-    updateChipCountsInDom();
-  }
-
-  function updateChipCountsInDom() {
-    // update semua span count yang punya data-program-id
-    document.querySelectorAll("[data-chip-count]").forEach((el) => {
-      const pid = el.getAttribute("data-program-id");
-      const kind = el.getAttribute("data-kind"); // sop|ik|rec
-      const c = docsCountsByProgram.get(String(pid)) || { sop: 0, ik: 0, rec: 0, sil_text: "-", sil_total: 0 };
-      if (kind === "sil") {
-        // count di chip = angka total, sedangkan ringkasan A/NA(n) tampil di excerpt
-        el.textContent = String(typeof c.sil_total === "number" ? c.sil_total : 0);
-        return;
-      }
-      const v = kind === "ik" ? c.ik : kind === "rec" ? c.rec : c.sop;
-      el.textContent = String(v);
-    });
-
-    // update ringkasan silabus (A / NA(n)) di kolom Silabus
-    document.querySelectorAll("[data-sil-excerpt]").forEach((el) => {
-      const pid = el.getAttribute("data-program-id");
-      const c = docsCountsByProgram.get(String(pid)) || { sil_text: "-" };
-      el.textContent = String(c.sil_text || "-");
-    });
-
-    // jika modal edit sedang terbuka, sinkronkan ringkasan silabus juga
-    try {
-	      if (els.modal && els.modal.classList.contains("open") && activeProgramRow) {
-	        const pid = String(activeProgramRow.id || "");
-	        const cDocs = docsCountsByProgram.get(pid) || { sop: 0, ik: 0, rec: 0, sil_text: "-", sil_total: 0 };
-	        if (els.e_silabus) {
-	          const sil = (cDocs.sil_total || 0) === 0 ? "0" : String(cDocs.sil_text || "-");
-	          els.e_silabus.value = `Silabus: ${sil}`;
-	        }
-	        if (els.e_sop) els.e_sop.value = `SOP: ${Number(cDocs.sop || 0)}`;
-	        if (els.e_instruksi_kerja) els.e_instruksi_kerja.value = `IK: ${Number(cDocs.ik || 0)}`;
-	        if (els.e_bukti) els.e_bukti.value = `Record: ${Number(cDocs.rec || 0)}`;
-	      }
-    } catch (_) {}
-  }
-
-  function renderDocsList(docs, docType, container) {
-    if (!container) return;
-    const list = (docs || []).filter(d => d.doc_type === docType);
-    if (!list.length) {
-      container.innerHTML = `<div style="padding:14px; color:var(--text-muted)">Belum ada dokumen ${docType}.</div>`;
-      return;
-    }
-
-    // Group berdasarkan identitas dokumen (agar SOURCE_XLSX dan FINAL PDF/DOCX tampil 1 baris)
-    const groups = new Map();
-    list.forEach(d => {
-      const k = docGroupKey(d);
-      if (!groups.has(k)) groups.set(k, []);
-      groups.get(k).push(d);
-    });
-
-    // sort: group yang terbaru di atas (pakai created_at terbaru dari anggota group)
-    const groupArr = Array.from(groups.entries()).map(([k, arr]) => {
-      const newest = arr
-        .map(x => x.created_at || x.updated_at || "")
-        .sort()
-        .slice(-1)[0] || "";
-      return { k, arr, newest };
-    }).sort((a, b) => (a.newest < b.newest ? 1 : -1));
-
-    container.innerHTML = groupArr.map(({ arr }) => {
-      const ids = arr.map(x => x.id).filter(Boolean);
-      const idsCsv = ids.join(",");
-      const anyActive = arr.some(x => !!x.is_active);
-
-      // pilih source xlsx dan final non-xlsx (ambil yang paling baru)
-      const sorted = [...arr].sort((a, b) => (String(a.created_at) < String(b.created_at) ? 1 : -1));
-      const source = sorted.find(x => isTemplateXlsx(x.file_path)) || null;
-      const final = sorted.find(x => !isTemplateXlsx(x.file_path)) || null;
-      const main = final || source || sorted[0];
-
-      const title = safeText(main.title || (docType === "SOP" ? "Dokumen SOP" : "Dokumen IK"));
-      const sub = [
-        main.doc_no ? `No: ${safeText(main.doc_no)}` : null,
-        main.revision ? `Revisi: ${safeText(main.revision)}` : null,
-        main.effective_date ? `Berlaku: ${safeText(main.effective_date)}` : null,
-        anyActive ? "Aktif" : "Arsip",
-      ].filter(Boolean).join(" • ");
-
-      const parts = [];
-      if (final) parts.push(`<button class="link-btn" type="button" data-doc-view="${final.id}"><i class="ph ph-eye"></i> Lihat Final</button>`);
-      if (source) parts.push(`<button class="link-btn" type="button" data-doc-view="${source.id}"><i class="ph ph-file-arrow-up"></i> Lihat Source</button>`);
-      if (!final && !source) parts.push(`<button class="link-btn" type="button" data-doc-view="${main.id}"><i class="ph ph-eye"></i> Lihat</button>`);
-
-      parts.push(
-        `<button class="link-btn" type="button" data-doc-toggle-group="${idsCsv}">${anyActive ? '<i class="ph ph-archive"></i> Arsip' : '<i class="ph ph-check"></i> Aktifkan'}</button>`
-      );
-      parts.push(`<button class="link-btn danger" type="button" data-doc-del-group="${idsCsv}"><i class="ph ph-trash"></i></button>`);
-
-      return `
-        <div class="file-row">
-          <div class="file-left">
-            <div class="file-title">${title}</div>
-            <div class="file-sub">${sub}</div>
-          </div>
-          <div class="file-actions">
-            ${parts.join("")}
-          </div>
-        </div>
-      `;
-    }).join("");
-  }
-
-  function renderRecordsList(recs, container) {
-    if (!container) return;
-    const list = recs || [];
-    if (!list.length) {
-      container.innerHTML = `<div style="padding:14px; color:var(--text-muted)">Belum ada record bukti.</div>`;
-      return;
-    }
-
-    container.innerHTML = list.map(r => {
-      const title = safeText(r.title || "Record");
-      const date = safeText(r.record_date || "-");
-      const desc = safeText(r.description || "");
-      const sub = desc ? `${date} • ${desc}` : date;
-      return `
-        <div class="file-row">
-          <div class="file-left">
-            <div class="file-title">${title}</div>
-            <div class="file-sub">${sub}</div>
-          </div>
-          <div class="file-actions">
-            ${r.file_path ? '<button class="link-btn" type="button" data-rec-view="' + r.id + '"><i class="ph ph-eye"></i> Lihat</button>' : ''}
-            <button class="link-btn danger" type="button" data-rec-del="${r.id}"><i class="ph ph-trash"></i></button>
-          </div>
-        </div>
-      `;
-    }).join("");
-  }
-
-  async function uploadDoc(docType, fileOverride = null) {
-    if (!activeProgramRow?.id) return;
-    const pid = activeProgramRow.id;
-
-    const isSOP = docType === "SOP";
-    const title = norm(isSOP ? els.doc_title.value : els.ik_title.value);
-    const doc_no = norm(isSOP ? els.doc_no.value : els.ik_no.value);
-    const revision = norm(isSOP ? els.doc_revision.value : els.ik_revision.value);
-    const effective_date = (isSOP ? els.doc_effective.value : els.ik_effective.value) || null;
-    const notesRaw = norm(isSOP ? els.doc_notes.value : els.ik_notes.value);
-    const fileEl = isSOP ? els.doc_file : els.ik_file;
-    const file = fileOverride || fileEl?.files?.[0];
-    if (!file) {
-      notify("Pilih file dulu.", "error");
-      return;
-    }
-
-    const ok = await askConfirm(`Upload dokumen ${docType} untuk program ini?`);
-    if (!ok) return;
-
-    setStatus("Uploading...", "load");
-    try {
-      const path = buildStoragePath(pid, docType, file.name);
-      const { error: upErr } = await db.storage.from(STORAGE_BUCKET).upload(path, file, { upsert: false });
-      if (upErr) throw upErr;
-
-      const kindTag = isTemplateXlsx(file.name) ? "[SOURCE_XLSX]" : "[FINAL]";
-      const notes = (notesRaw ? notesRaw + "\n" : "") + kindTag;
-
-      const payload = {
-        program_id: pid,
-        doc_type: docType,
-        title: title || null,
-        doc_no: doc_no || null,
-        revision: revision || null,
-        effective_date,
-        notes: notes || null,
-        file_path: path,
-        is_active: true,
-      };
-
-      const { error: insErr } = await db.from(DOCS_TABLE).insert(payload);
-      if (insErr) throw insErr;
-
-      // reset inputs
-      if (!fileOverride) {
-        if (isSOP) {
-          els.doc_file.value = "";
-        } else {
-          els.ik_file.value = "";
-        }
-      }
-
-      notify(`Dokumen ${docType} berhasil diupload.`, "success");
-      await loadDocsAndRecords();
-      await refreshCountsForViewRows();
-    } catch (err) {
-      console.error(err);
-      if (isBucketNotFoundError(err)) { showBucketNotFoundHelp(); return; }
-      notify("Gagal upload: " + (err?.message || String(err)), "error");
-    } finally {
-      setStatus("Ready", "ok");
-    }
-  }
-
-  async function addRecord() {
-    if (!activeProgramRow?.id) return;
-    const pid = activeProgramRow.id;
-
-    const record_date = els.rec_date.value || null;
-    if (!record_date) {
-      notify("Tanggal kejadian wajib diisi.", "error");
-      return;
-    }
-    const title = norm(els.rec_title.value) || null;
-
-// gabungkan metadata tambahan ke description (supaya aman walau kolom DB belum ada)
-const metaParts = [];
-const pic = norm(els.rec_pic?.value) || null;
-const status = norm(els.rec_status?.value) || null;
-const tempat = norm(els.rec_tempat?.value) || null;
-const sasaran = norm(els.rec_sasaran?.value) || null;
-if (pic) metaParts.push(`PIC Bukti: ${pic}`);
-if (status) metaParts.push(`Status Verifikasi: ${status}`);
-if (tempat) metaParts.push(`Lokasi Kegiatan: ${tempat}`);
-if (sasaran) metaParts.push(`Sasaran: ${sasaran}`);
-
-const descMain = norm(els.rec_desc.value) || null;
-const description = (metaParts.length ? metaParts.join(" | ") + (descMain ? " | " : "") : "") + (descMain || "");
-    const file = els.rec_file?.files?.[0] || null;
-
-    const ok = await askConfirm("Tambah record bukti untuk program ini?");
-    if (!ok) return;
-
-    setStatus("Saving...", "load");
-    try {
-      let file_path = null;
-      if (file) {
-        const path = buildStoragePath(pid, "REC", file.name);
-        const { error: upErr } = await db.storage.from(STORAGE_BUCKET).upload(path, file, { upsert: false });
-        if (upErr) throw upErr;
-        file_path = path;
-      }
-
-      const payload = {
-        program_id: pid,
-        record_date,
-        title,
-        description,
-        file_path,
-      };
-      const { error: insErr } = await db.from(RECORDS_TABLE).insert(payload);
-      if (insErr) throw insErr;
-
-      // simpan lokasi kegiatan terakhir untuk auto-default (per program)
-      try {
-        if (tempat) localStorage.setItem(`pontren_last_lokasi_${pid}`, tempat);
-      } catch (_) {}
-
-      // reset inputs
-      els.rec_title.value = "";
-      els.rec_desc.value = "";
-      els.rec_file.value = "";
-
-      notify("Record bukti ditambahkan.", "success");
-      await loadDocsAndRecords();
-      await refreshCountsForViewRows();
-    } catch (err) {
-      console.error(err);
-      if (isBucketNotFoundError(err)) { showBucketNotFoundHelp(); return; }
-      notify("Gagal tambah record: " + (err?.message || String(err)), "error");
-    } finally {
-      setStatus("Ready", "ok");
-    }
-  }
-
-  async function toggleDocActive(docId) {
-    const ok = await askConfirm("Ubah status dokumen ini? (Aktif/Arsip)");
-    if (!ok) return;
-    setStatus("Updating...", "load");
-    try {
-      // ambil status sekarang
-      const { data, error } = await db.from(DOCS_TABLE).select("id,is_active").eq("id", docId).single();
-      if (error) throw error;
-      const next = !data.is_active;
-      const { error: upErr } = await db.from(DOCS_TABLE).update({ is_active: next }).eq("id", docId);
-      if (upErr) throw upErr;
-      notify("Status dokumen diperbarui.", "success");
-      await loadDocsAndRecords();
-      await refreshCountsForViewRows();
-    } catch (err) {
-      console.error(err);
-      notify("Gagal update: " + (err?.message || String(err)), "error");
-    } finally {
-      setStatus("Ready", "ok");
-    }
-  }
-
-  async function deleteDoc(docId) {
-    const ok = await askConfirm("Hapus dokumen ini? (file & data akan dihapus)");
-    if (!ok) return;
-    setStatus("Deleting...", "load");
-    try {
-      const { data, error } = await db.from(DOCS_TABLE).select("id,file_path").eq("id", docId).single();
-      if (error) throw error;
-      if (data?.file_path) {
-        await db.storage.from(STORAGE_BUCKET).remove([data.file_path]);
-      }
-      const { error: delErr } = await db.from(DOCS_TABLE).delete().eq("id", docId);
-      if (delErr) throw delErr;
-      notify("Dokumen dihapus.", "success");
-      await loadDocsAndRecords();
-      await refreshCountsForViewRows();
-    } catch (err) {
-      console.error(err);
-      notify("Gagal hapus: " + (err?.message || String(err)), "error");
-    } finally {
-      setStatus("Ready", "ok");
-    }
-  }
-
-  async function toggleDocActiveGroup(idsCsv) {
-    const ids = (idsCsv || "").split(",").map(x => x.trim()).filter(Boolean);
-    if (!ids.length) return;
-    const ok = await askConfirm("Ubah status dokumen ini? (Aktif/Arsip)");
-    if (!ok) return;
-    setStatus("Updating...", "load");
-    try {
-      const { data, error } = await db.from(DOCS_TABLE).select("id,is_active").in("id", ids);
-      if (error) throw error;
-      const anyActive = (data || []).some(x => !!x.is_active);
-      const next = !anyActive;
-      const { error: upErr } = await db.from(DOCS_TABLE).update({ is_active: next }).in("id", ids);
-      if (upErr) throw upErr;
-      notify("Status dokumen diperbarui.", "success");
-      await loadDocsAndRecords();
-      await refreshCountsForViewRows();
-    } catch (err) {
-      console.error(err);
-      notify("Gagal update: " + (err?.message || String(err)), "error");
-    } finally {
-      setStatus("Ready", "ok");
-    }
-  }
-
-  async function deleteDocGroup(idsCsv) {
-    const ids = (idsCsv || "").split(",").map(x => x.trim()).filter(Boolean);
-    if (!ids.length) return;
-    const ok = await askConfirm("Hapus dokumen ini? (semua file SOURCE/FINAL akan dihapus)");
-    if (!ok) return;
-    setStatus("Deleting...", "load");
-    try {
-      const { data, error } = await db.from(DOCS_TABLE).select("id,file_path").in("id", ids);
-      if (error) throw error;
-      const paths = (data || []).map(x => x.file_path).filter(Boolean);
-      if (paths.length) {
-        await db.storage.from(STORAGE_BUCKET).remove(paths);
-      }
-      const { error: delErr } = await db.from(DOCS_TABLE).delete().in("id", ids);
-      if (delErr) throw delErr;
-      notify("Dokumen dihapus.", "success");
-      await loadDocsAndRecords();
-      await refreshCountsForViewRows();
-    } catch (err) {
-      console.error(err);
-      notify("Gagal hapus: " + (err?.message || String(err)), "error");
-    } finally {
-      setStatus("Ready", "ok");
-    }
-  }
-
-  async function deleteRecord(recId) {
-    const ok = await askConfirm("Hapus record ini?");
-    if (!ok) return;
-    setStatus("Deleting...", "load");
-    try {
-      const { data, error } = await db.from(RECORDS_TABLE).select("id,file_path").eq("id", recId).single();
-      if (error) throw error;
-      if (data?.file_path) {
-        await db.storage.from(STORAGE_BUCKET).remove([data.file_path]);
-      }
-      const { error: delErr } = await db.from(RECORDS_TABLE).delete().eq("id", recId);
-      if (delErr) throw delErr;
-      notify("Record dihapus.", "success");
-      await loadDocsAndRecords();
-      await refreshCountsForViewRows();
-    } catch (err) {
-      console.error(err);
-      notify("Gagal hapus: " + (err?.message || String(err)), "error");
-    } finally {
-      setStatus("Ready", "ok");
-    }
-  }
-
-  async function viewDoc(docId) {
-    try {
-      const { data, error } = await db.from(DOCS_TABLE).select("file_path").eq("id", docId).single();
-      if (error) throw error;
-      const url = await getFileUrl(data.file_path);
-      if (!url) throw new Error("URL file kosong. Cek bucket/storage policy.");
-      window.open(url, "_blank");
-    } catch (err) {
-      notify("Gagal buka dokumen: " + (err?.message || String(err)), "error");
-    }
-  }
-
-  async function viewRecord(recId) {
-    try {
-      const { data, error } = await db.from(RECORDS_TABLE).select("file_path").eq("id", recId).single();
-      if (error) throw error;
-      if (!data?.file_path) throw new Error("Record tidak punya lampiran.");
-      const url = await getFileUrl(data.file_path);
-      if (!url) throw new Error("URL file kosong. Cek bucket/storage policy.");
-      window.open(url, "_blank");
-    } catch (err) {
-      notify("Gagal buka record: " + (err?.message || String(err)), "error");
-    }
-  }
-
   async function saveChanges() {
     const id = els.e_id.value;
-    const dataToSave = {
-      profil: norm(els.e_profil.value),
-      definisi: els.e_definisi.value.trim(),
-      indikator: els.e_indikator.value.trim(),
-      program: els.e_program.value.trim(),
-      target_renstra: els.e_target_renstra.value.trim(),
-      sasaran: els.e_sasaran.value.trim(),
-      frekuensi: norm(els.e_frekuensi.value),
-      pic: els.e_pic.value.trim(),
+    const data = {
+      profil: norm(els.e_profil.value), 
+      definisi: els.e_definisi.value, 
+      indikator: els.e_indikator.value,
+      program: els.e_program.value, 
+      sasaran: els.e_sasaran.value, 
+      frekuensi: els.e_frekuensi.value, 
+      pic: els.e_pic.value
     };
-
-    const hasData = Object.values(dataToSave).some(val => val !== "");
-    if (!hasData) {
-      notify("Harap isi minimal 1 kolom!", "error");
-      return;
-    }
-
+    
     if (id) {
-      const confirm = await askConfirm("Simpan perubahan pada data ini?");
-      if (!confirm) return;
-
-      setStatus("Menyimpan...", "load");
-      dataToSave.updated_at = new Date();
-      const { error } = await db.from("program_pontren").update(dataToSave).eq("id", id);
-      
-      if (error) {
-        notify("Gagal update: " + error.message, "error");
-        setStatus("Gagal", "err");
-      } else {
-        closeModal();
-        notify("Data berhasil diperbarui!", "success");
-        await refreshAllData();
-        fetchData();
-      }
+      const { error } = await db.from("program_pontren").update({...data, updated_at: new Date()}).eq('id', id);
+      if(error) notify("Gagal update: "+error.message, "error");
+      else { els.modal.classList.remove("open"); notify("Data diperbarui", "success"); refreshAllData(); }
     } else {
-      setStatus("Menambahkan...", "load");
-      const { error } = await db.from("program_pontren").insert(dataToSave);
-      
-      if (error) {
-        notify("Gagal tambah: " + error.message, "error");
-        setStatus("Gagal", "err");
-      } else {
-        closeModal();
-        notify("Data baru berhasil ditambahkan!", "success");
-        await refreshAllData();
-        fetchData();
-      }
+      const { error } = await db.from("program_pontren").insert(data);
+      if(error) notify("Gagal simpan: "+error.message, "error");
+      else { els.modal.classList.remove("open"); notify("Data ditambahkan", "success"); refreshAllData(); }
     }
   }
 
   async function deleteData() {
-    const id = els.e_id.value;
-    if (!id) return;
-    
-    const confirm = await askConfirm("PERINGATAN: Apakah Anda yakin ingin menghapus data ini secara permanen?");
-    if (!confirm) return;
-
-    setStatus("Menghapus...", "load");
-    const { error } = await db.from("program_pontren").delete().eq("id", id);
-    
-    if (error) {
-      notify("Gagal hapus: " + error.message, "error");
-      setStatus("Gagal", "err");
-    } else {
-      closeModal();
-      notify("Data berhasil dihapus.", "success");
-      await refreshAllData();
-      fetchData();
-    }
+    if (!await askConfirm("Hapus data program ini permanen?")) return;
+    const { error } = await db.from("program_pontren").delete().eq('id', els.e_id.value);
+    if (!error) { els.modal.classList.remove("open"); notify("Data dihapus", "success"); refreshAllData(); }
+    else notify("Gagal hapus: "+error.message, "error");
   }
 
-  // --- DATA LOADING (tanpa RPC) ---
+  // --- 9. VIEW & FILTER LOGIC (UPDATED) ---
+
   async function refreshAllData() {
     setStatus("Syncing...", "load");
-    const { data, error } = await db
-      .from("program_pontren")
-      .select("*")
-      .order("profil", { ascending: true })
-      .order("program", { ascending: true });
-
-    if (error) {
-      notify("Gagal ambil data: " + error.message, "error");
-      setStatus("Error", "err");
-      allRowsData = [];
-      return;
-    }
+    const { data } = await db.from("program_pontren").select("*").order("program", {ascending: true});
     allRowsData = data || [];
-    setStatus("Ready", "ok");
-  }
-
-  function uniqueSorted(values) {
-    const set = new Set((values || []).map(v => norm(v)).filter(Boolean));
-    return Array.from(set).sort((a, b) => a.localeCompare(b, 'id'));
-  }
-
-  function applyFilters(rows, f, skipKey = null) {
-  const q = normLower(f.q);
-
-  return (rows || []).filter(r => {
-    // Hanya 4 filter yang aktif: Profil, Indikator, Program, PIC
-    if (skipKey !== "profil" && f.profil && norm(r.profil || r.profil_utama) !== f.profil) return false;
-    if (skipKey !== "indikator" && f.indikator && norm(r.indikator) !== f.indikator) return false;
-    if (skipKey !== "program" && f.program && norm(r.program) !== f.program) return false;
-    if (skipKey !== "pic" && f.pic && norm(r.pic) !== norm(f.pic)) return false;
-
-    // Search (q) tetap nyapu semua kolom (biar enak)
-    if (!q) return true;
-
-    const hay = [
-      r.profil || r.profil_utama,
-      r.definisi,
-      r.indikator,
-      r.program,
-      r.target_renstra,
-      r.sasaran,
-      r.pic,
-      r.frekuensi,
-      r.sop,
-      r.instruksi_kerja,
-      r.bukti,
-    ].map(normLower).join(" | ");
-
-    return hay.includes(q);
-  });
-}
-
-  function updateFilterOptions(f) {
-  const rowsForProfil = applyFilters(allRowsData, f, "profil");
-  const rowsForIndikator = applyFilters(allRowsData, f, "indikator");
-  const rowsForProgram = applyFilters(allRowsData, f, "program");
-  const rowsForPic = applyFilters(allRowsData, f, "pic");
-
-  setOptions(els.profil, uniqueSorted(rowsForProfil.map(r => r.profil || r.profil_utama)));
-  setOptions(els.indikator, uniqueSorted(rowsForIndikator.map(r => r.indikator)));
-  setOptions(els.program, uniqueSorted(rowsForProgram.map(r => r.program)));
-  setOptions(els.pic, uniqueSorted(rowsForPic.map(r => r.pic)));
-}
-
-  function renderRows(rows) {
-    viewRowsData = rows || [];
-    els.count.textContent = String(viewRowsData.length || 0);
-    const empty = `<div style="padding:40px;text-align:center;color:var(--text-muted)">Data tidak ditemukan.</div>`;
-
-    if (!viewRowsData.length) {
-      els.tbody.innerHTML = `<tr><td colspan="12">${empty}</td></tr>`;
-      els.cards.innerHTML = empty;
-      return;
-    }
-
-    els.tbody.innerHTML = viewRowsData.map((r, i) => {
-      const pid = r.id;
-      return `
-  <tr data-index="${i}">
-    <td>${i + 1}</td>
-    <td><span class="cell-profil">${safeText(r.profil || r.profil_utama || "-")}</span><span class="cell-def">${safeText(r.definisi || "-")}</span></td>
-    <td>${safeText(r.indikator || "-")}</td>
-    <td>${safeText(r.program || "-")}</td>
-    <td>${safeText(r.target_renstra || "-")}</td>
-    <td>${safeText(r.sasaran || "-")}</td>
-    <td><div class="badge-wrap">${renderPicBadges(r.pic)}</div></td>
-    <td>${safeText(r.frekuensi || "-")}</td>
-    <td>
-      <div class="cell-excerpt"><span data-sil-excerpt data-program-id="${pid}">-</span></div>
-      <div class="mini-chips">
-        <button class="chip-btn" type="button" data-open-docs="SIL" data-index="${i}">
-          <span class="chip-dot sil"></span> Silabus: <span class="chip-count" data-chip-count data-kind="sil" data-program-id="${pid}">0</span>
-        </button>
-      </div>
-    </td>
-    <td>
-      <div class="cell-excerpt">${safeText(excerptText(r.sop || "-"))}</div>
-      <div class="mini-chips">
-        <button class="chip-btn" type="button" data-open-docs="SOP" data-index="${i}">
-          <span class="chip-dot sop"></span> SOP: <span class="chip-count" data-chip-count data-kind="sop" data-program-id="${pid}">0</span>
-        </button>
-      </div>
-    </td>
-    <td>
-      <div class="cell-excerpt">${safeText(excerptText(r.instruksi_kerja || "-"))}</div>
-      <div class="mini-chips">
-        <button class="chip-btn" type="button" data-open-docs="IK" data-index="${i}">
-          <span class="chip-dot ik"></span> IK: <span class="chip-count" data-chip-count data-kind="ik" data-program-id="${pid}">0</span>
-        </button>
-      </div>
-    </td>
-    <td>
-      <div class="cell-excerpt">${safeText(excerptText(r.bukti || "-"))}</div>
-      <div class="mini-chips">
-        <button class="chip-btn" type="button" data-open-docs="REC" data-index="${i}">
-          <span class="chip-dot rec"></span> Record: <span class="chip-count" data-chip-count data-kind="rec" data-program-id="${pid}">0</span>
-        </button>
-      </div>
-    </td>
-  </tr>
-`;
-    }).join("");
-
-    els.cards.innerHTML = viewRowsData.map((r, i) => `
-  <div class="m-card" data-index="${i}">
-    <div class="m-header">
-      <div class="m-title">${safeText(r.profil || r.profil_utama || "-")}</div>
-      <div class="m-sub">${safeText(r.definisi || "-")}</div>
-    </div>
-    <div class="m-row"><div class="m-label">Indikator</div><div>${safeText(r.indikator || "-")}</div></div>
-    <div class="m-row"><div class="m-label">Program</div><div>${safeText(r.program || "-")}</div></div>
-    <div class="m-row"><div class="m-label">Target Renstra</div><div>${safeText(r.target_renstra || "-")}</div></div>
-    <div class="m-row"><div class="m-label">Sasaran</div><div>${safeText(r.sasaran || "-")}</div></div>
-    <div class="m-row"><div class="m-label">PIC</div><div><div class="badge-wrap">${renderPicBadges(r.pic)}</div></div></div>
-    <div class="m-row"><div class="m-label">Frekuensi</div><div>${safeText(r.frekuensi || "-")}</div></div>
-    <div class="m-row"><div class="m-label">Silabus</div><div>
-      <div class="cell-excerpt"><span data-sil-excerpt data-program-id="${r.id}">-</span></div>
-      <div class="mini-chips">
-        <button class="chip-btn" type="button" data-open-docs="SIL" data-index="${i}">
-          <span class="chip-dot sil"></span> Silabus: <span class="chip-count" data-chip-count data-kind="sil" data-program-id="${r.id}">0</span>
-        </button>
-      </div>
-    </div></div>
-    <div class="m-row"><div class="m-label">SOP</div><div>
-      <div class="cell-excerpt">${safeText(excerptText(r.sop || "-", 200))}</div>
-      <div class="mini-chips">
-        <button class="chip-btn" type="button" data-open-docs="SOP" data-index="${i}">
-          <span class="chip-dot sop"></span> SOP: <span class="chip-count" data-chip-count data-kind="sop" data-program-id="${r.id}">0</span>
-        </button>
-      </div>
-    </div></div>
-    <div class="m-row"><div class="m-label">Instruksi Kerja</div><div>
-      <div class="cell-excerpt">${safeText(excerptText(r.instruksi_kerja || "-", 200))}</div>
-      <div class="mini-chips">
-        <button class="chip-btn" type="button" data-open-docs="IK" data-index="${i}">
-          <span class="chip-dot ik"></span> IK: <span class="chip-count" data-chip-count data-kind="ik" data-program-id="${r.id}">0</span>
-        </button>
-      </div>
-    </div></div>
-    <div class="m-row"><div class="m-label">Bukti</div><div>
-      <div class="cell-excerpt">${safeText(excerptText(r.bukti || "-", 200))}</div>
-      <div class="mini-chips">
-        <button class="chip-btn" type="button" data-open-docs="REC" data-index="${i}">
-          <span class="chip-dot rec"></span> Record: <span class="chip-count" data-chip-count data-kind="rec" data-program-id="${r.id}">0</span>
-        </button>
-      </div>
-    </div></div>
-  </div>
-`).join("");
-
-    document.querySelectorAll('tr[data-index]').forEach(row => {
-      row.addEventListener('click', () => openModal(viewRowsData[row.getAttribute('data-index')]));
-    });
-    
-    document.querySelectorAll('.m-card[data-index]').forEach(card => {
-      card.addEventListener('click', () => openModal(viewRowsData[card.getAttribute('data-index')]));
-    });
-
-    // tombol chip (buka dokumen/record) - jangan trigger openModal
-    document.querySelectorAll('[data-open-docs]').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const idx = Number(btn.getAttribute('data-index'));
-        const tab = btn.getAttribute('data-open-docs') || "SOP";
-        openDocsModal(viewRowsData[idx], tab);
-      });
-    });
-
-    // refresh counts untuk chip
-    refreshCountsForViewRows();
+    fetchData();
   }
 
   function fetchData() {
-    const f = readFilters();
-    updateFilterOptions(f);
-    const rows = applyFilters(allRowsData, f, null);
-    renderRows(rows);
-    setStatus("Ready", "ok");
+    // REVISI FILTER: Filter Sasaran & Frekuensi ditambahkan
+    const f = {
+      p: norm(els.profil.value), 
+      s: norm(els.sasaran.value), // Filter Sasaran
+      fr: norm(els.frekuensi.value), // Filter Frekuensi
+      pi: els.pic.value, 
+      q: normLower(els.q.value)
+    };
+    
+    viewRowsData = allRowsData.filter(r => {
+      if (f.p && norm(r.profil||r.profil_utama)!==f.p) return false;
+      if (f.s && norm(r.sasaran)!==f.s) return false; // Match Sasaran
+      if (f.fr && norm(r.frekuensi)!==f.fr) return false; // Match Frekuensi
+      if (f.pi && norm(r.pic)!==f.pi) return false;
+      if (f.q) {
+        const hay = [r.profil, r.definisi, r.indikator, r.program, r.sasaran, r.pic].map(normLower).join("|");
+        if (!hay.includes(f.q)) return false;
+      }
+      return true;
+    });
+    
+    renderRows();
+    setStatus("Ready");
   }
 
-  function resetFilters() {
-  els.profil.value = "";
-  els.indikator.value = "";
-  els.program.value = "";
-  els.pic.value = "";
-  els.q.value = "";
-  fetchData();
-}
-
-  // --- IMPORT EXCEL (Robust Sasaran Mapping) ---
-function normHeader(s) {
-  return String(s ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/[^\w]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-}
-
-const HEADER_TO_DB = {
-  // Profil / Kategori
-  profil: "profil",
-  kategori: "profil",
-  kategori_aqil: "profil",
-  profil_utama: "profil",
-
-  // Kolom utama
-  program: "program",
-  definisi: "definisi",
-  indikator: "indikator",
-  sasaran: "sasaran",
-  target: "sasaran",
-  sasaran_program: "sasaran",
-  sasaran_kegiatan: "sasaran",
-
-
-  // Target Renstra
-  target_renstra: "target_renstra",
-  targetrenstra: "target_renstra",
-  renstra: "target_renstra",
-  sop: "sop",
-  instruksi_kerja: "instruksi_kerja",
-  instruksi: "instruksi_kerja",
-  instruksi_kerja_ik: "instruksi_kerja",
-
-  pic: "pic",
-  pj: "pic",
-  penanggung_jawab: "pic",
-
-  bukti: "bukti",
-  eviden: "bukti",
-  evidance: "bukti",
-
-  frekuensi: "frekuensi",
-  tahapan: "frekuensi",
-};
-
-function resolveDbKey(rawHeader) {
-  const nh = normHeader(rawHeader);
-
-  // 1) exact mapping
-  if (HEADER_TO_DB[nh]) return HEADER_TO_DB[nh];
-
-  // 2) fallback: contains
-  if (nh.includes("sasaran") || nh.includes("target")) return "sasaran";
-  if (nh.includes("instruksi") || nh.includes("_ik") || nh === "ik") return "instruksi_kerja";
-  if (nh.includes("sop")) return "sop";
-  if (nh.includes("frekuensi") || nh.includes("tahapan")) return "frekuensi";
-  if (nh.includes("bukti") || nh.includes("eviden")) return "bukti";
-  if (nh.includes("pic") || nh.includes("penanggung_jawab") || nh.includes("pj")) return "pic";
-  if (nh.includes("indikator")) return "indikator";
-  if (nh.includes("definisi")) return "definisi";
-  if (nh === "profil") return "profil";
-
-  return null;
-}
-
-function makeKey(profil, program) {
-  return `${normLower(profil)}||${normLower(program)}`;
-}
-
-function setIfBetter(obj, key, val) {
-  const v = norm(val);
-  if (!v) return;
-  if (!obj[key]) obj[key] = v;
-}
-
-els.fileExcel.addEventListener("change", async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const ok = await askConfirm(
-    `Import file "${file.name}"?\nDuplikat (Profil & Program sama) akan di-merge (update otomatis).`
-  );
-  if (!ok) {
-    els.fileExcel.value = "";
-    return;
-  }
-
-  setStatus("Reading...", "load");
-  try {
-    const buffer = await file.arrayBuffer();
-    const workbook = XLSX.read(buffer, { type: "array" });
-    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-
-    const aoa = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
-    if (!aoa.length) throw new Error("File kosong");
-
-    const rawHeaders = aoa[0] || [];
-    const headerMap = rawHeaders.map((h) => resolveDbKey(h));
-
-    // Fetch DB (untuk merge: agar kolom kosong tidak menimpa data lama)
-    const { data: dbData, error: dbErr } = await db.from("program_pontren").select("*");
-    if (dbErr) throw dbErr;
-
-    const existingMap = new Map();
-    (dbData || []).forEach((r) => {
-      const p = r.profil || r.profil_utama || "";
-      const pr = r.program || "";
-      if (!p || !pr) return;
-      existingMap.set(makeKey(p, pr), r);
-    });
-
-    const stagedMap = new Map();
-    let skipped = 0;
-
-    for (let i = 1; i < aoa.length; i++) {
-      const line = aoa[i];
-      if (!line || line.every((c) => String(c ?? "").trim() === "")) continue;
-
-      const obj = {};
-      for (let c = 0; c < headerMap.length; c++) {
-        const k = headerMap[c];
-        if (!k) continue;
-        setIfBetter(obj, k, line[c]);
-      }
-
-      const profil = obj.profil || "";
-      const program = obj.program || "";
-      if (!profil || !program) {
-        skipped++;
-        continue;
-      }
-
-      const key = makeKey(profil, program);
-      const old = existingMap.get(key);
-
-      const merged = {
-        profil,
-        program,
-        definisi: (obj.definisi || (old ? (old.definisi || "") : "")),
-        indikator: (obj.indikator || (old ? (old.indikator || "") : "")),
-        sasaran: (obj.sasaran || (old ? (old.sasaran || "") : "")),
-        pic: (obj.pic || (old ? (old.pic || "") : "")),
-        frekuensi: (obj.frekuensi || (old ? (old.frekuensi || "") : "")),
-        sop: (obj.sop || (old ? (old.sop || "") : "")),
-        instruksi_kerja: (obj.instruksi_kerja || (old ? (old.instruksi_kerja || "") : "")),
-        bukti: (obj.bukti || (old ? (old.bukti || "") : "")),
-      };
-
-      // Rapikan indikator multiline
-      if (typeof merged.indikator === "string" && merged.indikator) {
-        merged.indikator = merged.indikator
-          .split(/\r?\n|;/)
-          .map((s) => s.trim())
-          .filter(Boolean)
-          .join("\n");
-      }
-
-      stagedMap.set(key, merged);
-    }
-
-    const stagedRows = Array.from(stagedMap.values());
-    if (!stagedRows.length) throw new Error("Tidak ada baris valid untuk di-import (cek kolom Profil & Program).");
-
-    let insertCount = 0;
-    let updateCount = 0;
-    stagedMap.forEach((_, key) => {
-      if (existingMap.has(key)) updateCount++;
-      else insertCount++;
-    });
-
-    const CHUNK = 200;
-    for (let i = 0; i < stagedRows.length; i += CHUNK) {
-      const chunk = stagedRows.slice(i, i + CHUNK);
-      const { error } = await db
-        .from("program_pontren")
-        .upsert(chunk, { onConflict: "profil,program" });
-      if (error) throw error;
-    }
-
-    const skippedNote = skipped ? ` (skip ${skipped} baris: profil/program kosong)` : "";
-    notify(`Selesai! Baru: ${insertCount}, Update: ${updateCount}${skippedNote}`, "success");
-
-    els.fileExcel.value = "";
-    await refreshAllData();
-    fetchData();
-    setStatus("Ready", "ok");
-  } catch (err) {
-    console.error(err);
-    notify("Gagal Import: " + (err?.message || String(err)), "error");
-    setStatus("Error", "err");
-    els.fileExcel.value = "";
-  }
-});
-
-  els.btnAddData.addEventListener("click", () => openModal(null));
-  els.btnApply.addEventListener("click", () => {
-    if (window.innerWidth < 1024) els.filtersPanel.open = false;
-    fetchData();
-  });
-  els.q.addEventListener("keyup", (e) => {
-    if (e.key === "Enter") {
-        if (window.innerWidth < 1024) els.filtersPanel.open = false;
-        fetchData();
-    }
-  });
-  els.btnReset.addEventListener("click", async () => {
-    resetFilters();
-    fetchData();
-  });
-  [
-    els.profil,
-    els.indikator,
-    els.program,
-    els.pic,
-    els.bukti,
-    els.frekuensi,
-  ].forEach(el => el && el.addEventListener("change", fetchData));
-
-
-  // Filter text inputs (SOP & Instruksi Kerja)
-  [els.sop, els.instruksi_kerja].forEach(el => {
-    if (!el) return;
-    el.addEventListener("input", () => {
-      fetchData();
-    });
-    el.addEventListener("keyup", (e) => {
-      if (e.key === "Enter") {
-        if (window.innerWidth < 1024) els.filtersPanel.open = false;
-        fetchData();
+  async function refreshCountsForViewRows() {
+    const ids = viewRowsData.map(r => r.id);
+    if (!ids.length) return;
+    
+    const { data: docs } = await db.from(DOCS_TABLE).select('program_id, doc_type').in('program_id', ids);
+    const { data: recs } = await db.from(RECORDS_TABLE).select('program_id').in('program_id', ids);
+    const map = {};
+    ids.forEach(id => map[id] = { sop:0, ik:0, rec:0, sil:0 });
+    
+    docs?.forEach(d => { 
+      if(map[d.program_id]) { 
+        if(d.doc_type==='SOP') map[d.program_id].sop++; 
+        if(d.doc_type==='IK') map[d.program_id].ik++; 
+        if(d.doc_type==='SILABUS') map[d.program_id].sil++; 
       }
     });
-  });
+    recs?.forEach(r => { if(map[r.program_id]) map[r.program_id].rec++; });
 
-  els.btnCloseModal.addEventListener("click", closeModal);
-  els.btnCancelEdit.addEventListener("click", closeModal);
-  els.btnSaveEdit.addEventListener("click", saveChanges);
-  els.btnDeleteData.addEventListener("click", deleteData);
-  els.modal.addEventListener("click", (e) => {
-    if (e.target === els.modal) closeModal();
-  });
-
-  // Quick link: kelola dokumen/record dari modal edit
-  els.btnManageDocs?.addEventListener("click", () => {
-    closeModal();
-    // buka tab terakhir yang dipakai (kalau ada), default Silabus
-    openDocsModal(activeProgramRow, lastDocsTab || "SIL");
-  });
-
-  // Docs modal interactions
-  els.btnCloseDocsModal?.addEventListener("click", closeDocsModal);
-  els.docsModal?.addEventListener("click", (e) => {
-    if (e.target === els.docsModal) closeDocsModal();
-  });
-  els.tabBtnSOP?.addEventListener("click", () => setDocsTab("SOP"));
-  els.tabBtnIK?.addEventListener("click", () => setDocsTab("IK"));
-  els.tabBtnSIL?.addEventListener("click", () => setDocsTab("SIL"));
-  els.tabBtnREC?.addEventListener("click", () => setDocsTab("REC"));
-
-  // Silabus (non-akademik)
-  els.sil_subtype?.addEventListener("change", () => loadSilabusForSelectedSubtype());
-  els.silNA_select?.addEventListener("change", () => {
-    const v = els.silNA_select?.value || "";
-    activeSilabusId = v ? Number(v) : null;
-    loadSilabusForSelectedSubtype();
-  });
-
-  // Input "Judul Silabus" berfungsi ganda: pilih yang sudah ada (via datalist) atau ketik judul baru
-  const syncSilabusFromTitle = () => {
-    const title = norm(els.silNA_title?.value);
-    if (!title) return;
-    const hitId = silNATitleToId.get(normLower(title)) || null;
-    if (hitId) {
-      if (els.silNA_select) els.silNA_select.value = String(hitId);
-      activeSilabusId = Number(hitId);
-      loadSilabusForSelectedSubtype();
-    } else {
-      // judul baru: jangan sampai tersimpan ke silabus lama
-      if (els.silNA_select) els.silNA_select.value = "";
-      activeSilabusId = null;
-      // kosongkan tabel (biar tidak "nyangkut" isi silabus yang lain)
-      renderSilabusItems([]);
-      setSilStatus("Judul baru belum dibuat. Klik 'Buat Baru' untuk menyimpan silabus baru.", "info");
-    }
-  };
-  els.silNA_title?.addEventListener("change", syncSilabusFromTitle);
-  els.silNA_title?.addEventListener("blur", syncSilabusFromTitle);
-  els.btnSilNANew?.addEventListener("click", () => createNewNonAcademicSilabus());
-  els.btnSilAddRow?.addEventListener("click", addSilabusRow);
-  els.btnSilNADefault?.addEventListener("click", () => {
-    silItemDefaults = getProgramDefaults();
-    applyDefaultsToSilabusRows(silItemDefaults);
-    notify("Default dari program diterapkan ke kolom kosong (PIC/Sasaran/Lokasi Kegiatan).", "success");
-  });
-  els.btnSilSave?.addEventListener("click", saveSilabus);
-
-  // Silabus akademik upload (file)
-  els.btnUploadSilAcademic?.addEventListener("click", () => {
-    els.sil_academic_file?.click();
-  });
-  els.sil_academic_file?.addEventListener("change", async () => {
-    const file = els.sil_academic_file?.files?.[0];
-    await uploadSilabusAcademic(file);
-    if (els.sil_academic_file) els.sil_academic_file.value = "";
-  });
-  els.silTbody?.addEventListener("click", (e) => {
-    const btn = e.target.closest("[data-sil-del]");
-    if (!btn) return;
-    const tr = btn.closest("tr");
-    if (!tr) return;
-    tr.remove();
-  });
-
-  // Download template XLSX isi otomatis (prefilled)
-  els.btnTemplateSOPPrefill?.addEventListener("click", () => downloadTemplatePrefilled("SOP"));
-  els.btnTemplateIKPrefill?.addEventListener("click", () => downloadTemplatePrefilled("IK"));
-  els.btnTemplateRECPrefill?.addEventListener("click", () => downloadTemplatePrefilled("REC"));
-
-  // Dropdown template: toggle + close on outside
-  const dropdownPairs = [
-    { btn: els.btnTplSOP, menu: els.menuTplSOP },
-    { btn: els.btnTplIK, menu: els.menuTplIK },
-    { btn: els.btnTplREC, menu: els.menuTplREC },
-    { btn: els.btnTplSIL, menu: els.menuTplSIL },
-    { btn: els.btnRecAddMenu, menu: els.menuRecAdd },
-  ].filter(x => x.btn && x.menu);
-
-  function closeAllDropdowns() {
-    dropdownPairs.forEach(({ menu }) => menu.classList.remove("open"));
-  }
-
-  dropdownPairs.forEach(({ btn, menu }) => {
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const nextOpen = !menu.classList.contains("open");
-      closeAllDropdowns();
-      if (nextOpen) menu.classList.add("open");
+    document.querySelectorAll("[data-chip-count]").forEach(el => {
+      const pid = el.getAttribute("data-pid");
+      const k = el.getAttribute("data-kind");
+      const c = map[pid];
+      if (c) el.textContent = k==='sil'?c.sil : k==='ik'?c.ik : k==='rec'?c.rec : c.sop;
     });
-    menu.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const hit = e.target.closest(".dd-item");
-      if (hit) closeAllDropdowns();
-    });
-  });
-  document.addEventListener("click", closeAllDropdowns);
-  window.addEventListener("resize", closeAllDropdowns);
-
-  // Upload pintar: satu tombol untuk XLSX (parse/source) atau PDF/DOCX (final)
-  async function handleSmartUpload(kind, file) {
-    if (!file) return;
-    const name = file.name || "";
-    const isXlsx = isTemplateXlsx(name);
-    if (isXlsx) {
-      await uploadTemplateParsed(kind, file);
-    } else {
-      await uploadDoc(kind, file);
-    }
   }
 
-  els.btnUploadSOPSmart?.addEventListener("click", () => {
-    els.sop_smart_file?.click();
-  });
-  els.sop_smart_file?.addEventListener("change", async () => {
-    const file = els.sop_smart_file?.files?.[0];
-    await handleSmartUpload("SOP", file);
-    els.sop_smart_file.value = "";
-  });
-
-  els.btnUploadIKSmart?.addEventListener("click", () => {
-    els.ik_smart_file?.click();
-  });
-  els.ik_smart_file?.addEventListener("change", async () => {
-    const file = els.ik_smart_file?.files?.[0];
-    await handleSmartUpload("IK", file);
-    els.ik_smart_file.value = "";
-  });
-
-  // Record: import XLSX via tombol, tambah manual tetap ada
-  els.btnImportREC?.addEventListener("click", () => {
-    els.rec_smart_file?.click();
-  });
-  els.rec_smart_file?.addEventListener("change", async () => {
-    const file = els.rec_smart_file?.files?.[0];
-    await uploadRecordTemplateParsed(file);
-    els.rec_smart_file.value = "";
-  });
-
-  els.btnRecDefault?.addEventListener("click", () => {
-    const d = getProgramDefaults();
-    applyDefaultsToRecordLog(d);
-    notify("Default dari program diterapkan ke kolom kosong (PIC Bukti/Sasaran/Lokasi Kegiatan).", "success");
-  });
-  els.btnAddRecord?.addEventListener("click", addRecord);
-
-  // Delegasi klik untuk list SOP/IK
-  function handleDocsListClick(e) {
-    const t = e.target.closest("button");
-    if (!t) return;
-    if (t.hasAttribute("data-doc-view")) return viewDoc(t.getAttribute("data-doc-view"));
-    if (t.hasAttribute("data-doc-toggle")) return toggleDocActive(t.getAttribute("data-doc-toggle"));
-    if (t.hasAttribute("data-doc-del")) return deleteDoc(t.getAttribute("data-doc-del"));
-    if (t.hasAttribute("data-doc-toggle-group")) return toggleDocActiveGroup(t.getAttribute("data-doc-toggle-group"));
-    if (t.hasAttribute("data-doc-del-group")) return deleteDocGroup(t.getAttribute("data-doc-del-group"));
+  function renderRows() {
+    els.count.textContent = viewRowsData.length;
+    els.tbody.innerHTML = viewRowsData.map((r, i) => `
+      <tr onclick="openModalById(${i})">
+        <td>${i+1}</td>
+        <td><span class="cell-profil">${safeText(r.profil||r.profil_utama)}</span><span class="cell-def">${safeText(r.definisi)}</span></td>
+        <td>${safeText(r.indikator)}</td>
+        <td>${safeText(r.program)}</td>
+        <td>${safeText(r.sasaran)}</td>
+        <td><div class="badge-wrap">${renderPicBadges(r.pic)}</div></td>
+        <td>${safeText(r.frekuensi)}</td>
+        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="sil">0</span></div></td>
+        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="sop">0</span></div></td>
+        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="ik">0</span></div></td>
+        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="rec">0</span></div></td>
+      </tr>
+    `).join("");
+    
+    els.cards.innerHTML = viewRowsData.map((r, i) => `
+      <div class="m-card" onclick="openModalById(${i})">
+        <div class="m-header"><div class="m-title">${safeText(r.program)}</div></div>
+        <div class="m-row"><div class="m-label">Profil</div><div>${safeText(r.profil)}</div></div>
+        <div class="m-row"><div class="m-label">PIC</div><div>${safeText(r.pic)}</div></div>
+      </div>
+    `).join("");
+    
+    refreshCountsForViewRows();
   }
-  els.docsListSOP?.addEventListener("click", handleDocsListClick);
-  els.docsListIK?.addEventListener("click", handleDocsListClick);
-
-  // Delegasi klik untuk list record
-  els.recordsList?.addEventListener("click", (e) => {
-    const t = e.target.closest("button");
-    if (!t) return;
-    if (t.hasAttribute("data-rec-view")) return viewRecord(t.getAttribute("data-rec-view"));
-    if (t.hasAttribute("data-rec-del")) return deleteRecord(t.getAttribute("data-rec-del"));
-  });
-
   
-// =================== NEW: SOP / IK / Record Register / Silabus Akademik Structured ===================
-let sopCurrentId = null;
-let ikCurrentId = null;
-let silAcadCurrentId = null;
+  window.openModalById = (idx) => openModal(viewRowsData[idx]);
 
-function _clearChildren(el){ if(!el) return; while(el.firstChild) el.removeChild(el.firstChild); }
-
-function _makeInput(value="", placeholder=""){ 
-  const inp = document.createElement("input");
-  inp.type = "text";
-  inp.value = value ?? "";
-  if (placeholder) inp.placeholder = placeholder;
-  return inp;
-}
-function _makeTextarea(value="", placeholder=""){
-  const ta = document.createElement("textarea");
-  ta.value = value ?? "";
-  if (placeholder) ta.placeholder = placeholder;
-  ta.rows = 2;
-  return ta;
-}
-function _makeIconBtn(iconClass, title){
-  const b = document.createElement("button");
-  b.type = "button";
-  b.className = "btn btn-danger";
-  b.style.height = "38px";
-  b.style.width = "40px";
-  b.style.padding = "0";
-  b.title = title || "";
-  b.innerHTML = `<i class="ph ${iconClass}"></i>`;
-  return b;
-}
-
-function addSopStepRow(data = {}){
-  const tb = els.sopStepsTbody;
-  if(!tb) return;
-  const tr = document.createElement("tr");
-
-  const tdNo = document.createElement("td");
-  tdNo.textContent = String(tb.children.length + 1);
-  tr.appendChild(tdNo);
-
-  const tdTahap = document.createElement("td");
-  tdTahap.appendChild(_makeInput(data.tahap || "", "Tahap"));
-  tr.appendChild(tdTahap);
-
-  const tdUraian = document.createElement("td");
-  tdUraian.appendChild(_makeTextarea(data.uraian || "", "Uraian"));
-  tr.appendChild(tdUraian);
-
-  const tdPelaksana = document.createElement("td");
-  tdPelaksana.appendChild(_makeInput(data.pelaksana || "", "Pelaksana"));
-  tr.appendChild(tdPelaksana);
-
-  const tdOutput = document.createElement("td");
-  tdOutput.appendChild(_makeInput(data.output || "", "Output"));
-  tr.appendChild(tdOutput);
-
-  const tdKontrol = document.createElement("td");
-  tdKontrol.appendChild(_makeInput(data.kontrol || "", "Kontrol"));
-  tr.appendChild(tdKontrol);
-
-  const tdBukti = document.createElement("td");
-  tdBukti.appendChild(_makeInput(data.bukti || "", "Bukti"));
-  tr.appendChild(tdBukti);
-
-  const tdAct = document.createElement("td");
-  const btnDel = _makeIconBtn("ph-trash", "Hapus");
-  btnDel.addEventListener("click", ()=>{
-    tr.remove();
-    // re-number
-    [...tb.children].forEach((row,i)=>{ row.children[0].textContent = String(i+1); });
+  // --- 10. IMPORT EXCEL MASTER ---
+  els.fileExcel.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!await askConfirm("Import Excel?")) { els.fileExcel.value=""; return; }
+    notify("Fitur Import Master Data belum diaktifkan.", "info");
+    els.fileExcel.value = "";
   });
-  tdAct.appendChild(btnDel);
-  tr.appendChild(tdAct);
 
-  tb.appendChild(tr);
-}
-
-function _readSopSteps(){
-  const tb = els.sopStepsTbody;
-  if(!tb) return [];
-  const rows = [...tb.querySelectorAll("tr")];
-  return rows.map((tr, idx)=>{
-    const tds = tr.querySelectorAll("td");
-    const getVal = (cellIdx)=>{
-      const el = tds[cellIdx]?.querySelector("input,textarea");
-      return norm(el?.value) || null;
-    };
-    return {
-      step_no: idx + 1,
-      tahap: getVal(1),
-      uraian: getVal(2),
-      pelaksana: getVal(3),
-      output: getVal(4),
-      kontrol: getVal(5),
-      bukti: getVal(6),
-    };
-  }).filter(r=> Object.values(r).some(v=>v && v!==r.step_no));
-}
-
-async function loadSopStructured(programId){
-  const pid = programId || activeProgramRow?.id;
-  if(!pid) return;
-  sopCurrentId = null;
-
-  // header fields
-  const { data: sop, error } = await db.from(SOP_TABLE).select("*").eq("program_id", pid).maybeSingle();
-  if(error){ console.warn("loadSopStructured error", error); return; }
-
-  if(!sop){
-    if(els.btnSopReset) els.btnSopReset.click();
-    addSopStepRow();
-    return;
-  }
-  sopCurrentId = sop.id;
-
-  // fill
-  els.sop_judul && (els.sop_judul.value = sop.doc_title || "");
-  els.sop_no_dok && (els.sop_no_dok.value = sop.doc_no || "");
-  els.sop_revisi && (els.sop_revisi.value = sop.revisi || "");
-  els.sop_tgl_berlaku && (els.sop_tgl_berlaku.value = sop.tgl_berlaku || "");
-  els.sop_disusun && (els.sop_disusun.value = sop.disusun_oleh || "");
-  els.sop_disahkan && (els.sop_disahkan.value = sop.disahkan_oleh || "");
-  els.sop_tujuan && (els.sop_tujuan.value = sop.tujuan || "");
-  els.sop_ruang_lingkup && (els.sop_ruang_lingkup.value = sop.ruang_lingkup || "");
-  els.sop_definisi && (els.sop_definisi.value = sop.definisi || "");
-  els.sop_referensi && (els.sop_referensi.value = sop.referensi || "");
-  els.sop_peran && (els.sop_peran.value = sop.peran_tanggung_jawab || "");
-  els.sop_rekaman && (els.sop_rekaman.value = sop.rekaman || "");
-
-  // steps
-  _clearChildren(els.sopStepsTbody);
-  const { data: steps, error: e2 } = await db.from(SOP_STEPS_TABLE).select("*").eq("sop_id", sop.id).order("step_no", { ascending: true });
-  if(e2){ console.warn("load sop steps error", e2); addSopStepRow(); return; }
-  if(steps?.length){
-    steps.forEach(s=> addSopStepRow(s));
-  }else{
-    addSopStepRow();
-  }
-}
-
-async function saveSopStructured(){
-  const pid = activeProgramRow?.id;
-  if(!pid) return notify("Pilih baris program dulu.", "warn");
-
-  const payload = {
-    id: sopCurrentId || undefined,
-    program_id: pid,
-    doc_title: norm(els.sop_judul?.value) || null,
-    doc_no: norm(els.sop_no_dok?.value) || null,
-    revisi: norm(els.sop_revisi?.value) || null,
-    tgl_berlaku: els.sop_tgl_berlaku?.value || null,
-    disusun_oleh: norm(els.sop_disusun?.value) || null,
-    disahkan_oleh: norm(els.sop_disahkan?.value) || null,
-    tujuan: norm(els.sop_tujuan?.value) || null,
-    ruang_lingkup: norm(els.sop_ruang_lingkup?.value) || null,
-    definisi: norm(els.sop_definisi?.value) || null,
-    referensi: norm(els.sop_referensi?.value) || null,
-    peran_tanggung_jawab: norm(els.sop_peran?.value) || null,
-    rekaman: norm(els.sop_rekaman?.value) || null,
-    updated_at: new Date().toISOString()
-  };
-
-  const { data, error } = await db.from(SOP_TABLE).upsert(payload, { onConflict: "program_id" }).select("*").single();
-  if(error){ console.error(error); return notify("Gagal simpan SOP.", "error"); }
-
-  sopCurrentId = data.id;
-
-  // steps replace
-  const steps = _readSopSteps();
-  await db.from(SOP_STEPS_TABLE).delete().eq("sop_id", sopCurrentId);
-  if(steps.length){
-    const stepsPayload = steps.map(s=> ({ ...s, sop_id: sopCurrentId }));
-    const { error: e2 } = await db.from(SOP_STEPS_TABLE).insert(stepsPayload);
-    if(e2){ console.error(e2); notify("SOP tersimpan, tapi langkah gagal disimpan.", "warn"); }
-  }
-  if(els.sopStatus) els.sopStatus.textContent = "✅ SOP tersimpan.";
-  notify("SOP tersimpan.", "success");
-}
-
-function resetSopStructured(){
-  sopCurrentId = null;
-  [
-    "sop_judul","sop_no_dok","sop_revisi","sop_tgl_berlaku","sop_disusun","sop_disahkan",
-    "sop_tujuan","sop_ruang_lingkup","sop_definisi","sop_referensi","sop_peran","sop_rekaman"
-  ].forEach(id=>{
-    const el = els[id];
-    if(!el) return;
-    el.value = "";
-  });
-  _clearChildren(els.sopStepsTbody);
-  addSopStepRow();
-  if(els.sopStatus) els.sopStatus.textContent = "";
-}
-
-// IK
-function addIkStepRow(data = {}){
-  const tb = els.ikStepsTbody;
-  if(!tb) return;
-  const tr = document.createElement("tr");
-
-  const tdNo = document.createElement("td");
-  tdNo.textContent = String(tb.children.length + 1);
-  tr.appendChild(tdNo);
-
-  const tdLangkah = document.createElement("td");
-  tdLangkah.appendChild(_makeInput(data.langkah || "", "Langkah"));
-  tr.appendChild(tdLangkah);
-
-  const tdDetail = document.createElement("td");
-  tdDetail.appendChild(_makeTextarea(data.detail || "", "Detail"));
-  tr.appendChild(tdDetail);
-
-  const tdCat = document.createElement("td");
-  tdCat.appendChild(_makeTextarea(data.catatan || "", "Catatan"));
-  tr.appendChild(tdCat);
-
-  const tdAct = document.createElement("td");
-  const btnDel = _makeIconBtn("ph-trash", "Hapus");
-  btnDel.addEventListener("click", ()=>{
-    tr.remove();
-    [...tb.children].forEach((row,i)=>{ row.children[0].textContent = String(i+1); });
-  });
-  tdAct.appendChild(btnDel);
-  tr.appendChild(tdAct);
-
-  tb.appendChild(tr);
-}
-
-function _readIkSteps(){
-  const tb = els.ikStepsTbody;
-  if(!tb) return [];
-  const rows = [...tb.querySelectorAll("tr")];
-  return rows.map((tr, idx)=>{
-    const tds = tr.querySelectorAll("td");
-    const getVal = (cellIdx)=>{
-      const el = tds[cellIdx]?.querySelector("input,textarea");
-      return norm(el?.value) || null;
-    };
-    return {
-      step_no: idx + 1,
-      langkah: getVal(1),
-      detail: getVal(2),
-      catatan: getVal(3),
-    };
-  }).filter(r=> Object.values(r).some(v=>v && v!==r.step_no));
-}
-
-async function loadIkStructured(programId){
-  const pid = programId || activeProgramRow?.id;
-  if(!pid) return;
-  ikCurrentId = null;
-
-  const { data: ik, error } = await db.from(IK_TABLE).select("*").eq("program_id", pid).maybeSingle();
-  if(error){ console.warn("loadIkStructured error", error); return; }
-
-  if(!ik){
-    resetIkStructured();
-    return;
-  }
-  ikCurrentId = ik.id;
-
-  els.ik_judul && (els.ik_judul.value = ik.doc_title || "");
-  els.ik_no_dok && (els.ik_no_dok.value = ik.doc_no || "");
-  els.ik_revisi && (els.ik_revisi.value = ik.revisi || "");
-  els.ik_tgl_berlaku && (els.ik_tgl_berlaku.value = ik.tgl_berlaku || "");
-  els.ik_disusun && (els.ik_disusun.value = ik.disusun_oleh || "");
-  els.ik_disahkan && (els.ik_disahkan.value = ik.disahkan_oleh || "");
-  els.ik_kapan && (els.ik_kapan.value = ik.kapan_digunakan || "");
-  els.ik_peralatan && (els.ik_peralatan.value = ik.peralatan || "");
-  els.ik_kriteria && (els.ik_kriteria.value = ik.kriteria_berhasil || "");
-  els.ik_trouble && (els.ik_trouble.value = ik.troubleshooting || "");
-
-  _clearChildren(els.ikStepsTbody);
-  const { data: steps, error: e2 } = await db.from(IK_STEPS_TABLE).select("*").eq("ik_id", ik.id).order("step_no", { ascending: true });
-  if(e2){ console.warn("load ik steps error", e2); addIkStepRow(); return; }
-  if(steps?.length){
-    steps.forEach(s=> addIkStepRow(s));
-  }else{
-    addIkStepRow();
-  }
-}
-
-async function saveIkStructured(){
-  const pid = activeProgramRow?.id;
-  if(!pid) return notify("Pilih baris program dulu.", "warn");
-
-  const payload = {
-    id: ikCurrentId || undefined,
-    program_id: pid,
-    doc_title: norm(els.ik_judul?.value) || null,
-    doc_no: norm(els.ik_no_dok?.value) || null,
-    revisi: norm(els.ik_revisi?.value) || null,
-    tgl_berlaku: els.ik_tgl_berlaku?.value || null,
-    disusun_oleh: norm(els.ik_disusun?.value) || null,
-    disahkan_oleh: norm(els.ik_disahkan?.value) || null,
-    kapan_digunakan: norm(els.ik_kapan?.value) || null,
-    peralatan: norm(els.ik_peralatan?.value) || null,
-    kriteria_berhasil: norm(els.ik_kriteria?.value) || null,
-    troubleshooting: norm(els.ik_trouble?.value) || null,
-    updated_at: new Date().toISOString()
-  };
-
-  const { data, error } = await db.from(IK_TABLE).upsert(payload, { onConflict: "program_id" }).select("*").single();
-  if(error){ console.error(error); return notify("Gagal simpan IK.", "error"); }
-
-  ikCurrentId = data.id;
-
-  const steps = _readIkSteps();
-  await db.from(IK_STEPS_TABLE).delete().eq("ik_id", ikCurrentId);
-  if(steps.length){
-    const stepsPayload = steps.map(s=> ({ ...s, ik_id: ikCurrentId }));
-    const { error: e2 } = await db.from(IK_STEPS_TABLE).insert(stepsPayload);
-    if(e2){ console.error(e2); notify("IK tersimpan, tapi langkah gagal disimpan.", "warn"); }
-  }
-  if(els.ikStatus) els.ikStatus.textContent = "✅ IK tersimpan.";
-  notify("IK tersimpan.", "success");
-}
-
-function resetIkStructured(){
-  ikCurrentId = null;
-  [
-    "ik_judul","ik_no_dok","ik_revisi","ik_tgl_berlaku","ik_disusun","ik_disahkan",
-    "ik_kapan","ik_peralatan","ik_kriteria","ik_trouble"
-  ].forEach(id=>{
-    const el = els[id];
-    if(!el) return;
-    el.value = "";
-  });
-  _clearChildren(els.ikStepsTbody);
-  addIkStepRow();
-  if(els.ikStatus) els.ikStatus.textContent = "";
-}
-
-// Record register
-async function loadRecordRegister(programId){
-  const pid = programId || activeProgramRow?.id;
-  if(!pid) return;
-  const { data, error } = await db.from(REC_REGISTER_TABLE).select("*").eq("program_id", pid).maybeSingle();
-  if(error){ console.warn("loadRecordRegister", error); return; }
-  if(!data){
-    resetRecordRegister();
-    return;
-  }
-  els.recReg_nama && (els.recReg_nama.value = data.nama || "");
-  els.recReg_kode && (els.recReg_kode.value = data.kode || "");
-  els.recReg_revisi && (els.recReg_revisi.value = data.revisi || "");
-  els.recReg_pengelola && (els.recReg_pengelola.value = data.pengelola || "");
-  els.recReg_verifikator && (els.recReg_verifikator.value = data.verifikator || "");
-  els.recReg_lokasi && (els.recReg_lokasi.value = data.lokasi_simpan || "");
-  els.recReg_retensi && (els.recReg_retensi.value = data.retensi || "");
-  els.recReg_klasifikasi && (els.recReg_klasifikasi.value = data.klasifikasi || "");
-  if(els.recRegStatus) els.recRegStatus.textContent = "";
-}
-
-async function saveRecordRegister(){
-  const pid = activeProgramRow?.id;
-  if(!pid) return notify("Pilih baris program dulu.", "warn");
-
-  const payload = {
-    program_id: pid,
-    nama: norm(els.recReg_nama?.value) || null,
-    kode: norm(els.recReg_kode?.value) || null,
-    revisi: norm(els.recReg_revisi?.value) || null,
-    pengelola: norm(els.recReg_pengelola?.value) || null,
-    verifikator: norm(els.recReg_verifikator?.value) || null,
-    lokasi_simpan: norm(els.recReg_lokasi?.value) || null,
-    retensi: norm(els.recReg_retensi?.value) || null,
-    klasifikasi: norm(els.recReg_klasifikasi?.value) || null,
-    updated_at: new Date().toISOString()
-  };
-
-  const { error } = await db.from(REC_REGISTER_TABLE).upsert(payload, { onConflict: "program_id" });
-  if(error){ console.error(error); return notify("Gagal simpan register.", "error"); }
-  if(els.recRegStatus) els.recRegStatus.textContent = "✅ Register tersimpan.";
-  notify("Register tersimpan.", "success");
-}
-
-function resetRecordRegister(){
-  [
-    "recReg_nama","recReg_kode","recReg_revisi","recReg_pengelola","recReg_verifikator","recReg_lokasi","recReg_retensi","recReg_klasifikasi"
-  ].forEach(id=>{ if(els[id]) els[id].value=""; });
-  if(els.recRegStatus) els.recRegStatus.textContent = "";
-}
-
-// Silabus akademik structured
-function addSilAsemRow(sem, data={}){
-  const tb = sem === 1 ? els.silA_sem1_tbody : els.silA_sem2_tbody;
-  if(!tb) return;
-  const tr = document.createElement("tr");
-  const tdNo = document.createElement("td");
-  tdNo.textContent = String(tb.children.length + 1);
-  tr.appendChild(tdNo);
-
-  const mk = (val, ph)=> _makeTextarea(val, ph);
-  const mkIn = (val, ph)=> _makeInput(val, ph);
-
-  const tdTP = document.createElement("td"); tdTP.appendChild(mk(data.tujuan_pembelajaran || "", "TP")); tr.appendChild(tdTP);
-  const tdMateri = document.createElement("td"); tdMateri.appendChild(mk(data.materi_inti || "", "Materi")); tr.appendChild(tdMateri);
-  const tdPM = document.createElement("td"); tdPM.appendChild(mk(data.pembelajaran_mendalam || "", "PM")); tr.appendChild(tdPM);
-  const tdF = document.createElement("td"); tdF.appendChild(mk(data.formatif || "", "Formatif")); tr.appendChild(tdF);
-  const tdS = document.createElement("td"); tdS.appendChild(mk(data.sumatif || "", "Sumatif")); tr.appendChild(tdS);
-  const tdAQ = document.createElement("td"); tdAQ.appendChild(mkIn(data.aqil || "", "AQIL")); tr.appendChild(tdAQ);
-  const tdJP = document.createElement("td"); 
-  const jp = document.createElement("input"); jp.type="number"; jp.min="0"; jp.value = (data.jp ?? ""); jp.placeholder="JP";
-  tdJP.appendChild(jp); tr.appendChild(tdJP);
-
-  const tdAct = document.createElement("td");
-  const btnDel = _makeIconBtn("ph-trash", "Hapus");
-  btnDel.addEventListener("click", ()=>{
-    tr.remove();
-    [...tb.children].forEach((row,i)=>{ row.children[0].textContent = String(i+1); });
-  });
-  tdAct.appendChild(btnDel);
-  tr.appendChild(tdAct);
-
-  tb.appendChild(tr);
-}
-
-function _readSilAsemRows(sem){
-  const tb = sem === 1 ? els.silA_sem1_tbody : els.silA_sem2_tbody;
-  if(!tb) return [];
-  const rows = [...tb.querySelectorAll("tr")];
-  return rows.map((tr, idx)=>{
-    const tds = tr.querySelectorAll("td");
-    const getVal = (cellIdx)=>{
-      const el = tds[cellIdx]?.querySelector("input,textarea");
-      return norm(el?.value) || null;
-    };
-    const jp = tds[7]?.querySelector("input")?.value;
-    return {
-      row_no: idx + 1,
-      semester: sem,
-      tujuan_pembelajaran: getVal(1),
-      materi_inti: getVal(2),
-      pembelajaran_mendalam: getVal(3),
-      formatif: getVal(4),
-      sumatif: getVal(5),
-      aqil: getVal(6),
-      jp: jp ? Number(jp) : null,
-    };
-  }).filter(r=> Object.values(r).some(v=>v && v!==r.row_no && v!==r.semester));
-}
-
-async function loadSilabusAkademikStructured(programId){
-  const pid = programId || activeProgramRow?.id;
-  if(!pid) return;
-  silAcadCurrentId = null;
-
-  const { data: sil, error } = await db.from(SILABUS_AKADEMIK_TABLE).select("*").eq("program_id", pid).maybeSingle();
-  if(error){ console.warn("loadSilabusAkademikStructured", error); return; }
-
-  if(!sil){
-    resetSilabusAkademikStructured();
-    return;
-  }
-  silAcadCurrentId = sil.id;
-
-  els.silA_satpen && (els.silA_satpen.value = sil.satpen || "");
-  els.silA_mapel && (els.silA_mapel.value = sil.mapel || "");
-  els.silA_fase && (els.silA_fase.value = sil.fase || "");
-  els.silA_tahun && (els.silA_tahun.value = sil.tahun_ajaran || "");
-  els.silA_jp && (els.silA_jp.value = sil.alokasi_waktu || "");
-  els.silA_karakter && (els.silA_karakter.value = sil.karakter || "");
-  els.silA_cp && (els.silA_cp.value = sil.cp || "");
-
-  _clearChildren(els.silA_sem1_tbody);
-  _clearChildren(els.silA_sem2_tbody);
-
-  const { data: rows, error: e2 } = await db.from(SILABUS_AKADEMIK_SEM_TABLE).select("*").eq("silabus_id", sil.id).order("semester", { ascending: true }).order("row_no", { ascending: true });
-  if(e2){ console.warn("load silabus sem rows error", e2); addSilAsemRow(1); addSilAsemRow(2); return; }
-
-  const sem1 = (rows||[]).filter(r=> Number(r.semester)===1);
-  const sem2 = (rows||[]).filter(r=> Number(r.semester)===2);
-  sem1.length ? sem1.forEach(r=> addSilAsemRow(1,r)) : addSilAsemRow(1);
-  sem2.length ? sem2.forEach(r=> addSilAsemRow(2,r)) : addSilAsemRow(2);
-}
-
-async function saveSilabusAkademikStructured(){
-  const pid = activeProgramRow?.id;
-  if(!pid) return notify("Pilih baris program dulu.", "warn");
-
-  const payload = {
-    id: silAcadCurrentId || undefined,
-    program_id: pid,
-    satpen: norm(els.silA_satpen?.value) || null,
-    mapel: norm(els.silA_mapel?.value) || null,
-    fase: norm(els.silA_fase?.value) || null,
-    tahun_ajaran: norm(els.silA_tahun?.value) || null,
-    alokasi_waktu: norm(els.silA_jp?.value) || null,
-    karakter: norm(els.silA_karakter?.value) || null,
-    cp: norm(els.silA_cp?.value) || null,
-    notes: norm(els.sil_notes?.value) || null,
-    updated_at: new Date().toISOString()
-  };
-
-  const { data, error } = await db.from(SILABUS_AKADEMIK_TABLE).upsert(payload, { onConflict: "program_id" }).select("*").single();
-  if(error){ console.error(error); return notify("Gagal simpan silabus akademik.", "error"); }
-
-  silAcadCurrentId = data.id;
-
-  const rows = [..._readSilAsemRows(1), ..._readSilAsemRows(2)];
-  await db.from(SILABUS_AKADEMIK_SEM_TABLE).delete().eq("silabus_id", silAcadCurrentId);
-  if(rows.length){
-    const payloadRows = rows.map(r=> ({ ...r, silabus_id: silAcadCurrentId }));
-    const { error: e2 } = await db.from(SILABUS_AKADEMIK_SEM_TABLE).insert(payloadRows);
-    if(e2){ console.error(e2); notify("Silabus akademik tersimpan, tapi baris semester gagal disimpan.", "warn"); }
-  }
-  // buat meta agar terhitung pada kolom Silabus di tabel hasil filter
-  await ensureSilabusMeta(programId, "AKADEMIK", "Silabus Akademik", null);
-  if(els.silAStatus) els.silAStatus.textContent = "✅ Silabus akademik tersimpan.";
-  notify("Silabus akademik tersimpan.", "success");
-}
-
-function resetSilabusAkademikStructured(){
-  silAcadCurrentId = null;
-  ["silA_satpen","silA_mapel","silA_fase","silA_tahun","silA_jp","silA_karakter","silA_cp"].forEach(id=>{ if(els[id]) els[id].value=""; });
-  _clearChildren(els.silA_sem1_tbody);
-  _clearChildren(els.silA_sem2_tbody);
-  addSilAsemRow(1);
-  addSilAsemRow(2);
-  if(els.silAStatus) els.silAStatus.textContent = "";
-}
-
-// upload final doc helper
-async function uploadFinalDoc(docType, fileInput, meta){
-  const pid = activeProgramRow?.id;
-  if(!pid) return notify("Pilih baris program dulu.", "warn");
-  const file = fileInput?.files?.[0];
-  if(!file) return notify("Pilih file dulu.", "warn");
-
-  const safeName = file.name.replace(/[^\w.\-() ]+/g, "_");
-  const folder = `program_pontren/${pid}/${docType.toLowerCase()}/`;
-  const filePath = folder + `${Date.now()}_${safeName}`;
-
-  const { error: upErr } = await db.storage.from(STORAGE_BUCKET).upload(filePath, file, { upsert: true });
-  if(upErr){ console.error(upErr); return notify("Upload gagal.", "error"); }
-
-  const payload = {
-    program_id: pid,
-    doc_type: docType,
-    doc_title: meta?.doc_title || null,
-    doc_no: meta?.doc_no || null,
-    doc_revision: meta?.doc_revision || null,
-    doc_effective: meta?.doc_effective || null,
-    notes: meta?.notes || null,
-    file_name: safeName,
-    file_path: filePath
-  };
-
-  const { error: insErr } = await db.from(DOCS_TABLE).insert(payload);
-  if(insErr){ console.error(insErr); return notify("Upload berhasil, tapi pencatatan dokumen gagal.", "warn"); }
-
-  fileInput.value = "";
-  notify("Dokumen terunggah.", "success");
-  // refresh list
-  await loadDocsList(docType, docType.startsWith("SOP") ? els.docsListSOP : (docType.startsWith("IK") ? els.docsListIK : els.docsListDOC));
-}
-
-// Hook listeners (safe)
-function _hookStructuredDocListeners(){
-  els.btnSopAddStep?.addEventListener("click", ()=> addSopStepRow());
-  els.btnSopReset?.addEventListener("click", resetSopStructured);
-  els.btnSopSave?.addEventListener("click", saveSopStructured);
-
-  els.btnIkAddStep?.addEventListener("click", ()=> addIkStepRow());
-  els.btnIkReset?.addEventListener("click", resetIkStructured);
-  els.btnIkSave?.addEventListener("click", saveIkStructured);
-
-  els.btnRecRegReset?.addEventListener("click", resetRecordRegister);
-  els.btnRecRegSave?.addEventListener("click", saveRecordRegister);
-
-  els.btnSilAAddSem1?.addEventListener("click", ()=> addSilAsemRow(1));
-  els.btnSilAAddSem2?.addEventListener("click", ()=> addSilAsemRow(2));
-  els.btnSilAReset?.addEventListener("click", resetSilabusAkademikStructured);
-  els.btnSilASave?.addEventListener("click", saveSilabusAkademikStructured);
-
-  els.btnUploadSOPFinal?.addEventListener("click", ()=> uploadFinalDoc("SOP", els.doc_file, {
-    doc_title: norm(els.sop_judul?.value) || null,
-    doc_no: norm(els.sop_no_dok?.value) || null,
-    doc_revision: norm(els.sop_revisi?.value) || null,
-    doc_effective: els.sop_tgl_berlaku?.value || null,
-    notes: null
-  }));
-  els.btnUploadIKFinal?.addEventListener("click", ()=> uploadFinalDoc("IK", els.ik_file, {
-    doc_title: norm(els.ik_judul?.value) || null,
-    doc_no: norm(els.ik_no_dok?.value) || null,
-    doc_revision: norm(els.ik_revisi?.value) || null,
-    doc_effective: els.ik_tgl_berlaku?.value || null,
-    notes: null
-  }));
-}
-
-(async function init() {
-    if (window.innerWidth < 1024) els.filtersPanel.open = false;
-    // Hook tombol form terstruktur (SOP/IK/Silabus Akademik/Record Register)
-    // Agar tombol "Tambah Baris" dan tombol simpan/reset berfungsi.
-    _hookStructuredDocListeners();
+  // --- 11. INIT ---
+  els.btnAddData.onclick = () => openModal(null);
+  els.btnCloseModal.onclick = els.btnCancelEdit.onclick = () => els.modal.classList.remove("open");
+  els.btnSaveEdit.onclick = saveChanges;
+  els.btnDeleteData.onclick = deleteData;
+  els.btnApply.onclick = fetchData;
+  els.btnReset.onclick = () => { els.q.value=""; els.profil.value=""; fetchData(); };
+  
+  els.q.addEventListener("keyup", (e) => { if(e.key==="Enter") fetchData(); });
+  // UPDATE: Event listener untuk filter baru
+  [els.profil, els.sasaran, els.frekuensi, els.pic].forEach(el => el && el.addEventListener("change", fetchData));
+
+  (async function init() {
     await refreshAllData();
-    fetchData();
+    const uniq = (k) => [...new Set(allRowsData.map(r => r[k]||r[k+'_utama']).filter(Boolean))].sort();
+    
+    setOptions(els.profil, uniq('profil'));
+    setOptions(els.sasaran, uniq('sasaran')); // Populate Sasaran Dropdown
+    setOptions(els.frekuensi, uniq('frekuensi')); // Populate Frekuensi Dropdown
+    setOptions(els.pic, uniq('pic'));
   })();
+
 })();
