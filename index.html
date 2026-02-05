@@ -54,28 +54,46 @@
       font-family: var(--font-family); font-weight: 600; font-size: 13px;
       border-radius: var(--radius); cursor: pointer; transition: all 0.2s ease; border: 1px solid transparent;
     }
-    .btn-add-new { background: var(--primary); color: white; padding: 10px 20px; box-shadow: 0 4px 12px rgba(15, 118, 110, 0.3); }
-    .btn-add-new:hover { background: var(--primary-hover); transform: translateY(-1px); }
-    .btn-upload { background: white; border-color: var(--border); color: var(--text-main); padding: 10px 16px; }
-    .status-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; background: white; border-radius: 99px; font-size: 12px; font-weight: 600; color: var(--text-main); box-shadow: var(--shadow-sm); }
+    /* Keep header actions visually coherent (flat / plain): no lift, no heavy shadow */
+    .btn-add-new,
+    .btn-upload {
+      background: white;
+      border-color: var(--border);
+      color: var(--text-main);
+      padding: 10px 16px;
+      box-shadow: none;
+      transform: none;
+    }
+    .btn-add-new { color: var(--primary); }
+    .btn-add-new:hover,
+    .btn-upload:hover { background: #f8fafc; border-color: #cbd5e1; }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 16px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 12px; font-weight: 600; color: var(--text-main);
+      box-shadow: none;
+    }
     .dot { width: 8px; height: 8px; border-radius: 50%; } .dot.ok { background: var(--success); } .dot.load { background: var(--warning); animation: pulse 1s infinite; }
 
     /* FILTER PANEL */
     .filter-panel { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
-    /* Remove native disclosure markers so we don't get double-caret (native + icon) */
     details summary { padding: 16px 24px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; list-style: none; font-weight: 700; color: var(--text-main); }
+    /* Prevent native marker arrow (avoid double-caret when we use custom icons) */
     details summary::-webkit-details-marker { display: none; }
     details summary::marker { content: ""; }
     details[open] summary { border-bottom: 1px solid var(--border); }
     .filter-body { padding: 24px; }
     .grid-filters { display: grid; gap: 20px; grid-template-columns: repeat(4, 1fr); margin-bottom: 24px; }
-    /* Keep typography coherent between form labels and section labels */
-    .form-group label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
     .input-wrapper { position: relative; }
-    /* Remove native select arrows (we use a custom icon) */
-    select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: none; }
-    select::-ms-expand { display: none; }
     select, input, textarea { width: 100%; padding: 10px 12px; font-family: inherit; font-size: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-input); color: var(--text-main); }
+    /* Remove native select arrow so it doesn't double with .select-arrow */
+    select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: none; padding-right: 38px; }
+    select::-ms-expand { display: none; }
     select:focus, input:focus, textarea:focus { background: white; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
     .select-arrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted); }
     .action-bar { display: flex; gap: 12px; align-items: flex-end; } .search-box { flex: 1; }
@@ -86,10 +104,11 @@
     .results-area { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--border); display: flex; flex-direction: column; flex: 1; overflow: hidden; }
     .table-header-info { padding: 16px 24px; border-bottom: 1px solid var(--border); background: white; color: var(--text-muted); font-size: 13px; font-weight: 500; }
     .table-scroll { flex: 1; overflow: auto; }
-    .table-columns-header { position: sticky; top: 0; z-index: 5; display: grid; grid-template-columns: 50px 300px 300px 240px 200px 250px 140px 220px 220px 220px 180px; min-width: 2320px; background: var(--text-main); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    /* Added Target Renstra column (kept fixed layout width for horizontal scroll). */
+    .table-columns-header { position: sticky; top: 0; z-index: 5; display: grid; grid-template-columns: 50px 300px 300px 240px 200px 220px 250px 140px 220px 220px 220px 180px; min-width: 2540px; background: var(--text-main); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
     .hcell { padding: 14px 16px; border-right: 1px solid rgba(255,255,255,0.1); }
-    table.data-table { width: 100%; border-collapse: collapse; min-width: 2320px; table-layout: fixed; }
-    col:nth-child(1){width:50px} col:nth-child(2){width:300px} col:nth-child(3){width:300px} col:nth-child(4){width:240px} col:nth-child(5){width:200px} col:nth-child(6){width:250px} col:nth-child(7){width:140px} col:nth-child(8){width:220px} col:nth-child(9){width:220px} col:nth-child(10){width:220px} col:nth-child(11){width:180px}
+    table.data-table { width: 100%; border-collapse: collapse; min-width: 2540px; table-layout: fixed; }
+    col:nth-child(1){width:50px} col:nth-child(2){width:300px} col:nth-child(3){width:300px} col:nth-child(4){width:240px} col:nth-child(5){width:200px} col:nth-child(6){width:220px} col:nth-child(7){width:250px} col:nth-child(8){width:140px} col:nth-child(9){width:220px} col:nth-child(10){width:220px} col:nth-child(11){width:220px} col:nth-child(12){width:180px}
     td { padding: 16px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text-main); font-size: 14px; background: white; }
     tbody tr:hover td { background-color: var(--primary-light); cursor: pointer; }
     .cell-profil { color: var(--primary); font-weight: 800; font-size: 15px; display: block; margin-bottom: 4px; }
@@ -100,7 +119,8 @@
     /* TABLE CHIPS */
     .mini-chips { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-start; }
     .chip-btn { padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); background: white; color: var(--text-muted); font-size: 11px; font-weight: 700; }
-    .chip-count { color: var(--text-main); font-weight: 500; }
+    /* Count label should not be bold and should not wrap (prevents "2\nFile" look). */
+    .chip-count { color: var(--text-main); font-weight: 500; white-space: nowrap; }
 
     /* MODAL */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.2s; }
@@ -114,7 +134,7 @@
     .modal-body .form-group { width: 100%; margin: 0; }
     .file-widget { background: #fcfcfc; border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 16px; }
     .file-widget-header { display: flex; justify-content: space-between; margin-bottom: 16px; }
-    .file-widget-label { font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase; }
+    .file-widget-label { font-size: 13px; font-weight: 800; color: var(--primary); text-transform: uppercase; }
     .file-status-text { font-size: 13px; color: var(--text-muted); font-weight: 500; }
     .file-status-text.has-file { color: var(--success); }
     .file-widget-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
@@ -143,9 +163,8 @@
 
     /* --- MOBILE RESPONSIVE TWEAKS (THE REAL MAGIC) --- */
     @media (max-width: 768px) {
+      /* Allow page scrolling on mobile (desktop uses a fixed viewport + inner scroll). */
       body { height: auto; min-height: 100vh; overflow: auto; }
-      .wrap { height: auto; }
-      /* Let mobile content extend and rely on page scroll */
       .results-area { overflow: visible; }
       .wrap { padding: 16px; gap: 16px; }
       
@@ -162,6 +181,7 @@
 
       /* Hide Table, Show Cards */
       .table-scroll { display: none; }
+      /* IMPORTANT: cards must win over the default `.cards-container{display:none}` defined later */
       .cards-container { display: flex !important; flex-direction: column; gap: 12px; padding: 0; }
       
       /* Mobile Cards Styling */
@@ -186,7 +206,7 @@
         border: 1px solid var(--border); border-radius: 6px; background: var(--bg-input);
         font-size: 10px; font-weight: 700; color: var(--text-muted);
       }
-      .m-chip span { display: block; font-size: 14px; color: var(--text-main); font-weight: 800; margin-bottom: 2px; }
+      .m-chip span { display: block; font-size: 14px; color: var(--text-main); font-weight: 700; margin-bottom: 2px; }
       
       /* Modal Fullscreen */
       .modal-box { width: 100%; height: 100%; max-height: none; border-radius: 0; transform: none; }
@@ -195,8 +215,7 @@
       .btn-danger, .btn-primary, .btn-secondary { width: 100%; }
       .file-widget-actions { grid-template-columns: 1fr; }
     }
-
-    /* Default: desktop/table view */
+    
     .cards-container { display: none; }
     .hidden { display: none !important; }
     .inline-actions { display: none; }
@@ -263,6 +282,7 @@
           <div class="hcell">INDIKATOR</div>
           <div class="hcell">PROGRAM</div>
           <div class="hcell">SASARAN</div>
+          <div class="hcell">TARGET RENSTRA</div>
           <div class="hcell">PIC</div>
           <div class="hcell">FREKUENSI</div>
           <div class="hcell">SILABUS</div>
@@ -272,7 +292,7 @@
         </div>
         <table class="data-table">
           <colgroup>
-            <col><col><col><col><col><col><col><col><col><col><col>
+            <col><col><col><col><col><col><col><col><col><col><col><col>
           </colgroup>
           <tbody id="tbody"></tbody>
         </table>
@@ -309,6 +329,10 @@
         <div class="form-group">
           <label>Sasaran</label>
           <input type="text" id="e_sasaran" placeholder="Target peserta">
+        </div>
+        <div class="form-group">
+          <label>Target Renstra</label>
+          <input type="text" id="e_target_renstra" placeholder="Target Renstra">
         </div>
         <div class="form-group">
           <label>PIC</label>

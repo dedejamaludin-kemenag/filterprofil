@@ -62,6 +62,7 @@
     e_indikator: document.getElementById("e_indikator"),
     e_program: document.getElementById("e_program"),
     e_sasaran: document.getElementById("e_sasaran"),
+    e_target_renstra: document.getElementById("e_target_renstra"),
     e_frekuensi: document.getElementById("e_frekuensi"),
     e_pic: document.getElementById("e_pic"),
     
@@ -413,15 +414,15 @@
     if (row) {
       els.modalTitle.textContent = "Edit Data";
       els.btnDeleteData.classList.remove("hidden");
-      ["id","profil","definisi","indikator","program","sasaran","frekuensi","pic"].forEach(k => {
+      ["id","profil","definisi","indikator","program","sasaran","target_renstra","frekuensi","pic"].forEach(k => {
         if(els[`e_${k}`]) els[`e_${k}`].value = row[k] || (k==='profil'?row.profil_utama:'') || "";
       });
       await refreshQuickWidgetStatus(row.id);
     } else {
       els.modalTitle.textContent = "Tambah Data";
       els.btnDeleteData.classList.add("hidden");
-      // RESET SEMUA 7 FIELD (+ID)
-      ["id","profil","definisi","indikator","program","sasaran","frekuensi","pic"].forEach(k => { if(els[`e_${k}`]) els[`e_${k}`].value = ""; });
+      // RESET SEMUA FIELD (+ID)
+      ["id","profil","definisi","indikator","program","sasaran","target_renstra","frekuensi","pic"].forEach(k => { if(els[`e_${k}`]) els[`e_${k}`].value = ""; });
       
       // Reset widgets
       ['SILABUS','SOP','IK','REC'].forEach(t => {
@@ -442,6 +443,7 @@
       indikator: els.e_indikator.value,
       program: els.e_program.value, 
       sasaran: els.e_sasaran.value, 
+      target_renstra: els.e_target_renstra ? els.e_target_renstra.value : null,
       frekuensi: els.e_frekuensi.value, 
       pic: els.e_pic.value
     };
@@ -489,7 +491,7 @@
       if (f.fr && norm(r.frekuensi)!==f.fr) return false; // Match Frekuensi
       if (f.pi && norm(r.pic)!==f.pi) return false;
       if (f.q) {
-        const hay = [r.profil, r.definisi, r.indikator, r.program, r.sasaran, r.pic].map(normLower).join("|");
+        const hay = [r.profil, r.definisi, r.indikator, r.program, r.sasaran, r.target_renstra, r.pic].map(normLower).join("|");
         if (!hay.includes(f.q)) return false;
       }
       return true;
@@ -522,8 +524,7 @@
       const k = el.getAttribute("data-kind");
       const c = map[pid];
       if (c) {
-        const n = (k==='sil'?c.sil : k==='ik'?c.ik : k==='rec'?c.rec : c.sop);
-        // Label count as "N File" (with a space) for consistency.
+        const n = k==='sil'?c.sil : k==='ik'?c.ik : k==='rec'?c.rec : c.sop;
         el.textContent = `${n} File`;
       }
     });
@@ -538,20 +539,26 @@
         <td>${safeText(r.indikator)}</td>
         <td>${safeText(r.program)}</td>
         <td>${safeText(r.sasaran)}</td>
+        <td>${safeText(r.target_renstra)}</td>
         <td><div class="badge-wrap">${renderPicBadges(r.pic)}</div></td>
         <td>${safeText(r.frekuensi)}</td>
-        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="sil">0</span></div></td>
-        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="sop">0</span></div></td>
-        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="ik">0</span></div></td>
-        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="rec">0</span></div></td>
+        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="sil">0 File</span></div></td>
+        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="sop">0 File</span></div></td>
+        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="ik">0 File</span></div></td>
+        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="rec">0 File</span></div></td>
       </tr>
     `).join("");
     
     els.cards.innerHTML = viewRowsData.map((r, i) => `
       <div class="m-card" onclick="openModalById(${i})">
         <div class="m-header"><div class="m-title">${safeText(r.program)}</div></div>
-        <div class="m-row"><div class="m-label">Profil</div><div>${safeText(r.profil)}</div></div>
-        <div class="m-row"><div class="m-label">PIC</div><div>${safeText(r.pic)}</div></div>
+        <div class="m-body">
+          <div class="m-row"><div class="m-label">Profil</div><div>${safeText(r.profil)}</div></div>
+          <div class="m-row"><div class="m-label">Sasaran</div><div>${safeText(r.sasaran)}</div></div>
+          <div class="m-row"><div class="m-label">Target Renstra</div><div>${safeText(r.target_renstra)}</div></div>
+          <div class="m-row"><div class="m-label">PIC</div><div>${safeText(r.pic)}</div></div>
+          <div class="m-row"><div class="m-label">Frekuensi</div><div>${safeText(r.frekuensi)}</div></div>
+        </div>
       </div>
     `).join("");
     
