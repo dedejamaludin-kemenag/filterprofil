@@ -105,10 +105,11 @@
     .table-header-info { padding: 16px 24px; border-bottom: 1px solid var(--border); background: white; color: var(--text-muted); font-size: 13px; font-weight: 500; }
     .table-scroll { flex: 1; overflow: auto; }
     /* Added Target Renstra column (kept fixed layout width for horizontal scroll). */
-    .table-columns-header { position: sticky; top: 0; z-index: 5; display: grid; grid-template-columns: 50px 300px 300px 240px 200px 220px 250px 140px 220px 220px 220px 180px; min-width: 2540px; background: var(--text-main); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    /* NOTE: grid-template-columns must match the number & order of .hcell elements */
+    .table-columns-header { position: sticky; top: 0; z-index: 5; display: grid; grid-template-columns: 50px 300px 300px 240px 200px 220px 250px 140px 180px 220px 220px 220px 180px; min-width: 2720px; background: var(--text-main); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
     .hcell { padding: 14px 16px; border-right: 1px solid rgba(255,255,255,0.1); }
-    table.data-table { width: 100%; border-collapse: collapse; min-width: 2540px; table-layout: fixed; }
-    col:nth-child(1){width:50px} col:nth-child(2){width:300px} col:nth-child(3){width:300px} col:nth-child(4){width:240px} col:nth-child(5){width:200px} col:nth-child(6){width:220px} col:nth-child(7){width:250px} col:nth-child(8){width:140px} col:nth-child(9){width:220px} col:nth-child(10){width:220px} col:nth-child(11){width:220px} col:nth-child(12){width:180px}
+    table.data-table { width: 100%; border-collapse: collapse; min-width: 2720px; table-layout: fixed; }
+    col:nth-child(1){width:50px} col:nth-child(2){width:300px} col:nth-child(3){width:300px} col:nth-child(4){width:240px} col:nth-child(5){width:200px} col:nth-child(6){width:220px} col:nth-child(7){width:250px} col:nth-child(8){width:140px} col:nth-child(9){width:180px} col:nth-child(10){width:220px} col:nth-child(11){width:220px} col:nth-child(12){width:220px} col:nth-child(13){width:180px}
     td { padding: 16px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text-main); font-size: 14px; background: white; }
     tbody tr:hover td { background-color: var(--primary-light); cursor: pointer; }
     .cell-profil { color: var(--primary); font-weight: 800; font-size: 15px; display: block; margin-bottom: 4px; }
@@ -290,22 +291,23 @@
       </div>
       <div class="table-scroll" id="tableScroll">
         <div class="table-columns-header" aria-hidden="true">
-          <div class="hcell">NO</div>
-          <div class="hcell">PROFIL &amp; DEFINISI</div>
-          <div class="hcell">INDIKATOR</div>
-          <div class="hcell">PROGRAM</div>
-          <div class="hcell">SASARAN</div>
-          <div class="hcell">TARGET RENSTRA</div>
-          <div class="hcell">PIC</div>
-          <div class="hcell">FREKUENSI</div>
-          <div class="hcell">SILABUS</div>
-          <div class="hcell">SOP</div>
-          <div class="hcell">INSTRUKSI KERJA</div>
-          <div class="hcell">BUKTI</div>
+          <div class="hcell"; style="text-align:center">NO</div>
+          <div class="hcell"; style="text-align:center"">PROFIL &amp; DEFINISI</div>
+          <div class="hcell"; style="text-align:center"">INDIKATOR</div>
+          <div class="hcell"; style="text-align:center"">PROGRAM</div>
+          <div class="hcell"; style="text-align:center"">SASARAN</div>
+          <div class="hcell"; style="text-align:center"">TARGET RENSTRA</div>
+          <div class="hcell"; style="text-align:center"">PIC</div>
+          <div class="hcell"; style="text-align:center"">FREKUENSI</div>
+          <div class="hcell"; style="text-align:center"">PENILAIAN</div>
+          <div class="hcell"; style="text-align:center"">SILABUS</div>
+          <div class="hcell"; style="text-align:center"">SOP</div>
+          <div class="hcell"; style="text-align:center"">INSTRUKSI KERJA</div>
+          <div class="hcell"; style="text-align:center"">BUKTI</div>
         </div>
         <table class="data-table">
           <colgroup>
-            <col><col><col><col><col><col><col><col><col><col><col><col>
+            <col><col><col><col><col><col><col><col><col><col><col><col><col>
           </colgroup>
           <tbody id="tbody"></tbody>
         </table>
@@ -356,6 +358,11 @@
           <input type="text" id="e_frekuensi" placeholder="Contoh: Harian, Pekanan">
         </div>
 
+        
+        <div class="form-group">
+          <label>Penilaian</label>
+          <input type="text" id="e_penilaian" placeholder="Contoh: Checklist, Observasi, Rubrik">
+        </div>
         <hr style="width:100%; border:0; border-top:1px dashed var(--border); margin:10px 0">
 
         <div class="file-widget" data-doc-type="SILABUS">

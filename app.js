@@ -64,6 +64,7 @@
     e_sasaran: document.getElementById("e_sasaran"),
     e_target_renstra: document.getElementById("e_target_renstra"),
     e_frekuensi: document.getElementById("e_frekuensi"),
+    e_penilaian: document.getElementById("e_penilaian"),
     e_pic: document.getElementById("e_pic"),
     
     // Utils
@@ -414,7 +415,7 @@
     if (row) {
       els.modalTitle.textContent = "Edit Data";
       els.btnDeleteData.classList.remove("hidden");
-      ["id","profil","definisi","indikator","program","sasaran","target_renstra","frekuensi","pic"].forEach(k => {
+      ["id","profil","definisi","indikator","program","sasaran","target_renstra","frekuensi","penilaian","pic"].forEach(k => {
         if(els[`e_${k}`]) els[`e_${k}`].value = row[k] || (k==='profil'?row.profil_utama:'') || "";
       });
       await refreshQuickWidgetStatus(row.id);
@@ -422,7 +423,7 @@
       els.modalTitle.textContent = "Tambah Data";
       els.btnDeleteData.classList.add("hidden");
       // RESET SEMUA FIELD (+ID)
-      ["id","profil","definisi","indikator","program","sasaran","target_renstra","frekuensi","pic"].forEach(k => { if(els[`e_${k}`]) els[`e_${k}`].value = ""; });
+      ["id","profil","definisi","indikator","program","sasaran","target_renstra","frekuensi","penilaian","pic"].forEach(k => { if(els[`e_${k}`]) els[`e_${k}`].value = ""; });
       
       // Reset widgets
       ['SILABUS','SOP','IK','REC'].forEach(t => {
@@ -445,6 +446,7 @@
       sasaran: els.e_sasaran.value, 
       target_renstra: els.e_target_renstra ? els.e_target_renstra.value : null,
       frekuensi: els.e_frekuensi.value, 
+      penilaian: els.e_penilaian ? els.e_penilaian.value : null,
       pic: els.e_pic.value
     };
     
@@ -542,6 +544,7 @@
         <td>${safeText(r.target_renstra)}</td>
         <td><div class="badge-wrap">${renderPicBadges(r.pic)}</div></td>
         <td>${safeText(r.frekuensi)}</td>
+        <td>${safeText(r.penilaian)}</td>
         <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="sil">0 File</span></div></td>
         <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="sop">0 File</span></div></td>
         <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="ik">0 File</span></div></td>
@@ -558,6 +561,7 @@
           <div class="m-row"><div class="m-label">Target Renstra</div><div>${safeText(r.target_renstra)}</div></div>
           <div class="m-row"><div class="m-label">PIC</div><div>${safeText(r.pic)}</div></div>
           <div class="m-row"><div class="m-label">Frekuensi</div><div>${safeText(r.frekuensi)}</div></div>
+          <div class="m-row"><div class="m-label">Penilaian</div><div>${safeText(r.penilaian)}</div></div>
         </div>
       </div>
     `).join("");
