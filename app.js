@@ -521,7 +521,9 @@
       const pid = el.getAttribute("data-pid");
       const k = el.getAttribute("data-kind");
       const c = map[pid];
-      if (c) el.textContent = k==='sil'?c.sil : k==='ik'?c.ik : k==='rec'?c.rec : c.sop;
+      if (!c) return;
+      const n = (k==='sil') ? c.sil : (k==='ik') ? c.ik : (k==='rec') ? c.rec : c.sop;
+      el.textContent = `${n} File`;
     });
   }
 
@@ -536,18 +538,33 @@
         <td>${safeText(r.sasaran)}</td>
         <td><div class="badge-wrap">${renderPicBadges(r.pic)}</div></td>
         <td>${safeText(r.frekuensi)}</td>
-        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="sil">0</span></div></td>
-        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="sop">0</span></div></td>
-        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="ik">0</span></div></td>
-        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="rec">0</span></div></td>
+        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="sil">0 File</span></div></td>
+        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="sop">0 File</span></div></td>
+        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="ik">0 File</span></div></td>
+        <td><div class="mini-chips"><span class="chip-count" data-chip-count data-pid="${r.id}" data-kind="rec">0 File</span></div></td>
       </tr>
     `).join("");
     
     els.cards.innerHTML = viewRowsData.map((r, i) => `
       <div class="m-card" onclick="openModalById(${i})">
-        <div class="m-header"><div class="m-title">${safeText(r.program)}</div></div>
-        <div class="m-row"><div class="m-label">Profil</div><div>${safeText(r.profil)}</div></div>
-        <div class="m-row"><div class="m-label">PIC</div><div>${safeText(r.pic)}</div></div>
+        <div class="m-header">
+          <div class="m-title">${safeText(r.program)}</div>
+          <div class="m-id">ID: ${safeText(r.id)}</div>
+        </div>
+
+        <div class="m-body">
+          <div class="m-row"><div class="m-label">Profil</div><div>${safeText(r.profil || r.profil_utama)}</div></div>
+          <div class="m-row"><div class="m-label">Sasaran</div><div>${safeText(r.sasaran)}</div></div>
+          <div class="m-row"><div class="m-label">PIC</div><div>${safeText(r.pic)}</div></div>
+          <div class="m-row"><div class="m-label">Frekuensi</div><div>${safeText(r.frekuensi)}</div></div>
+        </div>
+
+        <div class="m-footer">
+          <div class="m-chip"><span data-chip-count data-pid="${r.id}" data-kind="sil">0 File</span>Silabus</div>
+          <div class="m-chip"><span data-chip-count data-pid="${r.id}" data-kind="sop">0 File</span>SOP</div>
+          <div class="m-chip"><span data-chip-count data-pid="${r.id}" data-kind="ik">0 File</span>IK</div>
+          <div class="m-chip"><span data-chip-count data-pid="${r.id}" data-kind="rec">0 File</span>Bukti</div>
+        </div>
       </div>
     `).join("");
     
