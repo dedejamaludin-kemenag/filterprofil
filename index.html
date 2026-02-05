@@ -167,6 +167,16 @@
       body { height: auto; min-height: 100vh; overflow: auto; }
       .results-area { overflow: visible; }
       .wrap { padding: 16px; gap: 16px; }
+      /* --- Mobile polish: make outer area tidy (cards + header info sit nicely) --- */
+      .results-area { background: transparent; border: none; box-shadow: none; padding: 12px; }
+      .table-header-info { 
+        padding: 12px 14px; 
+        border: 1px solid var(--border); 
+        border-radius: 12px; 
+        margin: 0 0 12px 0; 
+        background: white;
+      }
+
       
       /* Header Stack */
       .header { flex-direction: column; align-items: flex-start; gap: 16px; padding: 16px 0; }
@@ -219,7 +229,10 @@
     .cards-container { display: none; }
     .hidden { display: none !important; }
     .inline-actions { display: none; }
-  </style>
+  
+    /* PATCH: keep Edit Data file widget label same size as form labels */
+    #editModal .file-widget-label { font-size: 11px; font-weight: 700; }
+</style>
 </head>
 <body>
 
