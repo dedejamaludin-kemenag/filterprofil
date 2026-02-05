@@ -62,19 +62,20 @@
 
     /* FILTER PANEL */
     .filter-panel { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--border); }
+    /* Remove native disclosure markers so we don't get double-caret (native + icon) */
     details summary { padding: 16px 24px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; list-style: none; font-weight: 700; color: var(--text-main); }
+    details summary::-webkit-details-marker { display: none; }
+    details summary::marker { content: ""; }
     details[open] summary { border-bottom: 1px solid var(--border); }
-    details summary .ph-caret-down { transition: transform 0.2s ease; }
-    details[open] summary .ph-caret-down { transform: rotate(180deg); }
-
     .filter-body { padding: 24px; }
     .grid-filters { display: grid; gap: 20px; grid-template-columns: repeat(4, 1fr); margin-bottom: 24px; }
-    .form-group label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+    /* Keep typography coherent between form labels and section labels */
+    .form-group label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
     .input-wrapper { position: relative; }
-    select, input, textarea { width: 100%; padding: 10px 12px; font-family: inherit; font-size: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-input); color: var(--text-main); }
-    select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: none; padding-right: 38px; }
+    /* Remove native select arrows (we use a custom icon) */
+    select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: none; }
     select::-ms-expand { display: none; }
-
+    select, input, textarea { width: 100%; padding: 10px 12px; font-family: inherit; font-size: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-input); color: var(--text-main); }
     select:focus, input:focus, textarea:focus { background: white; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-light); }
     .select-arrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--text-muted); }
     .action-bar { display: flex; gap: 12px; align-items: flex-end; } .search-box { flex: 1; }
@@ -82,14 +83,9 @@
     .btn-secondary { background: white; border: 1px solid var(--border); color: var(--text-main); height: 42px; padding: 0 24px; }
 
     /* RESULTS TABLE */
-    .results-area {background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--border); display: flex; flex-direction: column; flex: 1; overflow: hidden; min-height: 0;}
+    .results-area { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow-sm); border: 1px solid var(--border); display: flex; flex-direction: column; flex: 1; overflow: hidden; }
     .table-header-info { padding: 16px 24px; border-bottom: 1px solid var(--border); background: white; color: var(--text-muted); font-size: 13px; font-weight: 500; }
-    .table-scroll { flex: 1; overflow: auto; min-height: 0; -webkit-overflow-scrolling: touch; }
-    /* --- UX PATCH: readability + better scrolling --- */
-    .table-scroll { overscroll-behavior: contain; scrollbar-gutter: stable; }
-    .data-table tbody tr:nth-child(even) td { background: #fbfdff; }
-    .table-columns-header { box-shadow: 0 2px 0 rgba(0,0,0,0.04); }
-
+    .table-scroll { flex: 1; overflow: auto; }
     .table-columns-header { position: sticky; top: 0; z-index: 5; display: grid; grid-template-columns: 50px 300px 300px 240px 200px 250px 140px 220px 220px 220px 180px; min-width: 2320px; background: var(--text-main); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
     .hcell { padding: 14px 16px; border-right: 1px solid rgba(255,255,255,0.1); }
     table.data-table { width: 100%; border-collapse: collapse; min-width: 2320px; table-layout: fixed; }
@@ -118,7 +114,7 @@
     .modal-body .form-group { width: 100%; margin: 0; }
     .file-widget { background: #fcfcfc; border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 16px; }
     .file-widget-header { display: flex; justify-content: space-between; margin-bottom: 16px; }
-    .file-widget-label { font-size: 13px; font-weight: 800; color: var(--primary); text-transform: uppercase; }
+    .file-widget-label { font-size: 12px; font-weight: 700; color: var(--primary); text-transform: uppercase; }
     .file-status-text { font-size: 13px; color: var(--text-muted); font-weight: 500; }
     .file-status-text.has-file { color: var(--success); }
     .file-widget-actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
@@ -148,9 +144,9 @@
     /* --- MOBILE RESPONSIVE TWEAKS (THE REAL MAGIC) --- */
     @media (max-width: 768px) {
       body { height: auto; min-height: 100vh; overflow: auto; }
+      .wrap { height: auto; }
+      /* Let mobile content extend and rely on page scroll */
       .results-area { overflow: visible; }
-      .cards-container { overflow: visible; }
-
       .wrap { padding: 16px; gap: 16px; }
       
       /* Header Stack */
@@ -166,7 +162,6 @@
 
       /* Hide Table, Show Cards */
       .table-scroll { display: none; }
-      /* IMPORTANT: force show cards on mobile (a default rule appears after this block) */
       .cards-container { display: flex !important; flex-direction: column; gap: 12px; padding: 0; }
       
       /* Mobile Cards Styling */
@@ -182,14 +177,13 @@
       
       .m-body { display: grid; gap: 8px; font-size: 13px; color: var(--text-main); }
       .m-row { display: grid; grid-template-columns: 80px 1fr; gap: 12px; align-items: baseline; }
-      .m-row { line-height: 1.35; }
       .m-label { color: var(--text-muted); font-size: 11px; font-weight: 700; text-transform: uppercase; }
       
       /* Chips in Card */
-      .m-footer { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--bg-body); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .m-footer { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--bg-body); display: flex; gap: 8px; flex-wrap: wrap; }
       .m-chip { 
-        width: 100%; min-width: 0; text-align: center; padding: 8px 6px; 
-        border: 1px solid var(--border); border-radius: 8px; background: var(--bg-input);
+        flex: 1; min-width: 70px; text-align: center; padding: 6px; 
+        border: 1px solid var(--border); border-radius: 6px; background: var(--bg-input);
         font-size: 10px; font-weight: 700; color: var(--text-muted);
       }
       .m-chip span { display: block; font-size: 14px; color: var(--text-main); font-weight: 800; margin-bottom: 2px; }
@@ -201,7 +195,8 @@
       .btn-danger, .btn-primary, .btn-secondary { width: 100%; }
       .file-widget-actions { grid-template-columns: 1fr; }
     }
-    
+
+    /* Default: desktop/table view */
     .cards-container { display: none; }
     .hidden { display: none !important; }
     .inline-actions { display: none; }
