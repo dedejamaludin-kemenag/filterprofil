@@ -421,17 +421,18 @@
       await refreshQuickWidgetStatus(row.id);
     } else {
       els.modalTitle.textContent = "Tambah Data";
-      els.btnDeleteData.classList.add("hidden");
-      // RESET SEMUA FIELD (+ID)
-      ["id","profil","definisi","indikator","program","sasaran","target_renstra","frekuensi","penilaian","pic"].forEach(k => { if(els[`e_${k}`]) els[`e_${k}`].value = ""; });
-      
-      // Reset widgets
-      ['SILABUS','SOP','IK','REC'].forEach(t => {
-        document.getElementById(`status_txt_${t}`).textContent = "0 File";
-        document.getElementById(`list_${t}`).innerHTML = "";
-        document.getElementById(`list_${t}`).classList.remove('has-items');
-        document.getElementById(`btn_down_${t}`).disabled = true;
-      });
+    if (els.btnDeleteData) els.btnDeleteData.classList.add("hidden"); // atau style.display='none'
+
+    els.e_id.value = "";
+    els.e_profil.value = "";
+    els.e_definisi.value = "";
+    els.e_indikator.value = "";
+    els.e_program.value = "";
+    els.e_sasaran.value = "";
+    if (els.e_target_renstra) els.e_target_renstra.value = "";
+    els.e_pic.value = "";
+    els.e_frekuensi.value = "";
+    if (els.e_penilaian) els.e_penilaian.value = "";
     }
     els.modal.classList.add("open");
   }
@@ -462,11 +463,34 @@
   }
 
   async function deleteData() {
-    if (!await askConfirm("Hapus data program ini permanen?")) return;
-    const { error } = await db.from("program_pontren").delete().eq('id', els.e_id.value);
-    if (!error) { els.modal.classList.remove("open"); notify("Data dihapus", "success"); refreshAllData(); }
-    else notify("Gagal hapus: "+error.message, "error");
+  if (!await askConfirm("Hapus data program ini permanen?")) return;
+
+  const id = Number(els.e_id.value);
+  if (!id || Number.isNaN(id)) {
+    notify("ID tidak valid", "error");
+    return;
   }
+
+  setStatus("Menghapus...", "load");
+
+  const { data, error } = await db
+    .from("program_pontren")
+    .delete()
+    .eq("id", id)
+    .select("id"); // ✅ biar ketahuan benar-benar terhapus
+
+  if (error) {
+    notify("Gagal hapus: " + error.message, "error");
+  } else if (!data || data.length === 0) {
+    notify("Tidak ada data yang terhapus. Cek RLS policy (SELECT/DELETE).", "error");
+  } else {
+    els.modal.classList.remove("open");
+    notify("Data dihapus", "success");
+    refreshAllData();
+  }
+
+  setStatus("Ready");
+}
 
   // --- 9. VIEW & FILTER LOGIC (UPDATED) ---
 

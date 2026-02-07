@@ -233,6 +233,7 @@
   
     /* PATCH: keep Edit Data file widget label same size as form labels */
     #editModal .file-widget-label { font-size: 11px; font-weight: 700; }
+    #confirmModal { z-index: 1200; }
 
     /* Center-align last 4 document columns */
     table.data-table td:nth-last-child(-n+4) {
@@ -262,7 +263,7 @@
                 <a class="btn-upload" id="btnProfil" href="https://drive.google.com/file/d/1zIcLorrbsEdDOi1tJr3rr_hgP3t1yU9T/view?usp=sharing" target="_blank" rel="noopener noreferrer">
           <i class="ph ph-user-circle" style="font-size: 18px;"></i> Profil
         </a>
-<button class="btn-add-new" id="btnAddData">
+        <button class="btn-add-new" id="btnAddData">
           <i class="ph ph-plus-circle" style="font-size: 18px;"></i> Tambah Baru
         </button>
         <input type="file" id="fileExcel" accept=".xlsx, .xls" style="display:none" />
